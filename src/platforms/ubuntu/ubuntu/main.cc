@@ -14,7 +14,27 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <qpa/qplatformintegrationplugin.h>
-#include "integration.h"
+#include "ubuntucommon/integration.h"
+#include "ubuntucommon/input.h"
+#include "ubuntucommon/input_adaptor_factory.h"
+
+namespace
+{
+struct InputAdaptorFactory : public QUbuntuInputAdaptorFactory {
+  InputAdaptorFactory() {}
+  ~InputAdaptorFactory() {}
+    
+  QUbuntuInput* create_input_adaptor(QUbuntuIntegration *integration){
+    return new QUbuntuInput(integration);
+  }
+    
+  static InputAdaptorFactory* instance(){
+    static InputAdaptorFactory global_instance;
+    return &global_instance;
+  }
+};
+}
+
 
 QT_BEGIN_NAMESPACE
 
@@ -38,7 +58,7 @@ QPlatformIntegration* QUbuntuIntegrationPlugin::create(
     const QString& system, const QStringList& paramList) {
   Q_UNUSED(paramList);
   if (system.toLower() == "ubuntu")
-    return new QUbuntuIntegration();
+    return new QUbuntuIntegration(InputAdaptorFactory::instance());
   return 0;
 }
 
