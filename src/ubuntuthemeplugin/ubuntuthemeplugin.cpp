@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Canonical, Ltd.
+ * Copyright (C) 2015 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -14,30 +14,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ubuntuthemeplugin.h"
 #include "theme.h"
 
-#include <QtCore/QVariant>
+#include <QDebug>
 
-const char *UbuntuTheme::name = "ubuntu";
+///////////////////////////////////////////////////////////
+const char *UbuntuThemePlugin::name = "ubuntu";
 
-UbuntuTheme::UbuntuTheme()
+UbuntuThemePlugin::UbuntuThemePlugin(QObject *parent)
 {
+    Q_UNUSED(parent);
 }
 
-UbuntuTheme::~UbuntuTheme()
+QPlatformTheme *
+UbuntuThemePlugin::create(const QString &key, const QStringList &paramList)
 {
-}
+    Q_UNUSED(paramList);
+    if (key.compare(QLatin1String(UbuntuThemePlugin::name), Qt::CaseInsensitive))
+        return 0;
 
-QVariant UbuntuTheme::themeHint(ThemeHint hint) const
-{
-    if (hint == QPlatformTheme::SystemIconThemeName) {
-        QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
-        if (iconTheme.isEmpty()) {
-            return QVariant(QStringLiteral("ubuntu-mobile"));
-        } else {
-            return QVariant(QString(iconTheme));
-        }
-    } else {
-        return QGenericUnixTheme::themeHint(hint);
-    }
+    qDebug() << "Using Ubuntu Theme!";
+    return new UbuntuTheme();
 }

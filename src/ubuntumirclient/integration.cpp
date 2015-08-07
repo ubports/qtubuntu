@@ -33,7 +33,7 @@
 #include "logging.h"
 #include "nativeinterface.h"
 #include "screen.h"
-#include "theme.h"
+#include "../ubuntuthemeplugin/theme.h"
 #include "window.h"
 
 // platform-api

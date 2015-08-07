@@ -12,7 +12,7 @@ QMAKE_CXXFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -We
 QMAKE_LFLAGS += -std=c++11 -Wl,-no-undefined
 
 CONFIG += link_pkgconfig
-PKGCONFIG += egl mirclient ubuntu-platform-api
+PKGCONFIG += egl mirclient ubuntu-platform-api gio-2.0
 
 SOURCES = \
     backingstore.cpp \
@@ -24,8 +24,9 @@ SOURCES = \
     platformservices.cpp \
     plugin.cpp \
     screen.cpp \
-    theme.cpp \
-    window.cpp
+    window.cpp \
+    ../ubuntuthemeplugin/theme.cpp \
+    ../ubuntuthemeplugin/gmenumodelplatformmenu.cpp
 
 HEADERS = \
     backingstore.h \
@@ -39,10 +40,14 @@ HEADERS = \
     platformservices.h \
     plugin.h \
     screen.h \
-    theme.h \
-    window.h
+    window.h \
+    ../ubuntuthemeplugin/theme.h \
+    ../ubuntuthemeplugin/gmenumodelplatformmenu.h
 
 # Installation path
 target.path +=  $$[QT_INSTALL_PLUGINS]/platforms
 
 INSTALLS += target
+
+OTHER_FILES += \
+    qtubuntutheme.json
