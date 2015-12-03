@@ -14,16 +14,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Local
+#include "nativeinterface.h"
+#include "screen.h"
+#include "glcontext.h"
+
 // Qt
 #include <private/qguiapplication_p.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtGui/qscreen.h>
 #include <QtCore/QMap>
-
-// Local
-#include "nativeinterface.h"
-#include "screen.h"
-#include "glcontext.h"
 
 class UbuntuResourceMap : public QMap<QByteArray, UbuntuNativeInterface::ResourceType>
 {
@@ -34,6 +34,7 @@ public:
         insert("eglcontext", UbuntuNativeInterface::EglContext);
         insert("nativeorientation", UbuntuNativeInterface::NativeOrientation);
         insert("display", UbuntuNativeInterface::Display);
+        insert("mirConnection", UbuntuNativeInterface::MirConnection);
     }
 };
 
@@ -42,6 +43,7 @@ Q_GLOBAL_STATIC(UbuntuResourceMap, ubuntuResourceMap)
 UbuntuNativeInterface::UbuntuNativeInterface()
     : mGenericEventFilterType(QByteArrayLiteral("Event"))
     , mNativeOrientation(nullptr)
+    , mMirConnection(nullptr)
 {
 }
 
@@ -49,6 +51,23 @@ UbuntuNativeInterface::~UbuntuNativeInterface()
 {
     delete mNativeOrientation;
     mNativeOrientation = nullptr;
+}
+
+void* UbuntuNativeInterface::nativeResourceForIntegration(const QByteArray &resourceString)
+{
+    const QByteArray lowerCaseResource = resourceString.toLower();
+
+    if (!ubuntuResourceMap()->contains(lowerCaseResource)) {
+        return nullptr;
+    }
+
+    const ResourceType resourceType = ubuntuResourceMap()->value(lowerCaseResource);
+
+    if (resourceType == UbuntuNativeInterface::MirConnection) {
+        return mMirConnection;
+    } else {
+        return nullptr;
+    }
 }
 
 void* UbuntuNativeInterface::nativeResourceForContext(

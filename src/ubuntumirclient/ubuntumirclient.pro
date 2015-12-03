@@ -2,7 +2,7 @@ TARGET = qpa-ubuntumirclient
 TEMPLATE = lib
 
 QT -= gui
-QT += core-private gui-private platformsupport-private sensors dbus
+QT += core-private platformsupport-private dbus
 
 CONFIG += plugin no_keywords qpa/genericunixfontdatabase
 
@@ -17,6 +17,7 @@ PKGCONFIG += egl mirclient ubuntu-platform-api gio-2.0
 SOURCES = \
     backingstore.cpp \
     clipboard.cpp \
+    cursor.cpp \
     glcontext.cpp \
     input.cpp \
     integration.cpp \
@@ -31,12 +32,13 @@ SOURCES = \
 HEADERS = \
     backingstore.h \
     clipboard.h \
+    cursor.h \
     glcontext.h \
     input.h \
     integration.h \
     logging.h \
     nativeinterface.h \
-    orientationchangeevent_p.h \    
+    orientationchangeevent_p.h \
     platformservices.h \
     plugin.h \
     screen.h \

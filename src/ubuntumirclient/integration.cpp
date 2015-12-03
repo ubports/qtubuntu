@@ -14,6 +14,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Local
+#include "integration.h"
+#include "backingstore.h"
+#include "clipboard.h"
+#include "glcontext.h"
+#include "input.h"
+#include "logging.h"
+#include "nativeinterface.h"
+#include "screen.h"
+#include "../ubuntuthemeplugin/theme.h"
+#include "window.h"
+
 // Qt
 #include <QGuiApplication>
 #include <private/qguiapplication_p.h>
@@ -23,18 +35,6 @@
 #include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
 #include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
 #include <QOpenGLContext>
-
-// Local
-#include "backingstore.h"
-#include "clipboard.h"
-#include "glcontext.h"
-#include "input.h"
-#include "integration.h"
-#include "logging.h"
-#include "nativeinterface.h"
-#include "screen.h"
-#include "../ubuntuthemeplugin/theme.h"
-#include "window.h"
 
 // platform-api
 #include <ubuntu/application/lifecycle_delegate.h>
@@ -55,7 +55,12 @@ static void aboutToStopCallback(UApplicationArchive *archive, void* context)
     Q_UNUSED(archive)
     DASSERT(context != NULL);
     UbuntuClientIntegration* integration = static_cast<UbuntuClientIntegration*>(context);
-    integration->inputContext()->hideInputPanel();
+    QPlatformInputContext *inputContext = integration->inputContext();
+    if (inputContext) {
+        inputContext->hideInputPanel();
+    } else {
+        qWarning("UbuntuClientIntegration aboutToStopCallback(): no input context");
+    }
     QCoreApplication::postEvent(QCoreApplication::instance(),
                                 new QEvent(QEvent::ApplicationDeactivate));
 }
@@ -78,6 +83,8 @@ UbuntuClientIntegration::UbuntuClientIntegration()
         qFatal("UbuntuClientIntegration: connection to Mir server failed. Check that a Mir server is\n"
                "running, and the correct socket is being used and is accessible. The shell may have\n"
                "rejected the incoming connection, so check its log file");
+
+    mNativeInterface->setMirConnection(u_application_instance_get_mir_connection(mInstance));
 
     // Create default screen.
     mScreen = new UbuntuScreen(u_application_instance_get_mir_connection(mInstance));
@@ -155,10 +162,8 @@ QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) 
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window)
 {
-    QPlatformWindow* platformWindow = new UbuntuWindow(
-            window, mClipboard, static_cast<UbuntuScreen*>(mScreen), mInput, u_application_instance_get_mir_connection(mInstance));
-    platformWindow->requestActivateWindow();
-    return platformWindow;
+    return new UbuntuWindow(window, mClipboard, static_cast<UbuntuScreen*>(mScreen),
+                            mInput, u_application_instance_get_mir_connection(mInstance));
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const
@@ -166,11 +171,9 @@ bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap
     switch (cap) {
     case ThreadedPixmaps:
         return true;
-        break;
 
     case OpenGL:
         return true;
-        break;
 
     case ThreadedOpenGL:
         if (qEnvironmentVariableIsEmpty("QTUBUNTU_NO_THREADED_OPENGL")) {
@@ -179,8 +182,9 @@ bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap
             DLOG("ubuntumirclient: disabled threaded OpenGL");
             return false;
         }
-        break;
-
+    case MultipleWindows:
+    case NonFullScreenWindows:
+        return true;
     default:
         return QPlatformIntegration::hasCapability(cap);
     }
@@ -240,4 +244,9 @@ QVariant UbuntuClientIntegration::styleHint(StyleHint hint) const
 QPlatformClipboard* UbuntuClientIntegration::clipboard() const
 {
     return mClipboard.data();
+}
+
+QPlatformNativeInterface* UbuntuClientIntegration::nativeInterface() const
+{
+    return mNativeInterface;
 }

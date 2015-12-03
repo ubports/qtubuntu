@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Canonical, Ltd.
+ * Copyright (C) 2015 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -14,24 +14,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ORIENTATIONCHANGEEVENT_P_H
-#define ORIENTATIONCHANGEEVENT_P_H
+#ifndef UBUNTU_CURSOR_H
+#define UBUNTU_CURSOR_H
 
-#include <QEvent>
-#include "logging.h"
+#include <qpa/qplatformcursor.h>
 
-class OrientationChangeEvent : public QEvent {
+#include <QMap>
+#include <QByteArray>
+
+struct MirConnection;
+struct MirSurface;
+
+class UbuntuCursor : public QPlatformCursor
+{
 public:
-    enum Orientation { TopUp, LeftUp, TopDown, RightUp };
-
-    OrientationChangeEvent(QEvent::Type type, Orientation orientation)
-        : QEvent(type)
-        , mOrientation(orientation)
-    {
-    }
-
-    static const QEvent::Type mType;
-    Orientation mOrientation;
+    UbuntuCursor(MirConnection *connection);
+    void changeCursor(QCursor *windowCursor, QWindow *window) override;
+private:
+    void configureMirCursorWithPixmapQCursor(MirSurface *surface, QCursor &cursor);
+    void applyDefaultCursorConfiguration(MirSurface *surface);
+    QMap<int, QByteArray> mShapeToCursorName;
+    MirConnection *mConnection;
 };
 
-#endif // ORIENTATIONCHANGEEVENT_P_H
+#endif // UBUNTU_CURSOR_H
