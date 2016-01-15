@@ -36,6 +36,7 @@
 
 namespace
 {
+#define MENU_OBJ_PATH "/com/canonical/AppMenu"
 
 // FIXME: this used to be defined by platform-api, but it's been removed in v3. Change ubuntu-keyboard to use
 // a different enum for window roles.
@@ -288,6 +289,7 @@ public:
     void setVisible(bool state);
     void updateTitle(const QString& title);
     void setSizingConstraints(const QSize& minSize, const QSize& maxSize, const QSize& increment);
+    void setDbusMenuInfo(const QByteArray& object_name, const QByteArray& object_path);
 
     void onSwapBuffersDone();
     void handleSurfaceResized(int width, int height);
@@ -375,6 +377,13 @@ void UbuntuSurface::setSizingConstraints(const QSize& minSize, const QSize& maxS
     Spec spec{mir_connection_create_spec_for_changes(mConnection)};
     ::setSizingConstraints(spec.get(), minSize, maxSize, increment);
     mir_surface_apply_spec(mMirSurface, spec.get());
+}
+
+void UbuntuSurface::setDbusMenuInfo(const QByteArray &object_name, const QByteArray &object_path)
+{
+    mir_wait_for(mir_surface_set_dbus_menu_info(mMirSurface,
+                                                object_name.constData(),
+                                                object_path.constData()));
 }
 
 void UbuntuSurface::handleSurfaceResized(int width, int height)
@@ -496,11 +505,18 @@ UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &cl
     , mSurface(new UbuntuSurface{this, screen, input, connection})
 {
     DLOG("[ubuntumirclient QPA] UbuntuWindow(window=%p, screen=%p, input=%p, surf=%p)", w, screen, input, mSurface.get());
+
+    if (w->property("dbus_menu_name").isValid()) {
+        handleDBusMenuInfoChanged();
+    }
+    w->installEventFilter(this);
 }
 
 UbuntuWindow::~UbuntuWindow()
 {
     DLOG("[ubuntumirclient QPA] ~UbuntuWindow(window=%p)", this);
+
+    removeEventFilter(window());
 }
 
 void UbuntuWindow::handleSurfaceResized(int width, int height)
@@ -535,6 +551,14 @@ void UbuntuWindow::handleSurfaceFocused()
     // focused again.
     mClipboard->requestDBusClipboardContents();
     QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
+}
+
+void UbuntuWindow::handleDBusMenuInfoChanged()
+{
+    DLOG("[ubuntumirclient QPA] handleDBusMenuInfoChanged(window=%p, dbus_menu_name=%s)", window(), qPrintable(window()->property("dbus_menu_name").toString()));
+
+    mSurface->setDbusMenuInfo(window()->property("dbus_menu_name").toByteArray(),
+                              MENU_OBJ_PATH);
 }
 
 void UbuntuWindow::setWindowState(Qt::WindowState state)
@@ -609,4 +633,17 @@ void UbuntuWindow::onSwapBuffersDone()
 {
     QMutexLocker lock(&mMutex);
     mSurface->onSwapBuffersDone();
+}
+
+bool UbuntuWindow::eventFilter(QObject * watched, QEvent * event) {
+    if (watched == window()) {
+        if (event->type() == QEvent::DynamicPropertyChange) {
+            QDynamicPropertyChangeEvent* propertyEvent = static_cast<QDynamicPropertyChangeEvent*>(event);
+            if (propertyEvent->propertyName() == "dbus_menu_name") {
+                handleDBusMenuInfoChanged();
+                return true;
+            }
+        }
+    }
+    return false;
 }
