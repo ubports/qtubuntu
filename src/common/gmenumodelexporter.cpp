@@ -73,6 +73,7 @@ GMenuModelExporter::GMenuModelExporter(GMenuModelPlatformMenuBar * bar)
         for (; iter != bar->menus().end(); ++iter) {
             GMenuItem* item = createSubmenu(*iter, nullptr);
             g_menu_append_item(m_gmainMenu, item);
+            g_object_unref(item);
         }
     });
     m_structureTimer.setSingleShot(true);
@@ -182,6 +183,7 @@ GMenuItem *GMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, GMenuM
     addSubmenuItems(gplatformMenu, menu);
 
     GMenuItem* gmenuItem = g_menu_item_new_submenu(label.constData(), G_MENU_MODEL(menu));
+    g_object_unref(menu);
     return gmenuItem;
 }
 
@@ -198,6 +200,7 @@ void GMenuModelExporter::addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, 
             if (lastSectionStart != gplatformMenu->menuItems().begin()) {
                 GMenuItem* section = createSection(lastSectionStart, iter);
                 g_menu_append_item(menu, section);
+                g_object_unref(section);
             }
             lastSectionStart = iter + 1;
         } else if (lastSectionStart == gplatformMenu->menuItems().begin()) {
@@ -209,6 +212,7 @@ void GMenuModelExporter::addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, 
             lastSectionStart != gplatformMenu->menuItems().end()) {
         GMenuItem* section = createSection(lastSectionStart, gplatformMenu->menuItems().end());
         g_menu_append_item(menu, section);
+        g_object_unref(section);
     }
 }
 
@@ -246,9 +250,11 @@ void GMenuModelExporter::processItemForGMenu(QPlatformMenuItem *item, GMenu *gme
     if (gplatformMenuItem->menu()) {
         GMenuItem* subMenu = createSubmenu(gplatformMenuItem->menu(), gplatformMenuItem);
         g_menu_append_item(gmenu, subMenu);
+        g_object_unref(subMenu);
     } else {
         GMenuItem* item = createItem(gplatformMenuItem);
         g_menu_append_item(gmenu, item);
+        g_object_unref(item);
     }
 }
 

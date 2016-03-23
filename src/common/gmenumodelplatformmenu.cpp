@@ -47,6 +47,8 @@ GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
 void
 GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
 {
+    if (m_menus.contains(menu)) return;
+
     if (!before) {
         m_menus.push_back(menu);
     } else {
@@ -66,7 +68,8 @@ GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 {
     for (auto iter = m_menus.begin(); iter != m_menus.end(); ++iter) {
         if (*iter == menu) {
-            iter = m_menus.erase(iter);
+            m_menus.erase(iter);
+            break;
         }
     }
     connect(menu, SIGNAL(structureChanged()), this, SIGNAL(structureChanged()));
@@ -127,6 +130,8 @@ GMenuModelPlatformMenu::~GMenuModelPlatformMenu()
 
 void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatformMenuItem *before)
 {
+    if (m_menuItems.contains(menuItem)) return;
+
     if (!before) {
         m_menuItems.push_back(menuItem);
     } else {
@@ -143,13 +148,12 @@ void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatfo
 
 void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 {
-    QMutableListIterator<QPlatformMenuItem*> iter(m_menuItems);
-    while (iter.hasNext()) {
-        if (iter.next() == menuItem) {
-            iter.remove();
+    for (auto iter = m_menuItems.begin(); iter != m_menuItems.end(); ++iter) {
+        if (*iter == menuItem) {
+            m_menuItems.erase(iter);
+            break;
         }
     }
-
     Q_EMIT menuItemRemoved(menuItem);
 }
 
