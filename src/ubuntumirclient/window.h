@@ -18,6 +18,7 @@
 #define UBUNTU_WINDOW_H
 
 #include <qpa/qplatformwindow.h>
+#include <QLoggingCategory>
 #include <QSharedPointer>
 #include <QMutex>
 
@@ -54,6 +55,7 @@ public:
     void onSwapBuffersDone();
 
 private:
+    void updatePanelHeightHack(Qt::WindowState);
     mutable QMutex mMutex;
     const WId mId;
     const QSharedPointer<UbuntuClipboard> mClipboard;

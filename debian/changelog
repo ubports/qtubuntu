@@ -1,3 +1,48 @@
+qtubuntu (0.62+16.04.20160128.1-0ubuntu1) xenial; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Implement QPlatformOffscreenSurface (LP: #1527737)
+
+  [ Olivier Tilloy ]
+  * Instantiate QKeyEvents with the scan code, native modifiers and
+    native virtual key code, and special-case XKB_KEY_Return and
+    XKB_KEY_KP_Enter to emit a carriage return character. (LP: #1433138)
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Thu, 28 Jan 2016 18:30:08 +0000
+
+qtubuntu (0.62+16.04.20160111-0ubuntu1) xenial; urgency=medium
+
+  [ Gerry Boland ]
+  * Fix getting MirConnection pointer (LP: #1526684)
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Mon, 11 Jan 2016 11:27:32 +0000
+
+qtubuntu (0.62+16.04.20160104-0ubuntu1) xenial; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Fix QGuiApplication::applicationState() updates (LP: #1528668)
+
+  [ Gerry Boland ]
+  * On geometry change, save new geometry before creating change event
+    (LP: #1526328)
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Mon, 04 Jan 2016 09:38:35 +0000
+
+qtubuntu (0.62+16.04.20151207-0ubuntu1) xenial; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Implement support for application state (LP: #1504776)
+  * Update panel height hack when window enters or leaves fullscreen
+    (LP: #1422523)
+
+  [ Lukáš Tinkl ]
+  * Update the panel height hack, orange line is gone
+
+  [ Michał Sawicz ]
+  * Run wrap-and-sort -at
+
+ -- Gerry Boland <ci-train-bot@canonical.com>  Mon, 07 Dec 2015 16:21:01 +0000
+
 qtubuntu (0.62+16.04.20151124-0ubuntu2) xenial; urgency=medium
 
   * Rebuild against Qt 5.5.1.
