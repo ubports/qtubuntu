@@ -18,12 +18,13 @@
 #define EXPORTEDPLATFORMMENUBAR_H
 
 #include <qpa/qplatformmenu.h>
-#include <QTimer>
 
 // Local
-class GMenuModelParser;
+class GMenuModelExporter;
+class MenuRegistrar;
+class QWindow;
 
-class GMenuModelPlatformMenuBar : public QPlatformMenuBar
+class Q_DECL_EXPORT GMenuModelPlatformMenuBar : public QPlatformMenuBar
 {
     Q_OBJECT
 public:
@@ -38,21 +39,22 @@ public:
     virtual void handleReparent(QWindow *newParentWindow) override;
     virtual QPlatformMenu *menuForTag(quintptr tag) const override;
 
-    QPlatformMenu *menuAt(int position) const;
-    uint menuCount();
+    const QList<QPlatformMenu*> menus() const;
 
 Q_SIGNALS:
     void menuInserted(QPlatformMenu *menu);
     void menuRemoved(QPlatformMenu *menu);
 
     void structureChanged();
+    void ready();
 
 private:
-    QList<QPlatformMenu*> m_menus;
-    QTimer m_structureTimer;
-    GMenuModelParser* m_parser;
+    void setReady(bool);
 
-    friend class GMenuModelParser;
+    QList<QPlatformMenu*> m_menus;
+    GMenuModelExporter* m_exporter;
+    MenuRegistrar* m_registrar;
+    bool m_ready;
 };
 
 #define MENU_PROPERTY(class, name, type, defaultValue) \
@@ -61,7 +63,7 @@ private:
     static void set_##name(class *menuItem, const type& value) { menuItem->m_##name = value; }
 
 
-class GMenuModelPlatformMenu : public QPlatformMenu
+class Q_DECL_EXPORT GMenuModelPlatformMenu : public QPlatformMenu
 {
     Q_OBJECT
 public:
@@ -83,18 +85,24 @@ public:
     virtual void setMinimumWidth(int width) override;
     virtual void setFont(const QFont &font) override;
 
+    virtual void showPopup(const QWindow *parentWindow, const QRect &targetRect, const QPlatformMenuItem *item);
+
+    virtual void dismiss(); // Closes this and all its related menu popups
+
     virtual QPlatformMenuItem *menuItemAt(int position) const override;
     virtual QPlatformMenuItem *menuItemForTag(quintptr tag) const override;
-    uint menuItemCount();
 
     virtual QPlatformMenuItem *createMenuItem() const override;
 
     int id() const;
 
+
+    const QList<QPlatformMenuItem*> menuItems() const;
+
 Q_SIGNALS:
     void menuItemInserted(QPlatformMenuItem *menuItem);
     void menuItemRemoved(QPlatformMenuItem *menuItem);
-
+    void structureChanged();
     void propertyUpdated();
 
 private:
@@ -105,11 +113,15 @@ private:
 
     quintptr m_tag;
     QList<QPlatformMenuItem*> m_menuItems;
-    friend class GMenuModelParser;
+    const QWindow* m_parentWindow;
+    GMenuModelExporter* m_exporter;
+    MenuRegistrar* m_registrar;
+
+    friend class GMenuModelExporter;
 };
 
 
-class GMenuModelPlatformMenuItem : public QPlatformMenuItem
+class Q_DECL_EXPORT GMenuModelPlatformMenuItem : public QPlatformMenuItem
 {
     Q_OBJECT
 public:
@@ -150,6 +162,6 @@ private:
 
     quintptr m_tag;
     QPlatformMenu* m_menu;
-    friend class GMenuModelParser;
+    friend class GMenuModelExporter;
 };
 #endif // EXPORTEDPLATFORMMENUBAR_H

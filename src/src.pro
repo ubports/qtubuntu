@@ -1,3 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS += ubuntumirclient ubuntuthemeplugin
+SUBDIRS += common ubuntumirclient ubuntuthemeplugin
+
+ubuntumirclient.depends = common
+ubuntuthemeplugin.depends = common

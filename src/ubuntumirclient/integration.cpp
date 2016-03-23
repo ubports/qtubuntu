@@ -23,7 +23,7 @@
 #include "logging.h"
 #include "nativeinterface.h"
 #include "screen.h"
-#include "../ubuntuthemeplugin/theme.h"
+#include "../common/theme.h"
 #include "window.h"
 
 // Qt

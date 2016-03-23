@@ -1,0 +1,51 @@
+/*
+ * Copyright (C) 2014 Canonical, Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3, as published by
+ * the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranties of MERCHANTABILITY,
+ * SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef UBUNTU_MENU_REGISTRY_H
+#define UBUNTU_MENU_REGISTRY_H
+
+ #include <QObject>
+class ComUbuntuMenuSurfaceRegistrarInterface;
+class QDBusObjectPath;
+class QDBusServiceWatcher;
+
+class UbuntuMenuRegistry : public QObject
+{
+    Q_OBJECT
+public:
+    UbuntuMenuRegistry(QObject* parent = nullptr);
+    virtual ~UbuntuMenuRegistry();
+
+    static UbuntuMenuRegistry *instance();
+
+    void registerMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service);
+    void unregisterMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath);
+
+    bool isConnected() const { return m_connected; }
+
+Q_SIGNALS:
+    void serviceChanged();
+
+private Q_SLOTS:
+    void serviceOwnerChanged(const QString &serviceName, const QString& oldOwner, const QString &newOwner);
+
+private:
+    ComUbuntuMenuSurfaceRegistrarInterface* m_interface;
+    QDBusServiceWatcher* m_serviceWatcher;
+    bool m_connected;
+};
+
+#endif // UBUNTU_MENU_REGISTRY_H

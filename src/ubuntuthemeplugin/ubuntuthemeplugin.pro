@@ -1,25 +1,21 @@
-TARGET = ubuntu
+TARGET = ubuntutheme
 
 PLUGIN_TYPE = platformthemes
 PLUGIN_CLASS_NAME = UbuntuThemePlugin
 load(qt_plugin)
 
-QT += core-private gui-private platformsupport-private dbus
+QT += core-private gui-private platformsupport-private
 CONFIG += no_keywords link_pkgconfig
 PKGCONFIG += gio-2.0
+LIBS += ../common/libqpa-ubuntucommon.a
 
 DESTDIR = ./
 
 HEADERS += \
-    theme.h \
-    ubuntuthemeplugin.h \
-    gmenumodelplatformmenu.h \
-    menuexportevent_p.h
+    ubuntuthemeplugin.h
 
 SOURCES += \
-    theme.cpp \
-    ubuntuthemeplugin.cpp \
-    gmenumodelplatformmenu.cpp
+    ubuntuthemeplugin.cpp
 
 OTHER_FILES += \
     ubuntu.json

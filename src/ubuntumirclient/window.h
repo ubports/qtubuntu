@@ -51,10 +51,7 @@ public:
     MirSurface *mirSurface() const;
     void handleSurfaceResized(int width, int height);
     void handleSurfaceFocused();
-    void handleDBusMenuInfoChanged();
     void onSwapBuffersDone();
-
-    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     mutable QMutex mMutex;

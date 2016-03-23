@@ -30,6 +30,7 @@ bool useLocalMenu() {
 
 UbuntuTheme::UbuntuTheme()
 {
+    qDebug() << "UbuntuTheme::UbuntuTheme";
 }
 
 UbuntuTheme::~UbuntuTheme()
@@ -58,6 +59,7 @@ QPlatformMenuItem *UbuntuTheme::createPlatformMenuItem() const
 
 QPlatformMenu *UbuntuTheme::createPlatformMenu() const
 {
+    qDebug() << "UbuntuTheme::createPlatformMenu()";
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenu();
     return new GMenuModelPlatformMenu();
 }
@@ -65,6 +67,7 @@ QPlatformMenu *UbuntuTheme::createPlatformMenu() const
 QPlatformMenuBar *
 UbuntuTheme::createPlatformMenuBar() const
 {
+    qDebug() << "UbuntuTheme::createPlatformMenuBar()";
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenuBar();
     return new GMenuModelPlatformMenuBar();
 }
