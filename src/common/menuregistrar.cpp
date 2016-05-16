@@ -1,5 +1,6 @@
 #include "menuregistrar.h"
 #include "registry.h"
+#include "logging.h"
 
 #include <QDebug>
 #include <QDBusObjectPath>
@@ -12,7 +13,7 @@ MenuRegistrar::MenuRegistrar()
     GDBusConnection *bus;
     bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
     if (!bus) {
-        qWarning() << "Failed to retreive session bus - " << (error ? error->message : "unknown error");
+        qCWarning(qtubuntuMenus, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
         return;
     }
     m_service = g_dbus_connection_get_unique_name(bus);
@@ -42,6 +43,8 @@ void MenuRegistrar::registerMenuForWindow(QWindow* window, const QDBusObjectPath
 
 void MenuRegistrar::registerMenu()
 {
+    if (!UbuntuMenuRegistry::instance()->isConnected()) return;
+
     const QString surfaceId = m_window->property("surfaceId").toString();
     UbuntuMenuRegistry::instance()->registerMenu(surfaceId, m_path, m_service);
     m_registeredSurfaceId = surfaceId;
@@ -49,7 +52,7 @@ void MenuRegistrar::registerMenu()
 
 void MenuRegistrar::unregisterMenu()
 {
-    if (!UbuntuMenuRegistry::instance()->isConnected())
+    if (!UbuntuMenuRegistry::instance()->isConnected()) return;
     if (m_registeredSurfaceId.isEmpty()) return;
 
     UbuntuMenuRegistry::instance()->unregisterMenu(m_registeredSurfaceId, m_path);

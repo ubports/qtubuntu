@@ -19,24 +19,30 @@
 #include "gmenumodelexporter.h"
 #include "registry.h"
 #include "menuregistrar.h"
-#include "../ubuntumirclient/logging.h"
+#include "logging.h"
 
 // Qt
 #include <QDebug>
 #include <QWindow>
 #include <QCoreApplication>
 
+Q_LOGGING_CATEGORY(qtubuntuMenus, "qtubuntu.platformmenu", QtWarningMsg)
+
 GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar()
     : m_exporter(new GMenuModelExporter(this))
     , m_registrar(new MenuRegistrar())
     , m_ready(false)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar");
+
     connect(this, SIGNAL(menuInserted(QPlatformMenu*)), this, SIGNAL(structureChanged()));
     connect(this, SIGNAL(menuRemoved(QPlatformMenu*)), this, SIGNAL(structureChanged()));
 }
 
 GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar");
+
     delete m_registrar;
     m_registrar = nullptr;
 
@@ -47,6 +53,8 @@ GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
 void
 GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::insertMenu(%p, %p)", menu, before);
+
     if (m_menus.contains(menu)) return;
 
     if (!before) {
@@ -66,6 +74,8 @@ GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before
 void
 GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::insertMenu(%p)", menu);
+
     for (auto iter = m_menus.begin(); iter != m_menus.end(); ++iter) {
         if (*iter == menu) {
             m_menus.erase(iter);
@@ -79,12 +89,16 @@ GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 void
 GMenuModelPlatformMenuBar::syncMenu(QPlatformMenu *menu)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::syncMenu(%p)", menu);
+
     Q_UNUSED(menu)
 }
 
 void
 GMenuModelPlatformMenuBar::handleReparent(QWindow *newParentWindow)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::handleReparent(%p)", newParentWindow);
+
     setReady(true);
     m_registrar->registerMenuForWindow(newParentWindow, QDBusObjectPath(m_exporter->menuPath()));
 }
@@ -120,16 +134,21 @@ GMenuModelPlatformMenu::GMenuModelPlatformMenu()
     , m_exporter(nullptr)
     , m_registrar(nullptr)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::GMenuModelPlatformMenu");
+
     connect(this, SIGNAL(menuItemInserted(QPlatformMenuItem*)), this, SIGNAL(structureChanged()));
     connect(this, SIGNAL(menuItemRemoved(QPlatformMenuItem*)), this, SIGNAL(structureChanged()));
 }
 
 GMenuModelPlatformMenu::~GMenuModelPlatformMenu()
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::~GMenuModelPlatformMenu");
 }
 
 void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatformMenuItem *before)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::insertMenuItem(%p, %p)", menuItem, before);
+
     if (m_menuItems.contains(menuItem)) return;
 
     if (!before) {
@@ -148,6 +167,8 @@ void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatfo
 
 void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::removeMenuItem(%p)", menuItem);
+
     for (auto iter = m_menuItems.begin(); iter != m_menuItems.end(); ++iter) {
         if (*iter == menuItem) {
             m_menuItems.erase(iter);
@@ -159,6 +180,8 @@ void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 
 void GMenuModelPlatformMenu::syncMenuItem(QPlatformMenuItem *menuItem)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::syncMenuItem(%p)", menuItem);
+
     Q_UNUSED(menuItem)
 }
 
@@ -261,11 +284,6 @@ QPlatformMenuItem *GMenuModelPlatformMenu::menuItemForTag(quintptr tag) const
     return nullptr;
 }
 
-QPlatformMenuItem *GMenuModelPlatformMenu::createMenuItem() const
-{
-    return new GMenuModelPlatformMenuItem();
-}
-
 const QList<QPlatformMenuItem *> GMenuModelPlatformMenu::menuItems() const
 {
     return m_menuItems;
@@ -276,10 +294,12 @@ const QList<QPlatformMenuItem *> GMenuModelPlatformMenu::menuItems() const
 GMenuModelPlatformMenuItem::GMenuModelPlatformMenuItem()
     : m_menu(nullptr)
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuItem::GMenuModelPlatformMenuItem");
 }
 
 GMenuModelPlatformMenuItem::~GMenuModelPlatformMenuItem()
 {
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuItem::~GMenuModelPlatformMenuItem");
 }
 
 void GMenuModelPlatformMenuItem::setTag(quintptr tag)

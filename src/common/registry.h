@@ -43,8 +43,8 @@ private Q_SLOTS:
     void serviceOwnerChanged(const QString &serviceName, const QString& oldOwner, const QString &newOwner);
 
 private:
-    ComUbuntuMenuSurfaceRegistrarInterface* m_interface;
     QDBusServiceWatcher* m_serviceWatcher;
+    ComUbuntuMenuSurfaceRegistrarInterface* m_interface;
     bool m_connected;
 };
 

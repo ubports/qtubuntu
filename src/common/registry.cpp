@@ -15,6 +15,7 @@
  */
 
 #include "registry.h"
+#include "logging.h"
 #include "menusurfaceregistrar_interface.h"
 
 #include <QDBusObjectPath>
@@ -31,11 +32,10 @@ UbuntuMenuRegistry *UbuntuMenuRegistry::instance()
 
 UbuntuMenuRegistry::UbuntuMenuRegistry(QObject* parent)
     : QObject(parent)
-    , m_interface(new ComUbuntuMenuSurfaceRegistrarInterface(REGISTRAR_SERVICE, REGISTRY_OBJECT_PATH, QDBusConnection::sessionBus(), this))
     , m_serviceWatcher(new QDBusServiceWatcher(REGISTRAR_SERVICE, QDBusConnection::sessionBus(), QDBusServiceWatcher::WatchForOwnerChange, this))
-    , m_connected(false)
+    , m_interface(new ComUbuntuMenuSurfaceRegistrarInterface(REGISTRAR_SERVICE, REGISTRY_OBJECT_PATH, QDBusConnection::sessionBus(), this))
+    , m_connected(m_interface->isValid())
 {
-    qDebug() << "PLOP";
     connect(m_serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &UbuntuMenuRegistry::serviceOwnerChanged);
 }
 
@@ -46,7 +46,12 @@ UbuntuMenuRegistry::~UbuntuMenuRegistry()
 
 void UbuntuMenuRegistry::registerMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service)
 {
-    m_interface->RegisterMenu(surfaceId, menuObjectPath, service);
+    qCDebug(qtubuntuMenus, "UbuntuMenuRegistry::registerMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
+            qPrintable(surfaceId),
+            qPrintable(menuObjectPath.path()),
+            qPrintable(service));
+
+    auto ret = m_interface->RegisterMenu(surfaceId, menuObjectPath, service);
 }
 
 void UbuntuMenuRegistry::unregisterMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath)
@@ -57,6 +62,8 @@ void UbuntuMenuRegistry::unregisterMenu(const QString &surfaceId, QDBusObjectPat
 
 void UbuntuMenuRegistry::serviceOwnerChanged(const QString &serviceName, const QString& oldOwner, const QString &newOwner)
 {
+    qCDebug(qtubuntuMenus, "UbuntuMenuRegistry::serviceOwnerChanged(newOwner=%s)", qPrintable(newOwner));
+
     Q_UNUSED(oldOwner);
     if (serviceName != REGISTRAR_SERVICE) return;
 

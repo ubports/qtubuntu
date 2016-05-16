@@ -18,6 +18,7 @@ INCLUDEPATH += $$top_builddir/src/common
 HEADERS = theme.h \
           gmenumodelexporter.h \
           gmenumodelplatformmenu.h \
+          logging.h \
           menuregistrar.h \
           menusurfaceregistrar_interface.h \
           registry.h

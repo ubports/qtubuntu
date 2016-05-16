@@ -92,8 +92,6 @@ public:
     virtual QPlatformMenuItem *menuItemAt(int position) const override;
     virtual QPlatformMenuItem *menuItemForTag(quintptr tag) const override;
 
-    virtual QPlatformMenuItem *createMenuItem() const override;
-
     int id() const;
 
 

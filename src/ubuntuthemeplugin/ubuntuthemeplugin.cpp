@@ -15,7 +15,7 @@
  */
 
 #include "ubuntuthemeplugin.h"
-#include "../common/theme.h"
+#include "theme.h"
 
 #include <QDebug>
 
@@ -34,6 +34,5 @@ UbuntuThemePlugin::create(const QString &key, const QStringList &paramList)
     if (key.compare(QLatin1String(UbuntuThemePlugin::name), Qt::CaseInsensitive))
         return 0;
 
-    qDebug() << "CREATE THEME!" << key;
     return new UbuntuTheme();
 }

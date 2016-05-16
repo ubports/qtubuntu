@@ -24,7 +24,7 @@
 #include "nativeinterface.h"
 #include "offscreensurface.h"
 #include "screen.h"
-#include "../common/theme.h"
+#include "theme.h"
 #include "window.h"
 
 // Qt

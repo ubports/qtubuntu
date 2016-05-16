@@ -20,6 +20,7 @@
 #include <gio/gio.h>
 
 #include <QTimer>
+#include <QSet>
 
 #include "gmenumodelplatformmenu.h"
 
@@ -45,12 +46,12 @@ private:
     void addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, GMenu* menu);
     void processItemForGMenu(QPlatformMenuItem* item, GMenu* gmenu);
 
-    GSimpleAction* createAction(const QByteArray& name, GMenuModelPlatformMenuItem* gplatformItem);
+    void createAction(const QByteArray& name, GMenuModelPlatformMenuItem* gplatformItem);
 
 private:
     GMenu* m_gmainMenu;
     GSimpleActionGroup* m_gactionGroup;
-    QHash<GMenuModelPlatformMenuItem*, GSimpleAction*> m_actions;
+    QSet<QByteArray> m_actions;
     int m_exportedModel;
     int m_exportedActions;
     QTimer m_structureTimer;

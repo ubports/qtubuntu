@@ -14,6 +14,7 @@ QMAKE_LFLAGS += -std=c++11 -Wl,-no-undefined
 CONFIG += link_pkgconfig
 PKGCONFIG += egl mirclient ubuntu-platform-api gio-2.0
 LIBS += ../common/libqpa-ubuntucommon.a
+INCLUDEPATH += ../common
 
 SOURCES = \
     backingstore.cpp \
@@ -36,16 +37,13 @@ HEADERS = \
     glcontext.h \
     input.h \
     integration.h \
-    logging.h \
     nativeinterface.h \
     offscreensurface.h \
     orientationchangeevent_p.h \
     platformservices.h \
     plugin.h \
     screen.h \
-    window.h \
-    ../common/theme.h \
-    ../common/gmenumodelplatformmenu.h
+    window.h
 
 # Installation path
 target.path +=  $$[QT_INSTALL_PLUGINS]/platforms
