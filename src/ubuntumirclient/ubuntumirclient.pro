@@ -12,7 +12,8 @@ QMAKE_CXXFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -We
 QMAKE_LFLAGS += -std=c++11 -Wl,-no-undefined
 
 CONFIG += link_pkgconfig
-PKGCONFIG += egl mirclient ubuntu-platform-api gio-2.0
+PKGCONFIG += egl mirclient ubuntu-platform-api xkbcommon
+PKGCONFIG += gio-2.0
 LIBS += ../common/libqpa-ubuntucommon.a
 INCLUDEPATH += ../common
 
@@ -28,6 +29,7 @@ SOURCES = \
     platformservices.cpp \
     plugin.cpp \
     screen.cpp \
+    screenobserver.cpp \
     window.cpp
 
 HEADERS = \
@@ -42,6 +44,7 @@ HEADERS = \
     orientationchangeevent_p.h \
     platformservices.h \
     plugin.h \
+    screenobserver.h \
     screen.h \
     window.h
 
