@@ -74,7 +74,7 @@ GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before
 void
 GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::insertMenu(%p)", menu);
+    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::removeMenu(%p)", menu);
 
     for (auto iter = m_menus.begin(); iter != m_menus.end(); ++iter) {
         if (*iter == menu) {
