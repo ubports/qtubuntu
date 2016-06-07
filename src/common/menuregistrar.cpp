@@ -22,12 +22,14 @@ MenuRegistrar::MenuRegistrar()
 
 MenuRegistrar::~MenuRegistrar()
 {
-    unregisterMenu();
+    unregisterSurfaceMenu();
 }
 
-void MenuRegistrar::registerMenuForWindow(QWindow* window, const QDBusObjectPath& path)
+void MenuRegistrar::registerSurfaceMenuForWindow(QWindow* window, const QDBusObjectPath& path)
 {
-    if (!m_registeredSurfaceId.isEmpty()) unregisterMenu();
+    qCWarning(qtubuntuMenus).nospace() << "MenuRegistrar::registerSurfaceMenuForWindow(window=" << window << ", path=" << path.path() << ")";
+
+    if (!m_registeredSurfaceId.isEmpty()) unregisterSurfaceMenu();
     if (!m_window.isNull()) m_window->removeEventFilter(this);
 
     m_window = window;
@@ -35,38 +37,40 @@ void MenuRegistrar::registerMenuForWindow(QWindow* window, const QDBusObjectPath
 
     if (window) {
         if (window->property("surfaceId").isValid()) {
-            registerMenu();
+            registerSurfaceMenu();
         }
         window->installEventFilter(this);
+    } else {
+        qCWarning(qtubuntuMenus, "No window for menu registration");
     }
 }
 
-void MenuRegistrar::registerMenu()
+void MenuRegistrar::registerSurfaceMenu()
 {
     if (!UbuntuMenuRegistry::instance()->isConnected()) return;
 
     const QString surfaceId = m_window->property("surfaceId").toString();
-    UbuntuMenuRegistry::instance()->registerMenu(surfaceId, m_path, m_service);
+    UbuntuMenuRegistry::instance()->registerSurfaceMenu(surfaceId, m_path, m_service);
     m_registeredSurfaceId = surfaceId;
 }
 
-void MenuRegistrar::unregisterMenu()
+void MenuRegistrar::unregisterSurfaceMenu()
 {
-    if (!UbuntuMenuRegistry::instance()->isConnected()) return;
     if (m_registeredSurfaceId.isEmpty()) return;
+    if (!UbuntuMenuRegistry::instance()->isConnected()) return;
 
-    UbuntuMenuRegistry::instance()->unregisterMenu(m_registeredSurfaceId, m_path);
+    UbuntuMenuRegistry::instance()->unregisterSurfaceMenu(m_registeredSurfaceId, m_path);
     m_registeredSurfaceId.clear();
 }
 
 void MenuRegistrar::onRegistrarServiceChanged()
 {
     if (!m_registeredSurfaceId.isEmpty()) {
-        unregisterMenu();
+        unregisterSurfaceMenu();
     }
     if (UbuntuMenuRegistry::instance()->isConnected()) {
         if (m_window && m_window->property("surfaceId").isValid()) {
-            registerMenu();
+            registerSurfaceMenu();
         }
     }
 }
@@ -77,9 +81,9 @@ bool MenuRegistrar::eventFilter(QObject * watched, QEvent * event) {
             QDynamicPropertyChangeEvent* propertyEvent = static_cast<QDynamicPropertyChangeEvent*>(event);
             if (propertyEvent->propertyName() == "surfaceId") {
                 if (m_window && m_window->property("surfaceId").isValid()) {
-                    registerMenu();
+                    registerSurfaceMenu();
                 } else {
-                    unregisterMenu();
+                    unregisterSurfaceMenu();
                 }
                 return true;
             }

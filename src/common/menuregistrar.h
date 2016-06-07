@@ -13,8 +13,8 @@ public:
     MenuRegistrar();
     ~MenuRegistrar();
 
-    void registerMenuForWindow(QWindow* window, const QDBusObjectPath& path);
-    void unregisterMenu();
+    void registerSurfaceMenuForWindow(QWindow* window, const QDBusObjectPath& path);
+    void unregisterSurfaceMenu();
 
     bool eventFilter(QObject * watched, QEvent * event);
 
@@ -22,7 +22,7 @@ private Q_SLOTS:
     void onRegistrarServiceChanged();
 
 private:
-    void registerMenu();
+    void registerSurfaceMenu();
 
     QString m_service;
     QDBusObjectPath m_path;

@@ -110,6 +110,8 @@ GMenuModelExporter::GMenuModelExporter(GMenuModelPlatformMenu *menu)
     });
     m_structureTimer.setSingleShot(true);
     m_structureTimer.setInterval(0);
+
+    addSubmenuItems(menu, m_gmainMenu);
 }
 
 GMenuModelExporter::~GMenuModelExporter()

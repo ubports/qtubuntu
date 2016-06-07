@@ -16,13 +16,13 @@
 
 #include "registry.h"
 #include "logging.h"
-#include "menusurfaceregistrar_interface.h"
+#include "menuregistrar_interface.h"
 
 #include <QDBusObjectPath>
 #include <QDBusServiceWatcher>
 
-#define REGISTRAR_SERVICE "com.ubuntu.MenuSurfaceRegistrar"
-#define REGISTRY_OBJECT_PATH "/com/ubuntu/MenuSurfaceRegistrar"
+#define REGISTRAR_SERVICE "com.ubuntu.MenuRegistrar"
+#define REGISTRY_OBJECT_PATH "/com/ubuntu/MenuRegistrar"
 
 UbuntuMenuRegistry *UbuntuMenuRegistry::instance()
 {
@@ -33,7 +33,7 @@ UbuntuMenuRegistry *UbuntuMenuRegistry::instance()
 UbuntuMenuRegistry::UbuntuMenuRegistry(QObject* parent)
     : QObject(parent)
     , m_serviceWatcher(new QDBusServiceWatcher(REGISTRAR_SERVICE, QDBusConnection::sessionBus(), QDBusServiceWatcher::WatchForOwnerChange, this))
-    , m_interface(new ComUbuntuMenuSurfaceRegistrarInterface(REGISTRAR_SERVICE, REGISTRY_OBJECT_PATH, QDBusConnection::sessionBus(), this))
+    , m_interface(new ComUbuntuMenuRegistrarInterface(REGISTRAR_SERVICE, REGISTRY_OBJECT_PATH, QDBusConnection::sessionBus(), this))
     , m_connected(m_interface->isValid())
 {
     connect(m_serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &UbuntuMenuRegistry::serviceOwnerChanged);
@@ -44,19 +44,19 @@ UbuntuMenuRegistry::~UbuntuMenuRegistry()
     delete m_interface;
 }
 
-void UbuntuMenuRegistry::registerMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service)
+void UbuntuMenuRegistry::registerSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service)
 {
     qCDebug(qtubuntuMenus, "UbuntuMenuRegistry::registerMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
             qPrintable(surfaceId),
             qPrintable(menuObjectPath.path()),
             qPrintable(service));
 
-    auto ret = m_interface->RegisterMenu(surfaceId, menuObjectPath, service);
+    auto ret = m_interface->RegisterSurfaceMenu(surfaceId, menuObjectPath, menuObjectPath, service);
 }
 
-void UbuntuMenuRegistry::unregisterMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath)
+void UbuntuMenuRegistry::unregisterSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath)
 {
-    m_interface->UnregisterMenu(surfaceId, menuObjectPath);
+    m_interface->UnregisterSurfaceMenu(surfaceId, menuObjectPath);
 }
 
 

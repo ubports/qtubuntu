@@ -18,7 +18,7 @@
 #define UBUNTU_MENU_REGISTRY_H
 
  #include <QObject>
-class ComUbuntuMenuSurfaceRegistrarInterface;
+class ComUbuntuMenuRegistrarInterface;
 class QDBusObjectPath;
 class QDBusServiceWatcher;
 
@@ -31,8 +31,8 @@ public:
 
     static UbuntuMenuRegistry *instance();
 
-    void registerMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service);
-    void unregisterMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath);
+    void registerSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service);
+    void unregisterSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath);
 
     bool isConnected() const { return m_connected; }
 
@@ -44,7 +44,7 @@ private Q_SLOTS:
 
 private:
     QDBusServiceWatcher* m_serviceWatcher;
-    ComUbuntuMenuSurfaceRegistrarInterface* m_interface;
+    ComUbuntuMenuRegistrarInterface* m_interface;
     bool m_connected;
 };
 

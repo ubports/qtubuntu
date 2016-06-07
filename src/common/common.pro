@@ -6,7 +6,7 @@ QT -= gui
 QT += core-private platformsupport-private dbus
 
 CONFIG += plugin no_keywords qpa/genericunixfontdatabase
-DBUS_INTERFACES += com.ubuntu.MenuSurfaceRegistrar.xml
+DBUS_INTERFACES += com.ubuntu.MenuRegistrar.xml
 
 QMAKE_CXXFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -Werror -Wall
 QMAKE_LFLAGS += -std=c++11 -Wl,-no-undefined
@@ -20,12 +20,12 @@ HEADERS = theme.h \
           gmenumodelplatformmenu.h \
           logging.h \
           menuregistrar.h \
-          menusurfaceregistrar_interface.h \
+          menuregistrar_interface.h \
           registry.h
 
 SOURCES = theme.cpp \
           gmenumodelexporter.cpp \
           gmenumodelplatformmenu.cpp \
           menuregistrar.cpp \
-          menusurfaceregistrar_interface.cpp \
+          menuregistrar_interface.cpp \
           registry.cpp

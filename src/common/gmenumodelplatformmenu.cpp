@@ -100,7 +100,7 @@ GMenuModelPlatformMenuBar::handleReparent(QWindow *newParentWindow)
     qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::handleReparent(%p)", newParentWindow);
 
     setReady(true);
-    m_registrar->registerMenuForWindow(newParentWindow, QDBusObjectPath(m_exporter->menuPath()));
+    m_registrar->registerSurfaceMenuForWindow(newParentWindow, QDBusObjectPath(m_exporter->menuPath()));
 }
 
 QPlatformMenu *
@@ -243,15 +243,15 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
 
     if (parentWindow != m_parentWindow) {
         if (m_parentWindow) {
-            m_registrar->unregisterMenu();
+            m_registrar->unregisterSurfaceMenu();
         }
 
         m_parentWindow = parentWindow;
 
         if (m_parentWindow) {
             if (!m_registrar) m_registrar = new MenuRegistrar;
-            m_registrar->registerMenuForWindow(const_cast<QWindow*>(m_parentWindow),
-                                               QDBusObjectPath(m_exporter->menuPath()));
+            m_registrar->registerSurfaceMenuForWindow(const_cast<QWindow*>(m_parentWindow),
+                                                      QDBusObjectPath(m_exporter->menuPath()));
         }
     }
 
@@ -264,7 +264,7 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
 void GMenuModelPlatformMenu::dismiss()
 {
     qDebug() << "DISMISS";
-    if (m_registrar) { m_registrar->unregisterMenu(); }
+    if (m_registrar) { m_registrar->unregisterSurfaceMenu(); }
     if (m_exporter) { m_exporter->unexportModels(); }
 }
 
