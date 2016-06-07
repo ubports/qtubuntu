@@ -13,9 +13,6 @@ QMAKE_LFLAGS += -std=c++11 -Wl,-no-undefined
 
 CONFIG += link_pkgconfig
 PKGCONFIG += egl mirclient ubuntu-platform-api xkbcommon
-PKGCONFIG += gio-2.0
-LIBS += ../common/libqpa-ubuntucommon.a
-INCLUDEPATH += ../common
 
 SOURCES = \
     backingstore.cpp \
@@ -46,7 +43,8 @@ HEADERS = \
     plugin.h \
     screenobserver.h \
     screen.h \
-    window.h
+    window.h \
+    logging.h
 
 # Installation path
 target.path +=  $$[QT_INSTALL_PLUGINS]/platforms

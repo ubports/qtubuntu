@@ -24,7 +24,6 @@
 #include "nativeinterface.h"
 #include "offscreensurface.h"
 #include "screen.h"
-#include "theme.h"
 #include "window.h"
 
 // Qt
@@ -248,17 +247,6 @@ QPlatformOpenGLContext* UbuntuClientIntegration::createPlatformOpenGLContext(
 {
     return new UbuntuOpenGLContext(mSurfaceFormat, static_cast<UbuntuOpenGLContext*>(context->shareHandle()),
                                    mEglDisplay, mEglConfig);
-}
-
-QStringList UbuntuClientIntegration::themeNames() const
-{
-    return QStringList(UbuntuTheme::name);
-}
-
-QPlatformTheme* UbuntuClientIntegration::createPlatformTheme(const QString& name) const
-{
-    Q_UNUSED(name);
-    return new UbuntuTheme;
 }
 
 QVariant UbuntuClientIntegration::styleHint(StyleHint hint) const

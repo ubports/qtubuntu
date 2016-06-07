@@ -50,8 +50,6 @@ public:
     QPlatformBackingStore* createPlatformBackingStore(QWindow* window) const override;
     QPlatformOpenGLContext* createPlatformOpenGLContext(QOpenGLContext* context) const override;
     QPlatformFontDatabase* fontDatabase() const override { return mFontDb; }
-    QStringList themeNames() const override;
-    QPlatformTheme* createPlatformTheme(const QString& name) const override;
     QVariant styleHint(StyleHint hint) const override;
     QPlatformServices *services() const override;
     QPlatformWindow* createPlatformWindow(QWindow* window) const override;
