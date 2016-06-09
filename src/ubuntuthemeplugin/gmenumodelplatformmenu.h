@@ -41,6 +41,8 @@ public:
 
     const QList<QPlatformMenu*> menus() const;
 
+    QDebug operator<<(QDebug stream);
+
 Q_SIGNALS:
     void menuInserted(QPlatformMenu *menu);
     void menuRemoved(QPlatformMenu *menu);
@@ -94,8 +96,9 @@ public:
 
     int id() const;
 
-
     const QList<QPlatformMenuItem*> menuItems() const;
+
+    QDebug operator<<(QDebug stream);
 
 Q_SIGNALS:
     void menuItemInserted(QPlatformMenuItem *menuItem);
@@ -143,6 +146,8 @@ public:
     virtual void setIconSize(int size) override;
 
     QPlatformMenu* menu() const;
+
+    QDebug operator<<(QDebug stream);
 
 Q_SIGNALS:
     void propertyUpdated();

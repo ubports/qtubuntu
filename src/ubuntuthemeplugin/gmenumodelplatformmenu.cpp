@@ -26,7 +26,22 @@
 #include <QWindow>
 #include <QCoreApplication>
 
+
 Q_LOGGING_CATEGORY(qtubuntuMenus, "qtubuntu.platformmenu", QtWarningMsg)
+int logRecusion = 0;
+
+QDebug operator<<(QDebug stream, GMenuModelPlatformMenuBar* bar) {
+    if (bar) return bar->operator<<(stream);
+    return stream;
+}
+QDebug operator<<(QDebug stream, GMenuModelPlatformMenu* menu) {
+    if (menu) return menu->operator<<(stream);
+    return stream;
+}
+QDebug operator<<(QDebug stream, GMenuModelPlatformMenuItem* menuItem) {
+    if (menuItem) return menuItem->operator<<(stream);
+    return stream;
+}
 
 GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar()
     : m_exporter(new GMenuModelExporter(this))
@@ -117,6 +132,22 @@ GMenuModelPlatformMenuBar::menuForTag(quintptr tag) const
 const QList<QPlatformMenu *> GMenuModelPlatformMenuBar::menus() const
 {
     return m_menus;
+}
+
+QDebug GMenuModelPlatformMenuBar::operator<<(QDebug stream)
+{
+    stream.nospace().noquote() << QString("%1").arg("", logRecusion, QLatin1Char('\t'))
+            << "GMenuModelPlatformMenuBar(this=" << (void*)this << ")" << endl;
+    Q_FOREACH(QPlatformMenu* menu, m_menus) {
+        auto myMenu = qobject_cast<GMenuModelPlatformMenu*>(menu);
+        if (myMenu) {
+            logRecusion++;
+            stream << myMenu;
+            logRecusion--;
+        }
+    }
+
+    return stream;
 }
 
 void GMenuModelPlatformMenuBar::setReady(bool _ready)
@@ -258,12 +289,10 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
     Q_UNUSED(targetRect);
     Q_UNUSED(item);
     setVisible(true);
-    qDebug() << "SHOW!" << this << targetRect;
 }
 
 void GMenuModelPlatformMenu::dismiss()
 {
-    qDebug() << "DISMISS";
     if (m_registrar) { m_registrar->unregisterSurfaceMenu(); }
     if (m_exporter) { m_exporter->unexportModels(); }
 }
@@ -287,6 +316,21 @@ QPlatformMenuItem *GMenuModelPlatformMenu::menuItemForTag(quintptr tag) const
 const QList<QPlatformMenuItem *> GMenuModelPlatformMenu::menuItems() const
 {
     return m_menuItems;
+}
+
+QDebug GMenuModelPlatformMenu::operator<<(QDebug stream)
+{
+    stream.nospace().noquote() << QString("%1").arg("", logRecusion, QLatin1Char('\t'))
+            << "GMenuModelPlatformMenu(this=" << (void*)this << ", text=\"" << m_text << "\")" << endl;
+    Q_FOREACH(QPlatformMenuItem* item, m_menuItems) {
+        logRecusion++;
+        auto myItem = qobject_cast<GMenuModelPlatformMenuItem*>(item);
+        if (myItem) {
+            stream << myItem;
+        }
+        logRecusion--;
+    }
+    return stream;
 }
 
 //////////////////////////////////////////////////////////////
@@ -385,4 +429,22 @@ void GMenuModelPlatformMenuItem::setMenu(QPlatformMenu *menu)
 QPlatformMenu *GMenuModelPlatformMenuItem::menu() const
 {
     return m_menu;
+}
+
+QDebug GMenuModelPlatformMenuItem::operator<<(QDebug stream)
+{
+    QString properties = "text=\"" + m_text + "\"";
+
+    stream.nospace().noquote() << QString("%1").arg("", logRecusion, QLatin1Char('\t'))
+            << "GMenuModelPlatformMenuItem(this=" << (void*)this << ", "
+            << (m_separator ? "Separator" : properties) << ")" << endl;
+    if (m_menu) {
+        auto myMenu = qobject_cast<GMenuModelPlatformMenu*>(m_menu);
+        if (myMenu) {
+            logRecusion++;
+            stream << myMenu;
+            logRecusion--;
+        }
+    }
+    return stream;
 }
