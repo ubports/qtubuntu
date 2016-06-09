@@ -35,12 +35,25 @@
 #include <QtPlatformSupport/private/qeglconvenience_p.h>
 #include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
 #include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
+#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
 #include <QOpenGLContext>
 
 // platform-api
 #include <ubuntu/application/lifecycle_delegate.h>
 #include <ubuntu/application/id.h>
 #include <ubuntu/application/options.h>
+
+
+class UbuntuIconTheme : public QGenericUnixTheme
+{
+public:
+    static const char* name;
+    UbuntuIconTheme() {}
+
+    // From QPlatformTheme
+    QVariant themeHint(ThemeHint hint) const override;
+};
+const char *UbuntuIconTheme::name = "ubuntu";
 
 static void resumedCallback(const UApplicationOptions *options, void* context)
 {
@@ -249,6 +262,17 @@ QPlatformOpenGLContext* UbuntuClientIntegration::createPlatformOpenGLContext(
                                    mEglDisplay, mEglConfig);
 }
 
+QStringList UbuntuClientIntegration::themeNames() const
+{
+    return QStringList(UbuntuIconTheme::name);
+}
+
+QPlatformTheme* UbuntuClientIntegration::createPlatformTheme(const QString& name) const
+{
+    Q_UNUSED(name);
+    return new UbuntuIconTheme;
+}
+
 QVariant UbuntuClientIntegration::styleHint(StyleHint hint) const
 {
     switch (hint) {
@@ -311,4 +335,18 @@ void UbuntuClientIntegration::destroyScreen(UbuntuScreen *screen)
 #else
     QPlatformIntegration::destroyScreen(screen);
 #endif
+}
+
+QVariant UbuntuIconTheme::themeHint(QPlatformTheme::ThemeHint hint) const
+{
+    if (hint == QPlatformTheme::SystemIconThemeName) {
+        QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
+        if (iconTheme.isEmpty()) {
+            return QVariant(QStringLiteral("suru"));
+        } else {
+            return QVariant(QString(iconTheme));
+        }
+    } else {
+        return QGenericUnixTheme::themeHint(hint);
+    }
 }
