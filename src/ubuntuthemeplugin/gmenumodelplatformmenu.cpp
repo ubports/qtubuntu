@@ -233,26 +233,34 @@ quintptr GMenuModelPlatformMenu::tag() const
 
 void GMenuModelPlatformMenu::setText(const QString &text)
 {
-    set_text(this, text);
-    Q_EMIT propertyUpdated();
+    if (m_text != text) {
+        m_text = text;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenu::setIcon(const QIcon &icon)
 {
-    set_icon(this, icon);
-    Q_EMIT propertyUpdated();
+    if (!icon.isNull() || (!m_icon.isNull() && icon.isNull())) {
+        m_icon = icon;
+        Q_EMIT propertyChanged();
+    }
 }
 
-void GMenuModelPlatformMenu::setEnabled(bool isEnabled)
+void GMenuModelPlatformMenu::setEnabled(bool enabled)
 {
-    set_enabled(this, isEnabled);
-    Q_EMIT propertyUpdated();
+    if (m_enabled != enabled) {
+        m_enabled = enabled;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenu::setVisible(bool isVisible)
 {
-    set_visible(this, isVisible);
-    Q_EMIT propertyUpdated();
+    if (m_visible != isVisible) {
+        m_visible = isVisible;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenu::setMinimumWidth(int width)
@@ -358,26 +366,34 @@ quintptr GMenuModelPlatformMenuItem::tag() const
 
 void GMenuModelPlatformMenuItem::setText(const QString &text)
 {
-    set_text(this, text);
-    Q_EMIT propertyUpdated();
+    if (m_text != text) {
+        m_text = text;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setIcon(const QIcon &icon)
 {
-    set_icon(this, icon);
-    Q_EMIT propertyUpdated();
+    if (!icon.isNull() || (!m_icon.isNull() && icon.isNull())) {
+        m_icon = icon;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setVisible(bool isVisible)
 {
-    set_visible(this, isVisible);
-    Q_EMIT propertyUpdated();
+    if (m_visible != isVisible) {
+        m_visible = isVisible;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setIsSeparator(bool isSeparator)
 {
-    set_separator(this, isSeparator);
-    Q_EMIT propertyUpdated();
+    if (m_separator != isSeparator) {
+        m_separator = isSeparator;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setFont(const QFont &font)
@@ -392,38 +408,48 @@ void GMenuModelPlatformMenuItem::setRole(QPlatformMenuItem::MenuRole role)
 
 void GMenuModelPlatformMenuItem::setCheckable(bool checkable)
 {
-    set_checkable(this, checkable);
-    Q_EMIT propertyUpdated();
+    if (m_checkable != checkable) {
+        m_checkable = checkable;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setChecked(bool isChecked)
 {
-    set_checked(this, isChecked);
-    Q_EMIT propertyUpdated();
+    if (m_checked != isChecked) {
+        m_checked = isChecked;
+        Q_EMIT checkChanged();
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setShortcut(const QKeySequence &shortcut)
 {
-    set_shortcut(this, shortcut);
-    Q_EMIT propertyUpdated();
+    if (m_shortcut != shortcut) {
+        m_shortcut = shortcut;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setEnabled(bool enabled)
 {
-    set_enabled(this, enabled);
-    Q_EMIT propertyUpdated();
+    if (m_enabled != enabled) {
+        m_enabled = enabled;
+        Q_EMIT propertyChanged();
+    }
 }
 
 void GMenuModelPlatformMenuItem::setIconSize(int size)
 {
-    set_iconSize(this, size);
-    Q_EMIT propertyUpdated();
+    Q_UNUSED(size);
 }
 
 void GMenuModelPlatformMenuItem::setMenu(QPlatformMenu *menu)
 {
-    m_menu = menu;
-    Q_EMIT propertyUpdated();
+    if (m_menu != menu) {
+        m_menu = menu;
+        Q_EMIT propertyChanged();
+    }
 }
 
 QPlatformMenu *GMenuModelPlatformMenuItem::menu() const

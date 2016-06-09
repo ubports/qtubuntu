@@ -60,10 +60,8 @@ private:
 };
 
 #define MENU_PROPERTY(class, name, type, defaultValue) \
-    type m_##name = defaultValue; \
     static type get_##name(const class *menuItem) { return menuItem->m_##name; } \
-    static void set_##name(class *menuItem, const type& value) { menuItem->m_##name = value; }
-
+    type m_##name = defaultValue;
 
 class Q_DECL_EXPORT GMenuModelPlatformMenu : public QPlatformMenu
 {
@@ -104,7 +102,7 @@ Q_SIGNALS:
     void menuItemInserted(QPlatformMenuItem *menuItem);
     void menuItemRemoved(QPlatformMenuItem *menuItem);
     void structureChanged();
-    void propertyUpdated();
+    void propertyChanged();
 
 private:
     MENU_PROPERTY(GMenuModelPlatformMenu, visible, bool, true)
@@ -150,7 +148,8 @@ public:
     QDebug operator<<(QDebug stream);
 
 Q_SIGNALS:
-    void propertyUpdated();
+    void checkChanged();
+    void propertyChanged();
 
 private:
     MENU_PROPERTY(GMenuModelPlatformMenuItem, separator, bool, false)
@@ -162,9 +161,10 @@ private:
     MENU_PROPERTY(GMenuModelPlatformMenuItem, shortcut, QKeySequence, QKeySequence())
     MENU_PROPERTY(GMenuModelPlatformMenuItem, icon, QIcon, QIcon())
     MENU_PROPERTY(GMenuModelPlatformMenuItem, iconSize, int, 16)
+    MENU_PROPERTY(GMenuModelPlatformMenuItem, menu, QPlatformMenu*, nullptr)
+
 
     quintptr m_tag;
-    QPlatformMenu* m_menu;
     friend class GMenuModelExporter;
 };
 #endif // EXPORTEDPLATFORMMENUBAR_H

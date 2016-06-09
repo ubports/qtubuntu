@@ -23,7 +23,7 @@
 
 namespace {
 
-inline QString actionString(const QString& label) {
+inline QString getActionString(const QString& label) {
     QRegExp re("\\W");
     QStringList parts = label.split(re, QString::SkipEmptyParts);
     for(auto iter = parts.begin(); iter != parts.end(); ++iter) {
@@ -41,16 +41,6 @@ static void activate_cb(GSimpleAction *action, GVariant *, gpointer user_data)
 
     auto item = (GMenuModelPlatformMenuItem*)user_data;
     item->activated();
-
-    auto type = g_action_get_state_type(G_ACTION(action));
-
-    if (type && g_variant_type_equal(type, G_VARIANT_TYPE_BOOLEAN)) {
-        GVariant* v = g_action_get_state(G_ACTION(action));
-        gboolean state = g_variant_get_boolean(v);
-        g_simple_action_set_state(action, g_variant_new_boolean(state == TRUE ? FALSE : TRUE));
-
-        g_variant_unref(v);
-    }
 }
 
 static uint s_menuId = 0;
@@ -127,6 +117,10 @@ GMenuModelExporter::~GMenuModelExporter()
 
 void GMenuModelExporter::clear()
 {
+    Q_FOREACH(const QMetaObject::Connection& connection, m_propertyConnections) {
+        QObject::disconnect(connection);
+    }
+
     g_menu_remove_all(m_gmainMenu);
 
     for (auto iter = m_actions.begin(); iter != m_actions.end(); ++iter) {
@@ -231,73 +225,81 @@ void GMenuModelExporter::addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, 
 
     if (lastSectionStart != gplatformMenu->menuItems().begin() &&
             lastSectionStart != gplatformMenu->menuItems().end()) {
-        GMenuItem* section = createSection(lastSectionStart, gplatformMenu->menuItems().end());
-        g_menu_append_item(menu, section);
-        g_object_unref(section);
+        GMenuItem* gsectionItem = createSection(lastSectionStart, gplatformMenu->menuItems().end());
+        g_menu_append_item(menu, gsectionItem);
+        g_object_unref(gsectionItem);
     }
 }
 
-GMenuItem *GMenuModelExporter::createItem(QPlatformMenuItem *platformMenuItem)
+GMenuItem *GMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuItem)
 {
-    GMenuModelPlatformMenuItem* gplatformItem = qobject_cast<GMenuModelPlatformMenuItem*>(platformMenuItem);
-    if (!gplatformItem) return nullptr;
+    GMenuModelPlatformMenuItem* gplatformMenuItem = qobject_cast<GMenuModelPlatformMenuItem*>(platformMenuItem);
+    if (!gplatformMenuItem) return nullptr;
 
-    QByteArray label(GMenuModelPlatformMenuItem::get_text(gplatformItem).toUtf8());
-    QByteArray action(actionString(GMenuModelPlatformMenuItem::get_text(gplatformItem)).toUtf8());
-    QByteArray shortcut(GMenuModelPlatformMenuItem::get_shortcut(gplatformItem).toString(QKeySequence::NativeText).toUtf8());
+    QByteArray label(GMenuModelPlatformMenuItem::get_text(gplatformMenuItem).toUtf8());
+    QByteArray actionLabel(getActionString(GMenuModelPlatformMenuItem::get_text(gplatformMenuItem)).toUtf8());
+    QByteArray shortcut(GMenuModelPlatformMenuItem::get_shortcut(gplatformMenuItem).toString(QKeySequence::NativeText).toUtf8());
 
     GMenuItem* gmenuItem = g_menu_item_new(label.constData(), NULL);
     g_menu_item_set_attribute(gmenuItem, "accel", "s", shortcut.constData());
-    g_menu_item_set_detailed_action(gmenuItem, ("unity." + action).constData());
+    g_menu_item_set_detailed_action(gmenuItem, ("unity." + actionLabel).constData());
 
-    createAction(action, gplatformItem);
+    createAction(actionLabel, gplatformMenuItem);
     return gmenuItem;
 }
 
 GMenuItem *GMenuModelExporter::createSection(QList<QPlatformMenuItem *>::const_iterator iter, QList<QPlatformMenuItem *>::const_iterator end)
 {
-    GMenu* sectionMenu = g_menu_new();
+    GMenu* gsectionMenu = g_menu_new();
     for (; iter != end; ++iter) {
-        processItemForGMenu(*iter, sectionMenu);
+        processItemForGMenu(*iter, gsectionMenu);
     }
-    GMenuItem* menuItem = g_menu_item_new_section("", G_MENU_MODEL(sectionMenu));
-    g_object_unref(sectionMenu);
-    return menuItem;
+    GMenuItem* gsectionItem = g_menu_item_new_section("", G_MENU_MODEL(gsectionMenu));
+    g_object_unref(gsectionMenu);
+    return gsectionItem;
 }
 
-void GMenuModelExporter::processItemForGMenu(QPlatformMenuItem *item, GMenu *gmenu)
+void GMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMenuItem, GMenu *gmenu)
 {
-    GMenuModelPlatformMenuItem* gplatformMenuItem = qobject_cast<GMenuModelPlatformMenuItem*>(item);
+    GMenuModelPlatformMenuItem* gplatformMenuItem = qobject_cast<GMenuModelPlatformMenuItem*>(platformMenuItem);
     if (!gplatformMenuItem) return;
 
-    if (gplatformMenuItem->menu()) {
-        GMenuItem* subMenu = createSubmenu(gplatformMenuItem->menu(), gplatformMenuItem);
-        if (subMenu) {
-            g_menu_append_item(gmenu, subMenu);
-            g_object_unref(subMenu);
-        }
-    } else {
-        GMenuItem* item = createItem(gplatformMenuItem);
-        if (item) {
-            g_menu_append_item(gmenu, item);
-            g_object_unref(item);
-        }
+    GMenuItem* gmenuItem = gplatformMenuItem->menu() ? createSubmenu(gplatformMenuItem->menu(), gplatformMenuItem) :
+                                                       createMenuItem(gplatformMenuItem);
+    if (gmenuItem) {
+        g_menu_append_item(gmenu, gmenuItem);
+        g_object_unref(gmenuItem);
     }
 }
 
-void GMenuModelExporter::createAction(const QByteArray &name, GMenuModelPlatformMenuItem *gplatformItem)
+void GMenuModelExporter::createAction(const QByteArray &name, GMenuModelPlatformMenuItem *gplatformMenuItem)
 {
+    disconnect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkChanged, this, 0);
+
     if (m_actions.contains(name)) {
         g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), name.constData());
         m_actions.remove(name);
     }
 
-    bool checkable(GMenuModelPlatformMenuItem::get_checkable(gplatformItem));
+    bool checkable(GMenuModelPlatformMenuItem::get_checkable(gplatformMenuItem));
 
     GSimpleAction* action = nullptr;
     if (checkable) {
-        bool checked(GMenuModelPlatformMenuItem::get_checked(gplatformItem));
+        bool checked(GMenuModelPlatformMenuItem::get_checked(gplatformMenuItem));
         action = g_simple_action_new_stateful(name.constData(), NULL, g_variant_new_boolean(checked));
+
+        // save the connection to disconnect in GMenuModelExporter::clear()
+        m_propertyConnections << connect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkChanged, this, [gplatformMenuItem, action]() {
+            bool checked(GMenuModelPlatformMenuItem::get_checked(gplatformMenuItem));
+            qCDebug(qtubuntuMenus, "Menu item check changed for action='%s', value=%s", g_action_get_name(G_ACTION(action)),
+                                                                                        checked ? "true" : "false");
+
+            auto type = g_action_get_state_type(G_ACTION(action));
+            if (type && g_variant_type_equal(type, G_VARIANT_TYPE_BOOLEAN)) {
+                g_simple_action_set_state(action, g_variant_new_boolean(checked ? TRUE : FALSE));
+            }
+        });
+
     } else {
         action = g_simple_action_new(name.constData(), NULL);
     }
@@ -305,7 +307,7 @@ void GMenuModelExporter::createAction(const QByteArray &name, GMenuModelPlatform
     g_signal_connect(action,
                      "activate",
                      G_CALLBACK(activate_cb),
-                     gplatformItem);
+                     gplatformMenuItem);
 
     m_actions.insert(name);
     g_action_map_add_action(G_ACTION_MAP(m_gactionGroup), G_ACTION(action));

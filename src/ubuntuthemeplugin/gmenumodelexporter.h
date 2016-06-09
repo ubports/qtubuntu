@@ -21,6 +21,7 @@
 
 #include <QTimer>
 #include <QSet>
+#include <QMetaObject>
 
 #include "gmenumodelplatformmenu.h"
 
@@ -40,7 +41,7 @@ public:
 
 private:
     GMenuItem *createSubmenu(QPlatformMenu* platformMenu, GMenuModelPlatformMenuItem* forItem);
-    GMenuItem *createItem(QPlatformMenuItem* platformMenuItem);
+    GMenuItem *createMenuItem(QPlatformMenuItem* platformMenuItem);
     GMenuItem *createSection(QList<QPlatformMenuItem*>::const_iterator iter, QList<QPlatformMenuItem*>::const_iterator end);
 
     void addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, GMenu* menu);
@@ -56,6 +57,8 @@ private:
     int m_exportedActions;
     QTimer m_structureTimer;
     QString m_menuPath;
+
+    QList<QMetaObject::Connection> m_propertyConnections;
 };
 
 #endif // GMENUMODELEXPORTER_H
