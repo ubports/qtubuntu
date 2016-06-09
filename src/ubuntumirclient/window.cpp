@@ -241,7 +241,6 @@ MirSurface *createMirSurface(QWindow *window, int mirOutputId, UbuntuInput *inpu
 
     auto surface = mir_surface_create_sync(spec.get());
     Q_ASSERT(mir_surface_is_valid(surface));
-
     return surface;
 }
 
