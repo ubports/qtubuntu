@@ -41,7 +41,7 @@ QVariant UbuntuTheme::themeHint(ThemeHint hint) const
     if (hint == QPlatformTheme::SystemIconThemeName) {
         QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
         if (iconTheme.isEmpty()) {
-            return QVariant(QStringLiteral("ubuntu-mobile"));
+            return QVariant(QStringLiteral("suru"));
         } else {
             return QVariant(QString(iconTheme));
         }

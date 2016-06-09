@@ -24,7 +24,7 @@ class GMenuModelExporter;
 class MenuRegistrar;
 class QWindow;
 
-class Q_DECL_EXPORT GMenuModelPlatformMenuBar : public QPlatformMenuBar
+class GMenuModelPlatformMenuBar : public QPlatformMenuBar
 {
     Q_OBJECT
 public:

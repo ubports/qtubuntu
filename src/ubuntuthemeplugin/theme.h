@@ -19,7 +19,7 @@
 
 #include <QtPlatformSupport/private/qgenericunixthemes_p.h>
 
-class Q_DECL_EXPORT UbuntuTheme : public QGenericUnixTheme
+class UbuntuTheme : public QGenericUnixTheme
 {
 public:
     static const char* name;
