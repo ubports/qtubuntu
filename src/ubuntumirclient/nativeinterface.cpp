@@ -148,6 +148,7 @@ QVariantMap UbuntuNativeInterface::windowProperties(QPlatformWindow *window) con
     if (w) {
         propertyMap.insert("scale", w->scale());
         propertyMap.insert("formFactor", w->formFactor());
+        propertyMap.insert("persistentSurfaceId", w->persistentSurfaceId());
     }
     return propertyMap;
 }
@@ -163,6 +164,8 @@ QVariant UbuntuNativeInterface::windowProperty(QPlatformWindow *window, const QS
         return w->scale();
     } else if (name == QStringLiteral("formFactor")) {
         return w->formFactor();
+    }  else if (name == QStringLiteral("persistentSurfaceId")) {
+        return w->persistentSurfaceId();
     } else {
         return QVariant();
     }

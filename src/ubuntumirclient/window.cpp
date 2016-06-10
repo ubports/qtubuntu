@@ -282,8 +282,7 @@ public:
 
         auto persistent_id = mir_surface_request_persistent_id_sync(mMirSurface);
         if (mir_persistent_id_is_valid(persistent_id)) {
-            mWindow->setProperty("surfaceId", mir_persistent_id_as_string(persistent_id));
-
+            mPersistentSurfaceId = mir_persistent_id_as_string(persistent_id);
             mir_persistent_id_release(persistent_id);
         }
 
@@ -342,6 +341,8 @@ public:
     void setSurfaceParent(MirSurface*);
     bool hasParent() const { return mParented; }
 
+    QString persistentSurfaceId() const { return mPersistentSurfaceId; }
+
 private:
     static void surfaceEventCallback(MirSurface* surface, const MirEvent *event, void* context);
     void postEvent(const MirEvent *event);
@@ -350,11 +351,11 @@ private:
     UbuntuWindow * const mPlatformWindow;
     UbuntuInput * const mInput;
     MirConnection * const mConnection;
-    QString mPersistentId;
 
     MirSurface* mMirSurface;
     const EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
+    QString mPersistentSurfaceId;
 
     bool mNeedsRepaint;
     bool mParented;
@@ -715,6 +716,11 @@ void UbuntuWindow::propagateSizeHints()
 bool UbuntuWindow::isExposed() const
 {
     return mWindowVisible && mWindowExposed;
+}
+
+QString UbuntuWindow::persistentSurfaceId() const
+{
+    return mSurface->persistentSurfaceId();
 }
 
 void* UbuntuWindow::eglSurface() const

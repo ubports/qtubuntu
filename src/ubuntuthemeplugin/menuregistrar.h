@@ -16,8 +16,6 @@ public:
     void registerSurfaceMenuForWindow(QWindow* window, const QDBusObjectPath& path);
     void unregisterSurfaceMenu();
 
-    bool eventFilter(QObject * watched, QEvent * event);
-
 private Q_SLOTS:
     void onRegistrarServiceChanged();
 
