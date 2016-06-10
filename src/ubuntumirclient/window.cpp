@@ -280,6 +280,12 @@ public:
         mMirSurface = createMirSurface(mWindow, mirOutputId, input, connection, surfaceEventCallback, this);
         mEglSurface = eglCreateWindowSurface(mEglDisplay, config, nativeWindowFor(mMirSurface), nullptr);
 
+        auto persistent_id = mir_surface_request_persistent_id_sync(mMirSurface);
+        if (mir_persistent_id_is_valid(persistent_id)) {
+            mPersistentSurfaceId = mir_persistent_id_as_string(persistent_id);
+            mir_persistent_id_release(persistent_id);
+        }
+
         // Window manager can give us a final size different from what we asked for
         // so let's check what we ended up getting
         MirSurfaceParameters parameters;
@@ -335,6 +341,8 @@ public:
     void setSurfaceParent(MirSurface*);
     bool hasParent() const { return mParented; }
 
+    QString persistentSurfaceId() const { return mPersistentSurfaceId; }
+
 private:
     static void surfaceEventCallback(MirSurface* surface, const MirEvent *event, void* context);
     void postEvent(const MirEvent *event);
@@ -347,6 +355,7 @@ private:
     MirSurface* mMirSurface;
     const EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
+    QString mPersistentSurfaceId;
 
     bool mNeedsRepaint;
     bool mParented;
@@ -707,6 +716,11 @@ void UbuntuWindow::propagateSizeHints()
 bool UbuntuWindow::isExposed() const
 {
     return mWindowVisible && mWindowExposed;
+}
+
+QString UbuntuWindow::persistentSurfaceId() const
+{
+    return mSurface->persistentSurfaceId();
 }
 
 void* UbuntuWindow::eglSurface() const

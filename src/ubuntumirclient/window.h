@@ -58,6 +58,8 @@ public:
     MirFormFactor formFactor() const { return mFormFactor; }
     float scale() const { return mScale; }
 
+    QString persistentSurfaceId() const;
+
     // New methods.
     void *eglSurface() const;
     MirSurface *mirSurface() const;
