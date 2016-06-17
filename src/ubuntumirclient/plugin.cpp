@@ -17,8 +17,9 @@
 #include "plugin.h"
 #include "integration.h"
 #include "logging.h"
+#include "qpa/qplatformwindow.h"
 
-Q_LOGGING_CATEGORY(ubuntumirclient, "ubuntumirclient", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntumirclient, "ubuntu.mirclient", QtWarningMsg)
 
 QStringList UbuntuMirClientIntegrationPlugin::keys() const
 {
@@ -30,6 +31,8 @@ QStringList UbuntuMirClientIntegrationPlugin::keys() const
 QPlatformIntegration* UbuntuMirClientIntegrationPlugin::create(const QString &system,
                                                                const QStringList &)
 {
+    qRegisterMetaType<QPlatformWindow*>("QPlatformWindow*");
+
     if (system.toLower() == QLatin1String("ubuntumirclient")) {
 #ifdef PLATFORM_API_TOUCH
         setenv("UBUNTU_PLATFORM_API_BACKEND", "touch_mirclient", 1);

@@ -6,6 +6,7 @@
 #include <QDBusObjectPath>
 #include <QGuiApplication>
 #include <qpa/qplatformnativeinterface.h>
+#include <qpa/qplatformwindow.h>
 
 #include <gio/gio.h>
 
@@ -20,6 +21,17 @@ MenuRegistrar::MenuRegistrar()
     }
     m_service = g_dbus_connection_get_unique_name(bus);
     connect(UbuntuMenuRegistry::instance(), &UbuntuMenuRegistry::serviceChanged, this, &MenuRegistrar::onRegistrarServiceChanged);
+
+    auto nativeInterface = qGuiApp->platformNativeInterface();
+    connect(nativeInterface, &QPlatformNativeInterface::windowPropertyChanged, this, [this](QPlatformWindow* window, const QString &property) {
+        if (property != QStringLiteral("persistentSurfaceId")) {
+            return;
+        }
+        if (window->window() == m_window) {
+            qDebug() << "EMIT " << property << m_window->handle();
+            registerSurfaceMenuForWindow(m_window, m_path);
+        }
+    });
 }
 
 MenuRegistrar::~MenuRegistrar()
@@ -31,8 +43,6 @@ MenuRegistrar::~MenuRegistrar()
 
 void MenuRegistrar::registerSurfaceMenuForWindow(QWindow* window, const QDBusObjectPath& path)
 {
-    qCWarning(qtubuntuMenus).nospace() << "MenuRegistrar::registerSurfaceMenuForWindow(window=" << window << ", path=" << path.path() << ")";
-
     if (!m_registeredSurfaceId.isEmpty()) {
         unregisterSurfaceMenu();
     }
@@ -51,6 +61,8 @@ void MenuRegistrar::registerSurfaceMenu()
     QString persistentSurfaceId = nativeInterface->windowProperty(m_window->handle(), "persistentSurfaceId", QString()).toString();
     if (persistentSurfaceId.isEmpty()) return;
 
+    qCDebug(qtubuntuMenus).nospace() << "MenuRegistrar::registerSurfaceMenuForWindow(window=" << m_window << ", path=" << m_path.path() << ")";
+
     UbuntuMenuRegistry::instance()->registerSurfaceMenu(persistentSurfaceId, m_path, m_service);
     m_registeredSurfaceId = persistentSurfaceId;
 }
@@ -58,6 +70,8 @@ void MenuRegistrar::registerSurfaceMenu()
 void MenuRegistrar::unregisterSurfaceMenu()
 {
     if (!UbuntuMenuRegistry::instance()->isConnected()) return;
+
+    qCDebug(qtubuntuMenus).nospace() << "MenuRegistrar::unregisterSurfaceMenu(window=" << m_window << ", path=" << m_path.path() << ")";
 
     UbuntuMenuRegistry::instance()->unregisterSurfaceMenu(m_registeredSurfaceId, m_path);
     m_registeredSurfaceId.clear();

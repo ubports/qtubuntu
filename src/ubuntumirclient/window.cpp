@@ -35,7 +35,7 @@
 
 #include <EGL/egl.h>
 
-Q_LOGGING_CATEGORY(ubuntumirclientBufferSwap, "ubuntumirclient.bufferSwap", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntumirclientBufferSwap, "ubuntu.mirclient.bufferSwap", QtWarningMsg)
 
 const Qt::WindowType LowChromeWindowHint = (Qt::WindowType)0x00800000;
 
@@ -538,6 +538,11 @@ UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &cl
             w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()), roleFor(window()));
 
     updatePanelHeightHack(w->windowState() != Qt::WindowFullScreen);
+
+    // queue the windowPropertyChanged signal. If it's emitted directly, the platformWindow will not yet be set for the window.
+    QMetaObject::invokeMethod(mNativeInterface, "windowPropertyChanged", Qt::QueuedConnection,
+                              Q_ARG(QPlatformWindow*, this),
+                              Q_ARG(QString, "persistentSurfaceId"));
 }
 
 UbuntuWindow::~UbuntuWindow()

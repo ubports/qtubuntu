@@ -47,13 +47,22 @@
 class UbuntuIconTheme : public QGenericUnixTheme
 {
 public:
-    static const char* name;
     UbuntuIconTheme() {}
 
     // From QPlatformTheme
-    QVariant themeHint(ThemeHint hint) const override;
+    QVariant themeHint(ThemeHint hint) const override {
+        if (hint == QPlatformTheme::SystemIconThemeName) {
+            QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
+            if (iconTheme.isEmpty()) {
+                return QVariant(QStringLiteral("suru"));
+            } else {
+                return QVariant(QString(iconTheme));
+            }
+        } else {
+            return QGenericUnixTheme::themeHint(hint);
+        }
+    }
 };
-const char *UbuntuIconTheme::name = "ubuntu";
 
 static void resumedCallback(const UApplicationOptions *options, void* context)
 {
@@ -264,7 +273,7 @@ QPlatformOpenGLContext* UbuntuClientIntegration::createPlatformOpenGLContext(
 
 QStringList UbuntuClientIntegration::themeNames() const
 {
-    return QStringList(UbuntuIconTheme::name);
+    return QStringList("ubuntuappmenu");
 }
 
 QPlatformTheme* UbuntuClientIntegration::createPlatformTheme(const QString& name) const
@@ -335,18 +344,4 @@ void UbuntuClientIntegration::destroyScreen(UbuntuScreen *screen)
 #else
     QPlatformIntegration::destroyScreen(screen);
 #endif
-}
-
-QVariant UbuntuIconTheme::themeHint(QPlatformTheme::ThemeHint hint) const
-{
-    if (hint == QPlatformTheme::SystemIconThemeName) {
-        QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
-        if (iconTheme.isEmpty()) {
-            return QVariant(QStringLiteral("suru"));
-        } else {
-            return QVariant(QString(iconTheme));
-        }
-    } else {
-        return QGenericUnixTheme::themeHint(hint);
-    }
 }

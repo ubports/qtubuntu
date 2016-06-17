@@ -1,19 +1,19 @@
-TARGET = ubuntu
+TARGET = ubuntuappmenu
+TEMPLATE = lib
 
-PLUGIN_TYPE = platformthemes
-PLUGIN_CLASS_NAME = UbuntuPlugin
-load(qt_plugin)
+QT -= gui
+QT += core-private platformsupport-private dbus
 
-QT += core-private gui-private platformsupport-private dbus
-CONFIG += no_keywords link_pkgconfig
-PKGCONFIG += gio-2.0
+CONFIG += plugin no_keywords
 
-DBUS_INTERFACES += com.ubuntu.MenuRegistrar.xml
-
+# CONFIG += c++11 # only enables C++0x
 QMAKE_CXXFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -Werror -Wall
 QMAKE_LFLAGS += -std=c++11 -Wl,-no-undefined
 
-DESTDIR = ./
+CONFIG += link_pkgconfig
+PKGCONFIG += gio-2.0
+
+DBUS_INTERFACES += com.ubuntu.MenuRegistrar.xml
 
 HEADERS += \
     ubuntuthemeplugin.h \
@@ -32,7 +32,10 @@ SOURCES += \
     menuregistrar.cpp \
     registry.cpp
 
-OTHER_FILES +=
-
-DISTFILES += \
+OTHER_FILES += \
     ubuntu.json
+
+# Installation path
+target.path +=  $$[QT_INSTALL_PLUGINS]/platformthemes
+
+INSTALLS += target

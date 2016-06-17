@@ -17,10 +17,10 @@ public:
     void unregisterSurfaceMenu();
 
 private Q_SLOTS:
+    void registerSurfaceMenu();
     void onRegistrarServiceChanged();
 
 private:
-    void registerSurfaceMenu();
 
     QString m_service;
     QDBusObjectPath m_path;

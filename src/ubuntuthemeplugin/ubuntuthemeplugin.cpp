@@ -20,7 +20,7 @@
 #include <QDebug>
 
 ///////////////////////////////////////////////////////////
-const char *UbuntuThemePlugin::name = "ubuntu";
+const char *UbuntuThemePlugin::name = "ubuntuappmenu";
 
 UbuntuThemePlugin::UbuntuThemePlugin(QObject *parent)
 {

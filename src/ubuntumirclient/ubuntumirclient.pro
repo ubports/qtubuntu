@@ -46,10 +46,10 @@ HEADERS = \
     window.h \
     logging.h
 
+OTHER_FILES += \
+    ubuntumirclient.json
+
 # Installation path
 target.path +=  $$[QT_INSTALL_PLUGINS]/platforms
 
 INSTALLS += target
-
-OTHER_FILES += \
-    qtubuntutheme.json

@@ -148,7 +148,8 @@ public:
     QDebug operator<<(QDebug stream);
 
 Q_SIGNALS:
-    void checkChanged();
+    void checkedChanged(bool);
+    void enabledChanged(bool);
     void propertyChanged();
 
 private:

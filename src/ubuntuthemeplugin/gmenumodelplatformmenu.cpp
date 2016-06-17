@@ -26,8 +26,11 @@
 #include <QWindow>
 #include <QCoreApplication>
 
+#define BAR_DEBUG_MSG qCDebug(qtubuntuMenus).nospace() << "GMenuModelPlatformMenuBar[" << (void*)this <<"]::" << __func__
+#define MENU_DEBUG_MSG qCDebug(qtubuntuMenus).nospace() << "GMenuModelPlatformMenu[" << (void*)this <<"]::" << __func__
+#define ITEM_DEBUG_MSG qCDebug(qtubuntuMenus).nospace() << "GMenuModelPlatformMenuItem[" << (void*)this <<"]::" << __func__
 
-Q_LOGGING_CATEGORY(qtubuntuMenus, "qtubuntu.platformmenu", QtWarningMsg)
+Q_LOGGING_CATEGORY(qtubuntuMenus, "ubuntu.appmenu", QtWarningMsg)
 int logRecusion = 0;
 
 QDebug operator<<(QDebug stream, GMenuModelPlatformMenuBar* bar) {
@@ -48,7 +51,7 @@ GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar()
     , m_registrar(new MenuRegistrar())
     , m_ready(false)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar");
+    BAR_DEBUG_MSG << "()";
 
     connect(this, SIGNAL(menuInserted(QPlatformMenu*)), this, SIGNAL(structureChanged()));
     connect(this, SIGNAL(menuRemoved(QPlatformMenu*)), this, SIGNAL(structureChanged()));
@@ -56,7 +59,7 @@ GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar()
 
 GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar");
+    BAR_DEBUG_MSG << "()";
 
     delete m_registrar;
     m_registrar = nullptr;
@@ -68,7 +71,7 @@ GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
 void
 GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::insertMenu(%p, %p)", menu, before);
+    BAR_DEBUG_MSG << "(menu=" << menu << ", before=" <<  before << ")";
 
     if (m_menus.contains(menu)) return;
 
@@ -89,7 +92,7 @@ GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before
 void
 GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::removeMenu(%p)", menu);
+    BAR_DEBUG_MSG << "(menu=" << menu << ")";
 
     for (auto iter = m_menus.begin(); iter != m_menus.end(); ++iter) {
         if (*iter == menu) {
@@ -104,18 +107,18 @@ GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 void
 GMenuModelPlatformMenuBar::syncMenu(QPlatformMenu *menu)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::syncMenu(%p)", menu);
+    BAR_DEBUG_MSG << "(menu=" << menu << ")";
 
     Q_UNUSED(menu)
 }
 
 void
-GMenuModelPlatformMenuBar::handleReparent(QWindow *newParentWindow)
+GMenuModelPlatformMenuBar::handleReparent(QWindow *parentWindow)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuBar::handleReparent(%p)", newParentWindow);
+    BAR_DEBUG_MSG << "(parentWindow=" << parentWindow << ")";
 
     setReady(true);
-    m_registrar->registerSurfaceMenuForWindow(newParentWindow, QDBusObjectPath(m_exporter->menuPath()));
+    m_registrar->registerSurfaceMenuForWindow(parentWindow, QDBusObjectPath(m_exporter->menuPath()));
 }
 
 QPlatformMenu *
@@ -165,7 +168,7 @@ GMenuModelPlatformMenu::GMenuModelPlatformMenu()
     , m_exporter(nullptr)
     , m_registrar(nullptr)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::GMenuModelPlatformMenu");
+    MENU_DEBUG_MSG << "()";
 
     connect(this, SIGNAL(menuItemInserted(QPlatformMenuItem*)), this, SIGNAL(structureChanged()));
     connect(this, SIGNAL(menuItemRemoved(QPlatformMenuItem*)), this, SIGNAL(structureChanged()));
@@ -173,12 +176,12 @@ GMenuModelPlatformMenu::GMenuModelPlatformMenu()
 
 GMenuModelPlatformMenu::~GMenuModelPlatformMenu()
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::~GMenuModelPlatformMenu");
+    MENU_DEBUG_MSG << "()";
 }
 
 void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatformMenuItem *before)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::insertMenuItem(%p, %p)", menuItem, before);
+    MENU_DEBUG_MSG << "(menuItem=" << menuItem << ", before=" << before << ")";
 
     if (m_menuItems.contains(menuItem)) return;
 
@@ -198,7 +201,7 @@ void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatfo
 
 void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::removeMenuItem(%p)", menuItem);
+    MENU_DEBUG_MSG << "(menuItem=" << menuItem << ")";
 
     for (auto iter = m_menuItems.begin(); iter != m_menuItems.end(); ++iter) {
         if (*iter == menuItem) {
@@ -211,18 +214,20 @@ void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 
 void GMenuModelPlatformMenu::syncMenuItem(QPlatformMenuItem *menuItem)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenu::syncMenuItem(%p)", menuItem);
+    MENU_DEBUG_MSG << "(menuItem=" << menuItem << ")";
 
     Q_UNUSED(menuItem)
 }
 
 void GMenuModelPlatformMenu::syncSeparatorsCollapsible(bool enable)
 {
+    MENU_DEBUG_MSG << "(enable=" << enable << ")";
     Q_UNUSED(enable)
 }
 
 void GMenuModelPlatformMenu::setTag(quintptr tag)
 {
+    MENU_DEBUG_MSG << "(tag=" << tag << ")";
     m_tag = tag;
 }
 
@@ -233,6 +238,7 @@ quintptr GMenuModelPlatformMenu::tag() const
 
 void GMenuModelPlatformMenu::setText(const QString &text)
 {
+    MENU_DEBUG_MSG << "(text=" << text << ")";
     if (m_text != text) {
         m_text = text;
         Q_EMIT propertyChanged();
@@ -241,6 +247,8 @@ void GMenuModelPlatformMenu::setText(const QString &text)
 
 void GMenuModelPlatformMenu::setIcon(const QIcon &icon)
 {
+    MENU_DEBUG_MSG << "(icon=" << icon.name() << ")";
+
     if (!icon.isNull() || (!m_icon.isNull() && icon.isNull())) {
         m_icon = icon;
         Q_EMIT propertyChanged();
@@ -249,6 +257,8 @@ void GMenuModelPlatformMenu::setIcon(const QIcon &icon)
 
 void GMenuModelPlatformMenu::setEnabled(bool enabled)
 {
+    MENU_DEBUG_MSG << "(enabled=" << enabled << ")";
+
     if (m_enabled != enabled) {
         m_enabled = enabled;
         Q_EMIT propertyChanged();
@@ -257,6 +267,8 @@ void GMenuModelPlatformMenu::setEnabled(bool enabled)
 
 void GMenuModelPlatformMenu::setVisible(bool isVisible)
 {
+    MENU_DEBUG_MSG << "(visible=" << isVisible << ")";
+
     if (m_visible != isVisible) {
         m_visible = isVisible;
         Q_EMIT propertyChanged();
@@ -265,16 +277,22 @@ void GMenuModelPlatformMenu::setVisible(bool isVisible)
 
 void GMenuModelPlatformMenu::setMinimumWidth(int width)
 {
+    MENU_DEBUG_MSG << "(width=" << width << ")";
+
     Q_UNUSED(width)
 }
 
 void GMenuModelPlatformMenu::setFont(const QFont &font)
 {
+    MENU_DEBUG_MSG << "(font=" << font << ")";
+
     Q_UNUSED(font)
 }
 
 void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect &targetRect, const QPlatformMenuItem *item)
 {
+    MENU_DEBUG_MSG << "(parentWindow=" << parentWindow << ", targetRect=" << targetRect << ", item=" << item << ")";
+
     if (!m_exporter) {
         m_exporter = new GMenuModelExporter(this);
         m_exporter->exportModels();
@@ -301,6 +319,8 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
 
 void GMenuModelPlatformMenu::dismiss()
 {
+    MENU_DEBUG_MSG << "()";
+
     if (m_registrar) { m_registrar->unregisterSurfaceMenu(); }
     if (m_exporter) { m_exporter->unexportModels(); }
 }
@@ -346,16 +366,17 @@ QDebug GMenuModelPlatformMenu::operator<<(QDebug stream)
 GMenuModelPlatformMenuItem::GMenuModelPlatformMenuItem()
     : m_menu(nullptr)
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuItem::GMenuModelPlatformMenuItem");
+    ITEM_DEBUG_MSG << "()";
 }
 
 GMenuModelPlatformMenuItem::~GMenuModelPlatformMenuItem()
 {
-    qCDebug(qtubuntuMenus, "GMenuModelPlatformMenuItem::~GMenuModelPlatformMenuItem");
+    ITEM_DEBUG_MSG << "()";
 }
 
 void GMenuModelPlatformMenuItem::setTag(quintptr tag)
 {
+    ITEM_DEBUG_MSG << "(tag=" << tag << ")";
     m_tag = tag;
 }
 
@@ -366,6 +387,7 @@ quintptr GMenuModelPlatformMenuItem::tag() const
 
 void GMenuModelPlatformMenuItem::setText(const QString &text)
 {
+    ITEM_DEBUG_MSG << "(text=" << text << ")";
     if (m_text != text) {
         m_text = text;
         Q_EMIT propertyChanged();
@@ -374,6 +396,8 @@ void GMenuModelPlatformMenuItem::setText(const QString &text)
 
 void GMenuModelPlatformMenuItem::setIcon(const QIcon &icon)
 {
+    ITEM_DEBUG_MSG << "(icon=" << icon.name() << ")";
+
     if (!icon.isNull() || (!m_icon.isNull() && icon.isNull())) {
         m_icon = icon;
         Q_EMIT propertyChanged();
@@ -382,6 +406,7 @@ void GMenuModelPlatformMenuItem::setIcon(const QIcon &icon)
 
 void GMenuModelPlatformMenuItem::setVisible(bool isVisible)
 {
+    ITEM_DEBUG_MSG << "(visible=" << isVisible << ")";
     if (m_visible != isVisible) {
         m_visible = isVisible;
         Q_EMIT propertyChanged();
@@ -390,6 +415,7 @@ void GMenuModelPlatformMenuItem::setVisible(bool isVisible)
 
 void GMenuModelPlatformMenuItem::setIsSeparator(bool isSeparator)
 {
+    ITEM_DEBUG_MSG << "(separator=" << isSeparator << ")";
     if (m_separator != isSeparator) {
         m_separator = isSeparator;
         Q_EMIT propertyChanged();
@@ -398,16 +424,19 @@ void GMenuModelPlatformMenuItem::setIsSeparator(bool isSeparator)
 
 void GMenuModelPlatformMenuItem::setFont(const QFont &font)
 {
+    ITEM_DEBUG_MSG << "(font=" << font << ")";
     Q_UNUSED(font);
 }
 
 void GMenuModelPlatformMenuItem::setRole(QPlatformMenuItem::MenuRole role)
 {
+    ITEM_DEBUG_MSG << "(role=" << role << ")";
     Q_UNUSED(role);
 }
 
 void GMenuModelPlatformMenuItem::setCheckable(bool checkable)
 {
+    ITEM_DEBUG_MSG << "(checkable=" << checkable << ")";
     if (m_checkable != checkable) {
         m_checkable = checkable;
         Q_EMIT propertyChanged();
@@ -416,15 +445,17 @@ void GMenuModelPlatformMenuItem::setCheckable(bool checkable)
 
 void GMenuModelPlatformMenuItem::setChecked(bool isChecked)
 {
+    ITEM_DEBUG_MSG << "(checked=" << isChecked << ")";
     if (m_checked != isChecked) {
         m_checked = isChecked;
-        Q_EMIT checkChanged();
+        Q_EMIT checkedChanged(isChecked);
         Q_EMIT propertyChanged();
     }
 }
 
 void GMenuModelPlatformMenuItem::setShortcut(const QKeySequence &shortcut)
 {
+    ITEM_DEBUG_MSG << "(shortcut=" << shortcut << ")";
     if (m_shortcut != shortcut) {
         m_shortcut = shortcut;
         Q_EMIT propertyChanged();
@@ -433,19 +464,23 @@ void GMenuModelPlatformMenuItem::setShortcut(const QKeySequence &shortcut)
 
 void GMenuModelPlatformMenuItem::setEnabled(bool enabled)
 {
+    ITEM_DEBUG_MSG << "(enabled=" << enabled << ")";
     if (m_enabled != enabled) {
         m_enabled = enabled;
+        Q_EMIT enabledChanged(enabled);
         Q_EMIT propertyChanged();
     }
 }
 
 void GMenuModelPlatformMenuItem::setIconSize(int size)
 {
+    ITEM_DEBUG_MSG << "(size=" << size << ")";
     Q_UNUSED(size);
 }
 
 void GMenuModelPlatformMenuItem::setMenu(QPlatformMenu *menu)
 {
+    ITEM_DEBUG_MSG << "(menu=" << menu << ")";
     if (m_menu != menu) {
         m_menu = menu;
         Q_EMIT propertyChanged();

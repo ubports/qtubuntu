@@ -37,7 +37,7 @@
 
 #include <mir_toolkit/mir_client_library.h>
 
-Q_LOGGING_CATEGORY(ubuntumirclientInput, "ubuntumirclient.input", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntumirclientInput, "ubuntu.mirclient.input", QtWarningMsg)
 
 namespace
 {

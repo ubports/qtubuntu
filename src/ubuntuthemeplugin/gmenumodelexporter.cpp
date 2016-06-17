@@ -21,6 +21,8 @@
 
 #include <QDebug>
 
+#include <functional>
+
 namespace {
 
 inline QString getActionString(const QString& label) {
@@ -38,7 +40,6 @@ inline QString getActionString(const QString& label) {
 static void activate_cb(GSimpleAction *action, GVariant *, gpointer user_data)
 {
     qCDebug(qtubuntuMenus, "Activate menu action '%s'", g_action_get_name(G_ACTION(action)));
-
     auto item = (GMenuModelPlatformMenuItem*)user_data;
     item->activated();
 }
@@ -274,7 +275,8 @@ void GMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMenuItem
 
 void GMenuModelExporter::createAction(const QByteArray &name, GMenuModelPlatformMenuItem *gplatformMenuItem)
 {
-    disconnect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkChanged, this, 0);
+    disconnect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkedChanged, this, 0);
+    disconnect(gplatformMenuItem, &GMenuModelPlatformMenuItem::enabledChanged, this, 0);
 
     if (m_actions.contains(name)) {
         g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), name.constData());
@@ -288,26 +290,30 @@ void GMenuModelExporter::createAction(const QByteArray &name, GMenuModelPlatform
         bool checked(GMenuModelPlatformMenuItem::get_checked(gplatformMenuItem));
         action = g_simple_action_new_stateful(name.constData(), NULL, g_variant_new_boolean(checked));
 
-        // save the connection to disconnect in GMenuModelExporter::clear()
-        m_propertyConnections << connect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkChanged, this, [gplatformMenuItem, action]() {
-            bool checked(GMenuModelPlatformMenuItem::get_checked(gplatformMenuItem));
-            qCDebug(qtubuntuMenus, "Menu item check changed for action='%s', value=%s", g_action_get_name(G_ACTION(action)),
-                                                                                        checked ? "true" : "false");
-
+        std::function<void(bool)> updateChecked = [gplatformMenuItem, action](bool checked) {
             auto type = g_action_get_state_type(G_ACTION(action));
             if (type && g_variant_type_equal(type, G_VARIANT_TYPE_BOOLEAN)) {
                 g_simple_action_set_state(action, g_variant_new_boolean(checked ? TRUE : FALSE));
             }
-        });
-
+        };
+        // save the connection to disconnect in GMenuModelExporter::clear()
+        m_propertyConnections << connect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkedChanged, this, updateChecked);
     } else {
         action = g_simple_action_new(name.constData(), NULL);
     }
 
-    g_signal_connect(action,
-                     "activate",
-                     G_CALLBACK(activate_cb),
-                     gplatformMenuItem);
+    // Enabled update
+    std::function<void(bool)> updateEnabled = [gplatformMenuItem, action](bool enabled) {
+        GValue value = G_VALUE_INIT;
+        g_value_init (&value, G_TYPE_BOOLEAN);
+        g_value_set_boolean(&value, enabled ? TRUE : FALSE);
+        g_object_set_property(G_OBJECT(action), "enabled", &value);
+    };
+    updateEnabled(GMenuModelPlatformMenuItem::get_enabled(gplatformMenuItem));
+    // save the connection to disconnect in GMenuModelExporter::clear()
+    m_propertyConnections << connect(gplatformMenuItem, &GMenuModelPlatformMenuItem::enabledChanged, this, updateEnabled);
+
+    g_signal_connect(action, "activate", G_CALLBACK(activate_cb), gplatformMenuItem);
 
     m_actions.insert(name);
     g_action_map_add_action(G_ACTION_MAP(m_gactionGroup), G_ACTION(action));
