@@ -32,6 +32,8 @@ public:
     void swapBuffers(QPlatformSurface *surface) final;
     bool makeCurrent(QPlatformSurface *surface) final;
 
+    QSurfaceFormat format() const final;
+
 protected:
     EGLSurface eglSurfaceForPlatformSurface(QPlatformSurface *surface) final;
 };
