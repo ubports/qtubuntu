@@ -60,15 +60,9 @@ public:
     void initialize() override;
     QPlatformOffscreenSurface *createPlatformOffscreenSurface(QOffscreenSurface *surface) const override;
 
-    // non-const versions of some QPlatformIntegration methods
-    QPlatformOpenGLContext* createPlatformOpenGLContext(QOpenGLContext* context);
-    QPlatformWindow* createPlatformWindow(QWindow* window);
-
     // New methods.
     MirConnection *mirConnection() const { return mMirConnection; }
-    QSurfaceFormat surfaceFormat() const { return mSurfaceFormat; }
     EGLDisplay eglDisplay() const { return mEglDisplay; }
-    EGLConfig eglConfig() const { return mEglConfig; }
     EGLNativeDisplayType eglNativeDisplay() const { return mEglNativeDisplay; }
     UbuntuScreenObserver *screenObserver() const { return mScreenObserver.data(); }
 
@@ -76,8 +70,10 @@ private Q_SLOTS:
     void destroyScreen(UbuntuScreen *screen);
 
 private:
-    void setupOptions();
-    void setupDescription();
+    void setupOptions(QStringList &args);
+    void setupDescription(QByteArray &sessionName);
+    static QByteArray generateSessionName(QStringList &args);
+    static QByteArray generateSessionNameFromQmlFile(QStringList &args);
 
     UbuntuNativeInterface* mNativeInterface;
     QPlatformFontDatabase* mFontDb;
@@ -99,9 +95,7 @@ private:
 
     // EGL related
     EGLDisplay mEglDisplay{EGL_NO_DISPLAY};
-    EGLConfig mEglConfig{nullptr};
     EGLNativeDisplayType mEglNativeDisplay;
-    QSurfaceFormat mSurfaceFormat;
 };
 
 #endif // UBUNTU_CLIENT_INTEGRATION_H
