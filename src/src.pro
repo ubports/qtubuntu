@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 
-SUBDIRS += ubuntumirclient ubuntuthemeplugin
+SUBDIRS += ubuntumirclient ubuntuappmenu

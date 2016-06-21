@@ -14,25 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ubuntuthemeplugin.h"
-#include "theme.h"
+#ifndef UBUNTU_THEME_H
+#define UBUNTU_THEME_H
 
-#include <QDebug>
+#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
 
-///////////////////////////////////////////////////////////
-const char *UbuntuThemePlugin::name = "ubuntuappmenu";
-
-UbuntuThemePlugin::UbuntuThemePlugin(QObject *parent)
+class UbuntuAppMenuTheme : public QGenericUnixTheme
 {
-    Q_UNUSED(parent);
-}
+public:
+    static const char* name;
+    UbuntuAppMenuTheme();
+    virtual ~UbuntuAppMenuTheme();
 
-QPlatformTheme *
-UbuntuThemePlugin::create(const QString &key, const QStringList &paramList)
-{
-    Q_UNUSED(paramList);
-    if (key.compare(QLatin1String(UbuntuThemePlugin::name), Qt::CaseInsensitive))
-        return 0;
+    // From QPlatformTheme
+    QVariant themeHint(ThemeHint hint) const override;
 
-    return new UbuntuTheme();
-}
+    // For the menus
+    virtual QPlatformMenuItem* createPlatformMenuItem() const override;
+    virtual QPlatformMenu* createPlatformMenu() const override;
+    virtual QPlatformMenuBar* createPlatformMenuBar() const override;
+};
+
+#endif // UBUNTU_THEME_H

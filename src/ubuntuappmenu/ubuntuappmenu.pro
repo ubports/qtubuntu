@@ -16,24 +16,24 @@ PKGCONFIG += gio-2.0
 DBUS_INTERFACES += com.ubuntu.MenuRegistrar.xml
 
 HEADERS += \
-    ubuntuthemeplugin.h \
     theme.h \
     gmenumodelexporter.h \
     gmenumodelplatformmenu.h \
     logging.h \
     menuregistrar.h \
-    registry.h
+    registry.h \
+    themeplugin.h
 
 SOURCES += \
-    ubuntuthemeplugin.cpp \
     theme.cpp \
     gmenumodelexporter.cpp \
     gmenumodelplatformmenu.cpp \
     menuregistrar.cpp \
-    registry.cpp
+    registry.cpp \
+    themeplugin.cpp
 
 OTHER_FILES += \
-    ubuntu.json
+    ubuntuappmenu.json
 
 # Installation path
 target.path +=  $$[QT_INSTALL_PLUGINS]/platformthemes

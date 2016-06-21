@@ -19,12 +19,12 @@
 
 #include <qpa/qplatformthemeplugin.h>
 
-class UbuntuThemePlugin : public QPlatformThemePlugin
+class UbuntuAppMenuThemePlugin : public QPlatformThemePlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QPA.QPlatformThemeFactoryInterface.5.1" FILE "ubuntu.json")
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QPA.QPlatformThemeFactoryInterface.5.1" FILE "ubuntuappmenu.json")
 public:
-    UbuntuThemePlugin(QObject *parent = 0);
+    UbuntuAppMenuThemePlugin(QObject *parent = 0);
 
     virtual QPlatformTheme *create(const QString &key, const QStringList &paramList);
 

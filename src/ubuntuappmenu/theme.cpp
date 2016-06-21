@@ -20,7 +20,7 @@
 #include <QtCore/QVariant>
 #include <QDebug>
 
-const char *UbuntuTheme::name = "ubuntu";
+const char *UbuntuAppMenuTheme::name = "ubuntuappmenu";
 
 bool useLocalMenu() {
     QByteArray menuProxy = qgetenv("UBUNTU_MENUPROXY");
@@ -28,15 +28,15 @@ bool useLocalMenu() {
     return menuProxyIsZero;
 }
 
-UbuntuTheme::UbuntuTheme()
+UbuntuAppMenuTheme::UbuntuAppMenuTheme()
 {
 }
 
-UbuntuTheme::~UbuntuTheme()
+UbuntuAppMenuTheme::~UbuntuAppMenuTheme()
 {
 }
 
-QVariant UbuntuTheme::themeHint(ThemeHint hint) const
+QVariant UbuntuAppMenuTheme::themeHint(ThemeHint hint) const
 {
     if (hint == QPlatformTheme::SystemIconThemeName) {
         QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
@@ -50,20 +50,20 @@ QVariant UbuntuTheme::themeHint(ThemeHint hint) const
     }
 }
 
-QPlatformMenuItem *UbuntuTheme::createPlatformMenuItem() const
+QPlatformMenuItem *UbuntuAppMenuTheme::createPlatformMenuItem() const
 {
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenuItem();
     return new GMenuModelPlatformMenuItem();
 }
 
-QPlatformMenu *UbuntuTheme::createPlatformMenu() const
+QPlatformMenu *UbuntuAppMenuTheme::createPlatformMenu() const
 {
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenu();
     return new GMenuModelPlatformMenu();
 }
 
 QPlatformMenuBar *
-UbuntuTheme::createPlatformMenuBar() const
+UbuntuAppMenuTheme::createPlatformMenuBar() const
 {
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenuBar();
     return new GMenuModelPlatformMenuBar();
