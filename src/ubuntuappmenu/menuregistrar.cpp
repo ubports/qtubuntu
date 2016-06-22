@@ -32,7 +32,7 @@ MenuRegistrar::MenuRegistrar()
     GDBusConnection *bus;
     bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
     if (!bus) {
-        qCWarning(qtubuntuMenus, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
+        qCWarning(ubuntuappmenu, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
         return;
     }
     m_service = g_dbus_connection_get_unique_name(bus);
@@ -44,7 +44,6 @@ MenuRegistrar::MenuRegistrar()
             return;
         }
         if (window->window() == m_window) {
-            qDebug() << "EMIT " << property << m_window->handle();
             registerSurfaceMenuForWindow(m_window, m_path);
         }
     });
@@ -77,8 +76,6 @@ void MenuRegistrar::registerSurfaceMenu()
     QString persistentSurfaceId = nativeInterface->windowProperty(m_window->handle(), "persistentSurfaceId", QString()).toString();
     if (persistentSurfaceId.isEmpty()) return;
 
-    qCDebug(qtubuntuMenus).nospace() << "MenuRegistrar::registerSurfaceMenuForWindow(window=" << m_window << ", path=" << m_path.path() << ")";
-
     UbuntuMenuRegistry::instance()->registerSurfaceMenu(persistentSurfaceId, m_path, m_service);
     m_registeredSurfaceId = persistentSurfaceId;
 }
@@ -86,8 +83,6 @@ void MenuRegistrar::registerSurfaceMenu()
 void MenuRegistrar::unregisterSurfaceMenu()
 {
     if (!UbuntuMenuRegistry::instance()->isConnected()) return;
-
-    qCDebug(qtubuntuMenus).nospace() << "MenuRegistrar::unregisterSurfaceMenu(window=" << m_window << ", path=" << m_path.path() << ")";
 
     UbuntuMenuRegistry::instance()->unregisterSurfaceMenu(m_registeredSurfaceId, m_path);
     m_registeredSurfaceId.clear();

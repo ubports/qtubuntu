@@ -16,10 +16,12 @@
 
 #include "theme.h"
 #include "gmenumodelplatformmenu.h"
+#include "logging.h"
 
 #include <QtCore/QVariant>
 #include <QDebug>
 
+Q_LOGGING_CATEGORY(ubuntuappmenu, "ubuntu.appmenu", QtWarningMsg)
 const char *UbuntuAppMenuTheme::name = "ubuntuappmenu";
 
 bool useLocalMenu() {
@@ -30,6 +32,7 @@ bool useLocalMenu() {
 
 UbuntuAppMenuTheme::UbuntuAppMenuTheme()
 {
+    qCDebug(ubuntuappmenu, "UbuntuAppMenuTheme::UbuntuAppMenuTheme() - useLocalMenu=%s", useLocalMenu() ? "true" : "false");
 }
 
 UbuntuAppMenuTheme::~UbuntuAppMenuTheme()

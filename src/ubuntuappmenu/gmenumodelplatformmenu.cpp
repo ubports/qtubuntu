@@ -26,11 +26,10 @@
 #include <QWindow>
 #include <QCoreApplication>
 
-#define BAR_DEBUG_MSG qCDebug(qtubuntuMenus).nospace() << "GMenuModelPlatformMenuBar[" << (void*)this <<"]::" << __func__
-#define MENU_DEBUG_MSG qCDebug(qtubuntuMenus).nospace() << "GMenuModelPlatformMenu[" << (void*)this <<"]::" << __func__
-#define ITEM_DEBUG_MSG qCDebug(qtubuntuMenus).nospace() << "GMenuModelPlatformMenuItem[" << (void*)this <<"]::" << __func__
+#define BAR_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenuBar[" << (void*)this <<"]::" << __func__
+#define MENU_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenu[" << (void*)this <<"]::" << __func__
+#define ITEM_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenuItem[" << (void*)this <<"]::" << __func__
 
-Q_LOGGING_CATEGORY(qtubuntuMenus, "ubuntu.appmenu", QtWarningMsg)
 int logRecusion = 0;
 
 QDebug operator<<(QDebug stream, GMenuModelPlatformMenuBar* bar) {

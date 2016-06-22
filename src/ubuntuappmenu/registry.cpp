@@ -46,7 +46,7 @@ UbuntuMenuRegistry::~UbuntuMenuRegistry()
 
 void UbuntuMenuRegistry::registerSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service)
 {
-    qCDebug(qtubuntuMenus, "UbuntuMenuRegistry::registerMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
+    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::registerMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
             qPrintable(surfaceId),
             qPrintable(menuObjectPath.path()),
             qPrintable(service));
@@ -56,13 +56,17 @@ void UbuntuMenuRegistry::registerSurfaceMenu(const QString &surfaceId, QDBusObje
 
 void UbuntuMenuRegistry::unregisterSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath)
 {
+    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::unregisterSurfaceMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
+            qPrintable(surfaceId),
+            qPrintable(menuObjectPath.path()));
+
     m_interface->UnregisterSurfaceMenu(surfaceId, menuObjectPath);
 }
 
 
 void UbuntuMenuRegistry::serviceOwnerChanged(const QString &serviceName, const QString& oldOwner, const QString &newOwner)
 {
-    qCDebug(qtubuntuMenus, "UbuntuMenuRegistry::serviceOwnerChanged(newOwner=%s)", qPrintable(newOwner));
+    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::serviceOwnerChanged(newOwner=%s)", qPrintable(newOwner));
 
     Q_UNUSED(oldOwner);
     if (serviceName != REGISTRAR_SERVICE) return;
