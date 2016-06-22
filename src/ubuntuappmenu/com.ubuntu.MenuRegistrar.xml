@@ -11,8 +11,8 @@
         <interface name="com.ubuntu.MenuRegistrar" xmlns:dox="http://www.ayatana.org/dbus/dox.dtd">
                 <dox:d>
                   An interface to register a menu from an application to be displayed in another
-                  window.  This manages that association between Mir surface IDs and the dbus
-                  address and object that provides the menu using the  org.gtk.Menus interface.
+                  window.  This manages that association between processes and/or Mir surface IDs and the dbus
+                  address and object that provides the menus using the  org.gtk.Menus interface.
                 </dox:d>
                 <method name="RegisterAppMenu">
                         <dox:d><![CDATA[
@@ -23,7 +23,7 @@
                             ensure this method is called with the same connection that implmenets the object.
                         ]]></dox:d>
                         <arg name="pid" type="u" direction="in">
-                                <dox:d>The surface ID of the surface</dox:d>
+                                <dox:d>The process ID of the application for which the menu is associated</dox:d>
                         </arg>
                         <arg name="menuObjectPath" type="o" direction="in">
                                 <dox:d>The object on the dbus interface implementing the gmenumodel interface</dox:d>

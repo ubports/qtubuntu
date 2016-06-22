@@ -26,7 +26,12 @@
 
 #include <gio/gio.h>
 
+bool isMirClient() {
+    return qgetenv("QT_QPA_PLATFORM") == "ubuntumirclient";
+}
+
 MenuRegistrar::MenuRegistrar()
+    : m_registeredProcessId(~0)
 {
     GError *error = NULL;
     GDBusConnection *bus;
@@ -38,35 +43,51 @@ MenuRegistrar::MenuRegistrar()
     m_service = g_dbus_connection_get_unique_name(bus);
     connect(UbuntuMenuRegistry::instance(), &UbuntuMenuRegistry::serviceChanged, this, &MenuRegistrar::onRegistrarServiceChanged);
 
-    auto nativeInterface = qGuiApp->platformNativeInterface();
-    connect(nativeInterface, &QPlatformNativeInterface::windowPropertyChanged, this, [this](QPlatformWindow* window, const QString &property) {
-        if (property != QStringLiteral("persistentSurfaceId")) {
-            return;
-        }
-        if (window->window() == m_window) {
-            registerSurfaceMenuForWindow(m_window, m_path);
-        }
-    });
+    if (isMirClient()) {
+        auto nativeInterface = qGuiApp->platformNativeInterface();
+        connect(nativeInterface, &QPlatformNativeInterface::windowPropertyChanged, this, [this](QPlatformWindow* window, const QString &property) {
+            if (property != QStringLiteral("persistentSurfaceId")) {
+                return;
+            }
+            if (window->window() == m_window) {
+                registerMenuForWindow(m_window, m_path);
+            }
+        });
+    }
 }
 
 MenuRegistrar::~MenuRegistrar()
 {
-    if (!m_registeredSurfaceId.isEmpty()) {
-        unregisterSurfaceMenu();
-    }
+    unregisterMenu();
 }
 
-void MenuRegistrar::registerSurfaceMenuForWindow(QWindow* window, const QDBusObjectPath& path)
+void MenuRegistrar::registerMenuForWindow(QWindow* window, const QDBusObjectPath& path)
 {
-    if (!m_registeredSurfaceId.isEmpty()) {
-        unregisterSurfaceMenu();
-    }
+    unregisterMenu();
 
     m_window = window;
     m_path = path;
 
+    registerMenu();
+}
+
+void MenuRegistrar::registerMenu()
+{
     if (UbuntuMenuRegistry::instance()->isConnected() && m_window) {
-        registerSurfaceMenu();
+        if (isMirClient()) {
+            registerSurfaceMenu();
+        } else {
+            registerApplicationMenu();
+        }
+    }
+}
+
+void MenuRegistrar::unregisterMenu()
+{
+    if (!m_registeredSurfaceId.isEmpty()) {
+        unregisterSurfaceMenu();
+    } else if (m_registeredProcessId != ~0) {
+        unregisterApplicationMenu();
     }
 }
 
@@ -82,18 +103,34 @@ void MenuRegistrar::registerSurfaceMenu()
 
 void MenuRegistrar::unregisterSurfaceMenu()
 {
-    if (!UbuntuMenuRegistry::instance()->isConnected()) return;
+    if (!UbuntuMenuRegistry::instance()->isConnected()) {
+        m_registeredSurfaceId.clear();
+        return;
+    }
 
     UbuntuMenuRegistry::instance()->unregisterSurfaceMenu(m_registeredSurfaceId, m_path);
     m_registeredSurfaceId.clear();
 }
 
+void MenuRegistrar::registerApplicationMenu()
+{
+    pid_t pid = getpid();
+    UbuntuMenuRegistry::instance()->registerApplicationMenu(pid, m_path, m_service);
+    m_registeredProcessId = pid;
+}
+
+void MenuRegistrar::unregisterApplicationMenu()
+{
+    if (!UbuntuMenuRegistry::instance()->isConnected()) {
+        m_registeredProcessId = ~0;
+        return;
+    }
+    UbuntuMenuRegistry::instance()->unregisterApplicationMenu(m_registeredProcessId, m_path);
+    m_registeredProcessId = ~0;
+}
+
 void MenuRegistrar::onRegistrarServiceChanged()
 {
-    if (!m_registeredSurfaceId.isEmpty()) {
-        unregisterSurfaceMenu();
-    }
-    if (UbuntuMenuRegistry::instance()->isConnected() && m_window) {
-        registerSurfaceMenu();
-    }
+    unregisterMenu();
+    registerMenu();
 }

@@ -17,39 +17,39 @@
 #ifndef GMENUMODELEXPORTER_H
 #define GMENUMODELEXPORTER_H
 
+#include "gmenumodelplatformmenu.h"
+
 #include <gio/gio.h>
 
 #include <QTimer>
 #include <QSet>
 #include <QMetaObject>
 
-#include "gmenumodelplatformmenu.h"
-
 class GMenuModelExporter : public QObject
 {
     Q_OBJECT
 public:
-    GMenuModelExporter(GMenuModelPlatformMenuBar * bar);
-    GMenuModelExporter(GMenuModelPlatformMenu * menu);
     virtual ~GMenuModelExporter();
 
     void exportModels();
     void unexportModels();
-    void clear();
 
     QString menuPath() const { return m_menuPath;}
 
-private:
+protected:
+    GMenuModelExporter(QObject *parent);
+
     GMenuItem *createSubmenu(QPlatformMenu* platformMenu, GMenuModelPlatformMenuItem* forItem);
     GMenuItem *createMenuItem(QPlatformMenuItem* platformMenuItem);
     GMenuItem *createSection(QList<QPlatformMenuItem*>::const_iterator iter, QList<QPlatformMenuItem*>::const_iterator end);
+    void addAction(const QByteArray& name, GMenuModelPlatformMenuItem* gplatformItem);
 
     void addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, GMenu* menu);
     void processItemForGMenu(QPlatformMenuItem* item, GMenu* gmenu);
 
-    void createAction(const QByteArray& name, GMenuModelPlatformMenuItem* gplatformItem);
+    void clear();
 
-private:
+protected:
     GMenu* m_gmainMenu;
     GSimpleActionGroup* m_gactionGroup;
     QSet<QByteArray> m_actions;
@@ -59,6 +59,18 @@ private:
     QString m_menuPath;
 
     QList<QMetaObject::Connection> m_propertyConnections;
+};
+
+class GMenuModelBarExporter : public GMenuModelExporter
+{
+public:
+    GMenuModelBarExporter(GMenuModelPlatformMenuBar *parent);
+};
+
+class GMenuModelMenuExporter : public GMenuModelExporter
+{
+public:
+    GMenuModelMenuExporter(GMenuModelPlatformMenu *parent);
 };
 
 #endif // GMENUMODELEXPORTER_H

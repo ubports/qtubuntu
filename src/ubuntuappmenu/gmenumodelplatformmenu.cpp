@@ -46,14 +46,14 @@ QDebug operator<<(QDebug stream, GMenuModelPlatformMenuItem* menuItem) {
 }
 
 GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar()
-    : m_exporter(new GMenuModelExporter(this))
+    : m_exporter(new GMenuModelBarExporter(this))
     , m_registrar(new MenuRegistrar())
     , m_ready(false)
 {
     BAR_DEBUG_MSG << "()";
 
-    connect(this, SIGNAL(menuInserted(QPlatformMenu*)), this, SIGNAL(structureChanged()));
-    connect(this, SIGNAL(menuRemoved(QPlatformMenu*)), this, SIGNAL(structureChanged()));
+    connect(this, &GMenuModelPlatformMenuBar::menuInserted, this, &GMenuModelPlatformMenuBar::structureChanged);
+    connect(this,&GMenuModelPlatformMenuBar::menuRemoved, this, &GMenuModelPlatformMenuBar::structureChanged);
 }
 
 GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
@@ -117,7 +117,7 @@ GMenuModelPlatformMenuBar::handleReparent(QWindow *parentWindow)
     BAR_DEBUG_MSG << "(parentWindow=" << parentWindow << ")";
 
     setReady(true);
-    m_registrar->registerSurfaceMenuForWindow(parentWindow, QDBusObjectPath(m_exporter->menuPath()));
+    m_registrar->registerMenuForWindow(parentWindow, QDBusObjectPath(m_exporter->menuPath()));
 }
 
 QPlatformMenu *
@@ -169,8 +169,8 @@ GMenuModelPlatformMenu::GMenuModelPlatformMenu()
 {
     MENU_DEBUG_MSG << "()";
 
-    connect(this, SIGNAL(menuItemInserted(QPlatformMenuItem*)), this, SIGNAL(structureChanged()));
-    connect(this, SIGNAL(menuItemRemoved(QPlatformMenuItem*)), this, SIGNAL(structureChanged()));
+    connect(this, &GMenuModelPlatformMenu::menuItemInserted, this, &GMenuModelPlatformMenu::structureChanged);
+    connect(this, &GMenuModelPlatformMenu::menuItemRemoved, this, &GMenuModelPlatformMenu::structureChanged);
 }
 
 GMenuModelPlatformMenu::~GMenuModelPlatformMenu()
@@ -293,20 +293,20 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
     MENU_DEBUG_MSG << "(parentWindow=" << parentWindow << ", targetRect=" << targetRect << ", item=" << item << ")";
 
     if (!m_exporter) {
-        m_exporter = new GMenuModelExporter(this);
+        m_exporter = new GMenuModelMenuExporter(this);
         m_exporter->exportModels();
     }
 
     if (parentWindow != m_parentWindow) {
         if (m_parentWindow) {
-            m_registrar->unregisterSurfaceMenu();
+            m_registrar->unregisterMenu();
         }
 
         m_parentWindow = parentWindow;
 
         if (m_parentWindow) {
             if (!m_registrar) m_registrar = new MenuRegistrar;
-            m_registrar->registerSurfaceMenuForWindow(const_cast<QWindow*>(m_parentWindow),
+            m_registrar->registerMenuForWindow(const_cast<QWindow*>(m_parentWindow),
                                                       QDBusObjectPath(m_exporter->menuPath()));
         }
     }
@@ -320,7 +320,7 @@ void GMenuModelPlatformMenu::dismiss()
 {
     MENU_DEBUG_MSG << "()";
 
-    if (m_registrar) { m_registrar->unregisterSurfaceMenu(); }
+    if (m_registrar) { m_registrar->unregisterMenu(); }
     if (m_exporter) { m_exporter->unexportModels(); }
 }
 

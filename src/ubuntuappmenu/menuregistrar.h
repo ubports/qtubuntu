@@ -29,19 +29,26 @@ public:
     MenuRegistrar();
     ~MenuRegistrar();
 
-    void registerSurfaceMenuForWindow(QWindow* window, const QDBusObjectPath& path);
-    void unregisterSurfaceMenu();
+    void registerMenuForWindow(QWindow* window, const QDBusObjectPath& path);
+    void unregisterMenu();
 
 private Q_SLOTS:
     void registerSurfaceMenu();
     void onRegistrarServiceChanged();
 
 private:
+    void registerMenu();
+
+    void registerApplicationMenu();
+    void unregisterApplicationMenu();
+
+    void unregisterSurfaceMenu();
 
     QString m_service;
     QDBusObjectPath m_path;
     QPointer<QWindow> m_window;
     QString m_registeredSurfaceId;
+    pid_t m_registeredProcessId;
 };
 
 

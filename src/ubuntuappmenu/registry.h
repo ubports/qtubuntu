@@ -31,6 +31,9 @@ public:
 
     static UbuntuMenuRegistry *instance();
 
+    void registerApplicationMenu(pid_t pid, QDBusObjectPath menuObjectPath, const QString &service);
+    void unregisterApplicationMenu(pid_t pid, QDBusObjectPath menuObjectPath);
+
     void registerSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service);
     void unregisterSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath);
 

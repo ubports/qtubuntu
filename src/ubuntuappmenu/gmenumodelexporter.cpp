@@ -50,15 +50,11 @@ static uint s_menuId = 0;
 
 } // namespace
 
-GMenuModelExporter::GMenuModelExporter(GMenuModelPlatformMenuBar * bar)
-    : QObject(bar)
-    , m_gmainMenu(g_menu_new())
-    , m_gactionGroup(g_simple_action_group_new())
-    , m_exportedModel(-1)
-    , m_exportedActions(-1)
-    , m_menuPath(MENU_OBJECT_PATH.arg(s_menuId++))
+
+GMenuModelBarExporter::GMenuModelBarExporter(GMenuModelPlatformMenuBar * bar)
+    : GMenuModelExporter(bar)
 {
-    qCDebug(ubuntuappmenu, "GMenuModelExporter::GMenuModelExporter");
+    qCDebug(ubuntuappmenu, "GMenuModelBarExporter::GMenuModelBarExporter");
 
     connect(bar, &GMenuModelPlatformMenuBar::structureChanged, this, [this]() {
         m_structureTimer.start();
@@ -74,23 +70,16 @@ GMenuModelExporter::GMenuModelExporter(GMenuModelPlatformMenuBar * bar)
             }
         }
     });
-    m_structureTimer.setSingleShot(true);
-    m_structureTimer.setInterval(0);
 
     connect(bar, &GMenuModelPlatformMenuBar::ready, this, [this]() {
         exportModels();
     });
 }
 
-GMenuModelExporter::GMenuModelExporter(GMenuModelPlatformMenu *menu)
-    : QObject(menu)
-    , m_gmainMenu(g_menu_new())
-    , m_gactionGroup(g_simple_action_group_new())
-    , m_exportedModel(-1)
-    , m_exportedActions(-1)
-    , m_menuPath(MENU_OBJECT_PATH.arg(s_menuId++))
+GMenuModelMenuExporter::GMenuModelMenuExporter(GMenuModelPlatformMenu *menu)
+    : GMenuModelExporter(menu)
 {
-    qCDebug(ubuntuappmenu, "GMenuModelExporter::GMenuModelExporter");
+    qCDebug(ubuntuappmenu, "GMenuModelMenuExporter::GMenuModelMenuExporter");
 
     connect(menu, &GMenuModelPlatformMenu::structureChanged, this, [this]() {
         m_structureTimer.start();
@@ -99,10 +88,19 @@ GMenuModelExporter::GMenuModelExporter(GMenuModelPlatformMenu *menu)
         clear();
         addSubmenuItems(menu, m_gmainMenu);
     });
+    addSubmenuItems(menu, m_gmainMenu);
+}
+
+GMenuModelExporter::GMenuModelExporter(QObject *parent)
+    : QObject(parent)
+    , m_gmainMenu(g_menu_new())
+    , m_gactionGroup(g_simple_action_group_new())
+    , m_exportedModel(-1)
+    , m_exportedActions(-1)
+    , m_menuPath(MENU_OBJECT_PATH.arg(s_menuId++))
+{
     m_structureTimer.setSingleShot(true);
     m_structureTimer.setInterval(0);
-
-    addSubmenuItems(menu, m_gmainMenu);
 }
 
 GMenuModelExporter::~GMenuModelExporter()
@@ -245,7 +243,7 @@ GMenuItem *GMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuIte
     g_menu_item_set_attribute(gmenuItem, "accel", "s", shortcut.constData());
     g_menu_item_set_detailed_action(gmenuItem, ("unity." + actionLabel).constData());
 
-    createAction(actionLabel, gplatformMenuItem);
+    addAction(actionLabel, gplatformMenuItem);
     return gmenuItem;
 }
 
@@ -273,7 +271,7 @@ void GMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMenuItem
     }
 }
 
-void GMenuModelExporter::createAction(const QByteArray &name, GMenuModelPlatformMenuItem *gplatformMenuItem)
+void GMenuModelExporter::addAction(const QByteArray &name, GMenuModelPlatformMenuItem *gplatformMenuItem)
 {
     disconnect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkedChanged, this, 0);
     disconnect(gplatformMenuItem, &GMenuModelPlatformMenuItem::enabledChanged, this, 0);

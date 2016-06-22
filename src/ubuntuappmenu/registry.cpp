@@ -44,6 +44,25 @@ UbuntuMenuRegistry::~UbuntuMenuRegistry()
     delete m_interface;
 }
 
+void UbuntuMenuRegistry::registerApplicationMenu(pid_t pid, QDBusObjectPath menuObjectPath, const QString &service)
+{
+    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::registerMenu(pid=%d, menuObjectPath=%s, service=%s)",
+            pid,
+            qPrintable(menuObjectPath.path()),
+            qPrintable(service));
+
+    m_interface->RegisterAppMenu(pid, menuObjectPath, menuObjectPath, service);
+}
+
+void UbuntuMenuRegistry::unregisterApplicationMenu(pid_t pid, QDBusObjectPath menuObjectPath)
+{
+    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::unregisterSurfaceMenu(pid=%d, menuObjectPath=%s)",
+            pid,
+            qPrintable(menuObjectPath.path()));
+
+    m_interface->UnregisterAppMenu(pid, menuObjectPath);
+}
+
 void UbuntuMenuRegistry::registerSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service)
 {
     qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::registerMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
@@ -51,12 +70,12 @@ void UbuntuMenuRegistry::registerSurfaceMenu(const QString &surfaceId, QDBusObje
             qPrintable(menuObjectPath.path()),
             qPrintable(service));
 
-    auto ret = m_interface->RegisterSurfaceMenu(surfaceId, menuObjectPath, menuObjectPath, service);
+    m_interface->RegisterSurfaceMenu(surfaceId, menuObjectPath, menuObjectPath, service);
 }
 
 void UbuntuMenuRegistry::unregisterSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath)
 {
-    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::unregisterSurfaceMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
+    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::unregisterSurfaceMenu(surfaceId=%s, menuObjectPath=%s)",
             qPrintable(surfaceId),
             qPrintable(menuObjectPath.path()));
 
