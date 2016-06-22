@@ -45,6 +45,7 @@
   logging categories:
 
   * ubuntumirclient.input       - Messages related to input and other Mir events.
+  * ubuntumirclient.graphics    - Messages related to graphics, GL and EGL
   * ubuntumirclient.swapBuffers - Messages related to surface buffer swapping.
   * ubuntumirclient             - For all other messages.
 
