@@ -95,16 +95,6 @@ bool UbuntuOpenGLContext::makeCurrent(QPlatformSurface* surface)
     }
 }
 
-// WORKAROUND for bug 1594198 - avoid having Qt use GLESv3
-QSurfaceFormat UbuntuOpenGLContext::format() const
-{
-    auto format = QEGLPlatformContext::format();
-    if (format.renderableType() == QSurfaceFormat::OpenGLES && format.majorVersion() > 2) {
-        format.setMajorVersion(2);
-    }
-    return format;
-}
-
 // Following method used internally in the base class QEGLPlatformContext to access
 // the egl surface of a QPlatformSurface/UbuntuWindow
 EGLSurface UbuntuOpenGLContext::eglSurfaceForPlatformSurface(QPlatformSurface *surface)
