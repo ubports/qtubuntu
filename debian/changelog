@@ -1,3 +1,10 @@
+qtubuntu (0.63+16.10.20160630.1-0ubuntu1) yakkety; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Expose MirSurface to client apps through the native interface
+
+ -- Michael Sheldon <michael.sheldon@canonical.com>  Thu, 30 Jun 2016 13:43:28 +0000
+
 qtubuntu (0.62+16.10.20160620-0ubuntu1) yakkety; urgency=medium
 
   * Revert r324 "EGL convenience" (LP: #1594198)
