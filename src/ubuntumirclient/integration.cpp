@@ -265,7 +265,7 @@ QPlatformOpenGLContext* UbuntuClientIntegration::createPlatformOpenGLContext(
         // requested OpenGL version to 1.0 to ensure EGL will give us a working context (lp:1549455).
         static const bool isMesa = QString(eglQueryString(mEglDisplay, EGL_VENDOR)).contains(QStringLiteral("Mesa"));
         if (isMesa) {
-            qCDebug(ubuntumirclient, "Attempting to choose OpenGL 1.4 context which may suit Mesa");
+            qCDebug(ubuntumirclientGraphics, "Attempting to choose OpenGL 1.4 context which may suit Mesa");
             format.setMajorVersion(1);
             format.setMinorVersion(4);
             delete platformContext;
