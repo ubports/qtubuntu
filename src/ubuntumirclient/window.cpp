@@ -336,6 +336,8 @@ public:
         mMirSurface = createMirSurface(mWindow, outputId, input, pixelFormat, connection, surfaceEventCallback, this);
         mEglSurface = eglCreateWindowSurface(mEglDisplay, config, nativeWindowFor(mMirSurface), nullptr);
 
+        mNeedsExposeCatchup = mir_surface_get_visibility(mMirSurface) == mir_surface_visibility_occluded;
+
         // Window manager can give us a final size different from what we asked for
         // so let's check what we ended up getting
         MirSurfaceParameters parameters;
@@ -395,6 +397,8 @@ public:
     bool hasParent() const { return mParented; }
 
     QSurfaceFormat format() const { return mFormat; }
+
+    bool mNeedsExposeCatchup;
 
 private:
     static void surfaceEventCallback(MirSurface* surface, const MirEvent *event, void* context);
@@ -622,6 +626,7 @@ void UbuntuWindow::handleSurfaceExposeChange(bool exposed)
     QMutexLocker lock(&mMutex);
     qCDebug(ubuntumirclient, "handleSurfaceExposeChange(window=%p, exposed=%s)", window(), exposed ? "true" : "false");
 
+    mSurface->mNeedsExposeCatchup = false;
     if (mWindowExposed == exposed) return;
     mWindowExposed = exposed;
 
@@ -793,6 +798,14 @@ void UbuntuWindow::onSwapBuffersDone()
 {
     QMutexLocker lock(&mMutex);
     mSurface->onSwapBuffersDone();
+
+    if (mSurface->mNeedsExposeCatchup) {
+        mSurface->mNeedsExposeCatchup = false;
+        mWindowExposed = false;
+
+        lock.unlock();
+        QWindowSystemInterface::handleExposeEvent(window(), QRect(QPoint(), geometry().size()));
+    }
 }
 
 void UbuntuWindow::handleScreenPropertiesChange(MirFormFactor formFactor, float scale)

@@ -36,6 +36,7 @@ public:
         insert("nativeorientation", UbuntuNativeInterface::NativeOrientation);
         insert("display", UbuntuNativeInterface::Display);
         insert("mirconnection", UbuntuNativeInterface::MirConnection);
+        insert("mirsurface", UbuntuNativeInterface::MirSurface);
         insert("scale", UbuntuNativeInterface::Scale);
         insert("formfactor", UbuntuNativeInterface::FormFactor);
     }
@@ -98,9 +99,11 @@ void* UbuntuNativeInterface::nativeResourceForWindow(const QByteArray& resourceS
     if (!ubuntuResourceMap()->contains(kLowerCaseResource))
         return NULL;
     const ResourceType kResourceType = ubuntuResourceMap()->value(kLowerCaseResource);
-    if (kResourceType == UbuntuNativeInterface::EglDisplay) {
+
+    switch (kResourceType) {
+    case EglDisplay:
         return mIntegration->eglDisplay();
-    } else if (kResourceType == UbuntuNativeInterface::NativeOrientation) {
+    case NativeOrientation:
         // Return the device's native screen orientation.
         if (window) {
             UbuntuScreen *ubuntuScreen = static_cast<UbuntuScreen*>(window->screen()->handle());
@@ -110,8 +113,19 @@ void* UbuntuNativeInterface::nativeResourceForWindow(const QByteArray& resourceS
             mNativeOrientation = new Qt::ScreenOrientation(platformScreen->nativeOrientation());
         }
         return mNativeOrientation;
-    } else {
-        return NULL;
+    case MirSurface:
+        if (window) {
+            auto ubuntuWindow = static_cast<UbuntuWindow*>(window->handle());
+            if (ubuntuWindow) {
+                return ubuntuWindow->mirSurface();
+            } else {
+                return nullptr;
+            }
+        } else {
+            return nullptr;
+        }
+    default:
+        return nullptr;
     }
 }
 
