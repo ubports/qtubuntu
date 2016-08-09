@@ -309,7 +309,7 @@ public:
             // requested OpenGL version to 1.0 to ensure EGL will give us a working context (lp:1549455).
             static const bool isMesa = QString(eglQueryString(display, EGL_VENDOR)).contains(QStringLiteral("Mesa"));
             if (isMesa) {
-                qCDebug(ubuntumirclient, "Attempting to choose OpenGL 1.4 context which may suit Mesa");
+                qCDebug(ubuntumirclientGraphics, "Attempting to choose OpenGL 1.4 context which may suit Mesa");
                 mFormat.setMajorVersion(1);
                 mFormat.setMinorVersion(4);
                 config = q_configFromGLFormat(display, mFormat, true);
@@ -358,8 +358,9 @@ public:
         QWindowSystemInterface::handleGeometryChange(mWindow, geom);
 
         qCDebug(ubuntumirclient) << "Created surface with geometry:" << geom << "title:" << mWindow->title()
-                                 << "role:" << roleFor(mWindow)
-                                 << "\nRequested format:" << mWindow->requestedFormat()
+                                 << "role:" << roleFor(mWindow);
+        qCDebug(ubuntumirclientGraphics)
+                                 << "Requested format:" << mWindow->requestedFormat()
                                  << "\nActual format:" << mFormat
                                  << "with associated Mir pixel format:" << mirPixelFormatToStr(pixelFormat);
     }
