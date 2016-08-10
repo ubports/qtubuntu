@@ -516,7 +516,7 @@ void UbuntuSurface::setSurfaceParent(MirSurface* parent)
 
 UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &clipboard,
                            UbuntuInput *input, UbuntuNativeInterface *native, EGLDisplay eglDisplay,
-                           EGLConfig eglConfig, MirConnection *mirConnection)
+                           EGLConfig eglConfig, MirConnection *mirConnection, UbuntuDebugExtension *debugExt)
     : QObject(nullptr)
     , QPlatformWindow(w)
     , mId(makeId())
@@ -525,6 +525,7 @@ UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &cl
     , mWindowFlags(w->flags())
     , mWindowVisible(false)
     , mWindowExposed(true)
+    , mDebugExtention(debugExt)
     , mNativeInterface(native)
     , mSurface(new UbuntuSurface{this, eglDisplay, eglConfig,
                static_cast<UbuntuScreen*>(w->screen()->handle())->mirOutputId(), input, mirConnection})
@@ -718,8 +719,8 @@ bool UbuntuWindow::isExposed() const
 
 QPoint UbuntuWindow::mapToGlobal(const QPoint &pos) const
 {
-    if (mIntegration->debugExtension()) {
-        return mIntegration->debugExtension()->mapSurfacePointToScreen(mSurface->mirSurface(), pos);
+    if (mDebugExtention) {
+        return mDebugExtention->mapSurfacePointToScreen(mSurface->mirSurface(), pos);
     } else {
         return pos;
     }
