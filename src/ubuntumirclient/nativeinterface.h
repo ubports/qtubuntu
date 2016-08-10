@@ -26,7 +26,7 @@ class QPlatformScreen;
 class UbuntuNativeInterface : public QPlatformNativeInterface {
     Q_OBJECT
 public:
-    enum ResourceType { EglDisplay, EglContext, NativeOrientation, Display, MirConnection, Scale, FormFactor };
+    enum ResourceType { EglDisplay, EglContext, NativeOrientation, Display, MirConnection, MirSurface, Scale, FormFactor };
 
     UbuntuNativeInterface(const UbuntuClientIntegration *integration);
     ~UbuntuNativeInterface();
