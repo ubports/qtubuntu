@@ -239,7 +239,7 @@ QByteArray UbuntuClientIntegration::generateSessionNameFromQmlFile(QStringList &
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) const
 {
-    return new UbuntuWindow(window, mClipboard, mInput, mNativeInterface, mEglDisplay, mEglConfig, mMirConnection);
+    return new UbuntuWindow(window, mClipboard, mInput, mNativeInterface, mEglDisplay, mEglConfig, mMirConnection, mDebugExtension.data());
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const

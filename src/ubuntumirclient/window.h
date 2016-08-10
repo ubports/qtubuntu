@@ -28,6 +28,7 @@
 #include <EGL/egl.h>
 
 class UbuntuClipboard;
+class UbuntuDebugExtension;
 class UbuntuNativeInterface;
 class UbuntuInput;
 class UbuntuScreen;
@@ -41,7 +42,7 @@ class UbuntuWindow : public QObject, public QPlatformWindow
 public:
     UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &clipboard,
                  UbuntuInput *input, UbuntuNativeInterface* native, EGLDisplay eglDisplay, EGLConfig eglConfig,
-                 MirConnection *mirConnection);
+                 MirConnection *mirConnection, UbuntuDebugExtension *debugExt);
     virtual ~UbuntuWindow();
 
     // QPlatformWindow methods.
@@ -81,6 +82,7 @@ private:
     Qt::WindowFlags mWindowFlags;
     bool mWindowVisible;
     bool mWindowExposed;
+    UbuntuDebugExtension *mDebugExtention;
     UbuntuNativeInterface *mNativeInterface;
     std::unique_ptr<UbuntuSurface> mSurface;
     float mScale;
