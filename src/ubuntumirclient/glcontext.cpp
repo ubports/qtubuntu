@@ -102,7 +102,9 @@ void UbuntuOpenGLContext::swapBuffers(QPlatformSurface *surface)
 {
     QEGLPlatformContext::swapBuffers(surface);
 
-    // notify window on swap completion
-    auto ubuntuWindow = static_cast<UbuntuWindow *>(surface);
-    ubuntuWindow->onSwapBuffersDone();
+    if (surface->surface()->surfaceClass() == QSurface::Window) {
+        // notify window on swap completion
+        auto ubuntuWindow = static_cast<UbuntuWindow *>(surface);
+        ubuntuWindow->onSwapBuffersDone();
+    }
 }
