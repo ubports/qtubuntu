@@ -91,10 +91,10 @@ bool UbuntuOpenGLContext::makeCurrent(QPlatformSurface* surface)
 // the egl surface of a QPlatformSurface/UbuntuWindow
 EGLSurface UbuntuOpenGLContext::eglSurfaceForPlatformSurface(QPlatformSurface *surface)
 {
-    if (surface->surface()->surfaceClass() == QSurface::Window)
+    if (surface->surface()->surfaceClass() == QSurface::Window) {
         return static_cast<UbuntuWindow *>(surface)->eglSurface();
-    else {
-      return static_cast<QEGLPbuffer *>(surface)->pbuffer();
+    } else {
+        return static_cast<QEGLPbuffer *>(surface)->pbuffer();
     }
 }
 
