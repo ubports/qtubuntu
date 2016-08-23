@@ -1,3 +1,41 @@
+qtubuntu (0.63+16.10.20160809-0ubuntu1) yakkety; urgency=medium
+
+  [ Daniel van Vugt ]
+  * Use correct scrolling scale of 120 as documented: (LP: #1607223,
+    #1607240)
+
+  [ Gerry Boland ]
+  * Reapply rev 324 plus fix: EGL convenience, plus workaround for
+    hybris not supporting GLESv3. (LP: #1507817, #1594198)
+  * Logging: separate graphics & cursor logging into their own logging
+    categories
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Tue, 09 Aug 2016 23:01:21 +0000
+
+qtubuntu (0.63+16.10.20160730-0ubuntu1) yakkety; urgency=medium
+
+  [ Lukáš Tinkl ]
+  * Differentiate between left/right Alt when extracting the modifiers
+    for Qt (LP: #1590515)
+
+  [ Nick Dedekind ]
+  * Re-added window exposure for occlusion detection (LP: #1475678)
+
+ -- Lukáš Tinkl <lukas.tinkl@canonical.com>  Sat, 30 Jul 2016 21:18:10 +0000
+
+qtubuntu (0.63+16.10.20160630.1-0ubuntu2~2) yakkety; urgency=medium
+
+  * Rebuild against Qt 5.6.
+
+ -- Timo Jyrinki <timo-jyrinki@ubuntu.com>  Sun, 24 Jul 2016 17:56:52 +0300
+
+qtubuntu (0.63+16.10.20160630.1-0ubuntu1) yakkety; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Expose MirSurface to client apps through the native interface
+
+ -- Michael Sheldon <michael.sheldon@canonical.com>  Thu, 30 Jun 2016 13:43:28 +0000
+
 qtubuntu (0.62+16.10.20160620-0ubuntu1) yakkety; urgency=medium
 
   * Revert r324 "EGL convenience" (LP: #1594198)

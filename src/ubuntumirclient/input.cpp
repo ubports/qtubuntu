@@ -422,7 +422,7 @@ Qt::KeyboardModifiers qt_modifiers_from_mir(MirInputEventModifiers modifiers)
     if (modifiers & mir_input_event_modifier_ctrl) {
         q_modifiers |= Qt::ControlModifier;
     }
-    if (modifiers & mir_input_event_modifier_alt) {
+    if (modifiers & mir_input_event_modifier_alt_left) {
         q_modifiers |= Qt::AltModifier;
     }
     if (modifiers & mir_input_event_modifier_meta) {
@@ -445,7 +445,7 @@ void UbuntuInput::dispatchKeyEvent(UbuntuWindow *window, const MirInputEvent *ev
     quint32 native_modifiers = mir_keyboard_event_modifiers(key_event);
 
     // Key modifier and unicode index mapping.
-    auto modifiers = qt_modifiers_from_mir(mir_keyboard_event_modifiers(key_event));
+    auto modifiers = qt_modifiers_from_mir(native_modifiers);
 
     MirKeyboardAction action = mir_keyboard_event_action(key_event);
     QEvent::Type keyType = action == mir_keyboard_action_up
@@ -521,7 +521,8 @@ void UbuntuInput::dispatchPointerEvent(UbuntuWindow *platformWindow, const MirIn
         const float vDelta = mir_pointer_event_axis_value(pev, mir_pointer_axis_vscroll);
 
         if (hDelta != 0 || vDelta != 0) {
-            const QPoint angleDelta = QPoint(hDelta * 15, vDelta * 15);
+            // QWheelEvent::DefaultDeltasPerStep = 120 but doesn't exist on vivid
+            const QPoint angleDelta(120 * hDelta, 120 * vDelta);
             QWindowSystemInterface::handleWheelEvent(window, timestamp, localPoint, window->position() + localPoint,
                                                      QPoint(), angleDelta, modifiers, Qt::ScrollUpdate);
         }
