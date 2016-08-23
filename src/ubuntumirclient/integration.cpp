@@ -298,7 +298,7 @@ QPlatformOpenGLContext* UbuntuClientIntegration::createPlatformOpenGLContext(
 
 QStringList UbuntuClientIntegration::themeNames() const
 {
-    return QStringList("ubuntuappmenu");
+    return QStringList(QStringLiteral("ubuntuappmenu"));
 }
 
 QPlatformTheme* UbuntuClientIntegration::createPlatformTheme(const QString& name) const

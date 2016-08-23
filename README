@@ -44,11 +44,12 @@
   logged and debug messages are disabled. QtUbuntu provides the following
   logging categories:
 
-  * ubuntumirclient.cursor      - Messages about the cursor.
-  * ubuntumirclient.input       - Messages related to input and other Mir events.
-  * ubuntumirclient.graphics    - Messages related to graphics, GL and EGL.
-  * ubuntumirclient.swapBuffers - Messages related to surface buffer swapping.
-  * ubuntumirclient             - For all other messages.
+  * ubuntu.mirclient.cursor      - Messages about the cursor.
+  * ubuntu.mirclient.input       - Messages related to input and other Mir events.
+  * ubuntu.mirclient.graphics    - Messages related to graphics, GL and EGL.
+  * ubuntu.mirclient.swapBuffers - Messages related to surface buffer swapping.
+  * ubuntu.mirclient             - For all other messages frm the ubuntumirclient QPA.
+  * ubuntu.appmenu               - For all messages frm the ubuntuappmenu QPA theme.
 
   The QT_QPA_EGLFS_DEBUG environment variable prints a little more information
   from Qt's internals.
@@ -99,4 +100,3 @@
 
   [1] http://doc-snapshot.qt-project.org/5.0/qabstractnativeeventfilter.html
   [2] http://doc-snapshot.qt-project.org/5.0/qcoreapplication.html#installNativeEventFilter
-

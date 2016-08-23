@@ -23,7 +23,7 @@
 #include <QtPlatformSupport/private/qeglconvenience_p.h>
 #include <QtGui/private/qopenglcontext_p.h>
 
-Q_LOGGING_CATEGORY(ubuntumirclientGraphics, "ubuntumirclient.graphics", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntumirclientGraphics, "ubuntu.mirclient.graphics", QtWarningMsg)
 
 namespace {
 

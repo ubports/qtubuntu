@@ -21,7 +21,7 @@
 
 #include <mir_toolkit/mir_client_library.h>
 
-Q_LOGGING_CATEGORY(ubuntumirclientCursor, "ubuntumirclient.cursor", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntumirclientCursor, "ubuntu.mirclient.cursor", QtWarningMsg)
 
 UbuntuCursor::UbuntuCursor(MirConnection *connection)
     : mConnection(connection)

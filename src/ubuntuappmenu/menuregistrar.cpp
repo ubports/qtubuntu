@@ -94,7 +94,7 @@ void MenuRegistrar::unregisterMenu()
 void MenuRegistrar::registerSurfaceMenu()
 {
     auto nativeInterface = qGuiApp->platformNativeInterface();
-    QString persistentSurfaceId = nativeInterface->windowProperty(m_window->handle(), "persistentSurfaceId", QString()).toString();
+    QByteArray persistentSurfaceId = nativeInterface->windowProperty(m_window->handle(), "persistentSurfaceId", QByteArray()).toByteArray();
     if (persistentSurfaceId.isEmpty()) return;
 
     UbuntuMenuRegistry::instance()->registerSurfaceMenu(persistentSurfaceId, m_path, m_service);

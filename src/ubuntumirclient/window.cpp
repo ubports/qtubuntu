@@ -403,7 +403,7 @@ public:
     void setSurfaceParent(MirSurface*);
     bool hasParent() const { return mParented; }
 
-    QString persistentSurfaceId() const { return mPersistentSurfaceId; }
+    QByteArray persistentSurfaceId() const { return mPersistentSurfaceId; }
 
     QSurfaceFormat format() const { return mFormat; }
 
@@ -421,7 +421,7 @@ private:
     MirSurface* mMirSurface;
     const EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
-    QString mPersistentSurfaceId;
+    QByteArray mPersistentSurfaceId;
 
     bool mNeedsRepaint;
     bool mParented;
@@ -607,7 +607,7 @@ UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &cl
     // queue the windowPropertyChanged signal. If it's emitted directly, the platformWindow will not yet be set for the window.
     QMetaObject::invokeMethod(mNativeInterface, "windowPropertyChanged", Qt::QueuedConnection,
                               Q_ARG(QPlatformWindow*, this),
-                              Q_ARG(QString, "persistentSurfaceId"));
+                              Q_ARG(QByteArray, "persistentSurfaceId"));
 }
 
 UbuntuWindow::~UbuntuWindow()
@@ -789,7 +789,7 @@ bool UbuntuWindow::isExposed() const
     return mWindowVisible && mWindowExposed;
 }
 
-QString UbuntuWindow::persistentSurfaceId() const
+QByteArray UbuntuWindow::persistentSurfaceId() const
 {
     return mSurface->persistentSurfaceId();
 }
