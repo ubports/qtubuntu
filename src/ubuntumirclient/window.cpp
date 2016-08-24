@@ -607,7 +607,7 @@ UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &cl
     // queue the windowPropertyChanged signal. If it's emitted directly, the platformWindow will not yet be set for the window.
     QMetaObject::invokeMethod(mNativeInterface, "windowPropertyChanged", Qt::QueuedConnection,
                               Q_ARG(QPlatformWindow*, this),
-                              Q_ARG(QByteArray, "persistentSurfaceId"));
+                              Q_ARG(QString, "persistentSurfaceId"));
 }
 
 UbuntuWindow::~UbuntuWindow()

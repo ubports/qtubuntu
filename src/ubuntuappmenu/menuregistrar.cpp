@@ -37,7 +37,7 @@ MenuRegistrar::MenuRegistrar()
     GDBusConnection *bus;
     bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
     if (!bus) {
-        qCWarning(ubuntuappmenu, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
+        qCWarning(ubuntuappmenuRegistrar, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
         return;
     }
     m_service = g_dbus_connection_get_unique_name(bus);

@@ -21,6 +21,8 @@
 #include <QDBusObjectPath>
 #include <QDBusServiceWatcher>
 
+Q_LOGGING_CATEGORY(ubuntuappmenuRegistrar, "ubuntu.appmenu.registrar", QtWarningMsg)
+
 #define REGISTRAR_SERVICE "com.ubuntu.MenuRegistrar"
 #define REGISTRY_OBJECT_PATH "/com/ubuntu/MenuRegistrar"
 
@@ -46,7 +48,7 @@ UbuntuMenuRegistry::~UbuntuMenuRegistry()
 
 void UbuntuMenuRegistry::registerApplicationMenu(pid_t pid, QDBusObjectPath menuObjectPath, const QString &service)
 {
-    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::registerMenu(pid=%d, menuObjectPath=%s, service=%s)",
+    qCDebug(ubuntuappmenuRegistrar, "UbuntuMenuRegistry::registerMenu(pid=%d, menuObjectPath=%s, service=%s)",
             pid,
             qPrintable(menuObjectPath.path()),
             qPrintable(service));
@@ -56,7 +58,7 @@ void UbuntuMenuRegistry::registerApplicationMenu(pid_t pid, QDBusObjectPath menu
 
 void UbuntuMenuRegistry::unregisterApplicationMenu(pid_t pid, QDBusObjectPath menuObjectPath)
 {
-    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::unregisterSurfaceMenu(pid=%d, menuObjectPath=%s)",
+    qCDebug(ubuntuappmenuRegistrar, "UbuntuMenuRegistry::unregisterSurfaceMenu(pid=%d, menuObjectPath=%s)",
             pid,
             qPrintable(menuObjectPath.path()));
 
@@ -65,7 +67,7 @@ void UbuntuMenuRegistry::unregisterApplicationMenu(pid_t pid, QDBusObjectPath me
 
 void UbuntuMenuRegistry::registerSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath, const QString &service)
 {
-    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::registerMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
+    qCDebug(ubuntuappmenuRegistrar, "UbuntuMenuRegistry::registerMenu(surfaceId=%s, menuObjectPath=%s, service=%s)",
             qPrintable(surfaceId),
             qPrintable(menuObjectPath.path()),
             qPrintable(service));
@@ -75,7 +77,7 @@ void UbuntuMenuRegistry::registerSurfaceMenu(const QString &surfaceId, QDBusObje
 
 void UbuntuMenuRegistry::unregisterSurfaceMenu(const QString &surfaceId, QDBusObjectPath menuObjectPath)
 {
-    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::unregisterSurfaceMenu(surfaceId=%s, menuObjectPath=%s)",
+    qCDebug(ubuntuappmenuRegistrar, "UbuntuMenuRegistry::unregisterSurfaceMenu(surfaceId=%s, menuObjectPath=%s)",
             qPrintable(surfaceId),
             qPrintable(menuObjectPath.path()));
 
@@ -85,7 +87,7 @@ void UbuntuMenuRegistry::unregisterSurfaceMenu(const QString &surfaceId, QDBusOb
 
 void UbuntuMenuRegistry::serviceOwnerChanged(const QString &serviceName, const QString& oldOwner, const QString &newOwner)
 {
-    qCDebug(ubuntuappmenu, "UbuntuMenuRegistry::serviceOwnerChanged(newOwner=%s)", qPrintable(newOwner));
+    qCDebug(ubuntuappmenuRegistrar, "UbuntuMenuRegistry::serviceOwnerChanged(newOwner=%s)", qPrintable(newOwner));
 
     Q_UNUSED(oldOwner);
     if (serviceName != REGISTRAR_SERVICE) return;

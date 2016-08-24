@@ -22,5 +22,6 @@
 #define ASSERT(cond) ((!(cond)) ? qt_assert(#cond,__FILE__,__LINE__) : qt_noop())
 
 Q_DECLARE_LOGGING_CATEGORY(ubuntuappmenu)
+Q_DECLARE_LOGGING_CATEGORY(ubuntuappmenuRegistrar)
 
 #endif  // QUBUNTUTHEMELOGGING_H
