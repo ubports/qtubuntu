@@ -610,7 +610,6 @@ void UbuntuInput::handleSurfaceEvent(const QPointer<UbuntuWindow> &window, const
         // so that we don't deactivate windows prematurely.
         if (focused) {
             mPendingFocusGainedEvents--;
-            window->handleSurfaceFocused();
             QWindowSystemInterface::handleWindowActivated(window->window(), Qt::ActiveWindowFocusReason);
 
             // NB: Since processing of system events is queued, never check qGuiApp->applicationState()
