@@ -347,9 +347,9 @@ public:
         geom.setWidth(parameters.width);
         geom.setHeight(parameters.height);
         if (mWindow->windowState() == Qt::WindowFullScreen) {
-            geom.setY(0);
+            geom.moveTop(0);
         } else {
-            geom.setY(panelHeight());
+            geom.moveTop(panelHeight());
         }
 
         // Assume that the buffer size matches the surface size at creation time
@@ -584,16 +584,17 @@ UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &cl
     , mWindowState(w->windowState())
     , mWindowFlags(w->flags())
     , mWindowVisible(false)
-    , mWindowExposed(true)
     , mNativeInterface(native)
     , mSurface(new UbuntuSurface{this, eglDisplay, input, mirConnection})
     , mScale(1.0)
     , mFormFactor(mir_form_factor_unknown)
 {
+    mWindowExposed = mSurface->mNeedsExposeCatchup == false;
+
     qCDebug(ubuntumirclient, "UbuntuWindow(window=%p, screen=%p, input=%p, surf=%p) with title '%s', role: '%d'",
             w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()), roleFor(window()));
 
-    updatePanelHeightHack(w->windowState() != Qt::WindowFullScreen);
+    updatePanelHeightHack(mSurface->state() != mir_surface_state_fullscreen);
 }
 
 UbuntuWindow::~UbuntuWindow()
@@ -703,9 +704,9 @@ void UbuntuWindow::updatePanelHeightHack(bool enable)
 
     QRect newGeometry = geometry();
     if (enable) {
-        newGeometry.setY(panelHeight());
+        newGeometry.moveTop(panelHeight());
     } else {
-        newGeometry.setY(0);
+        newGeometry.moveTop(0);
     }
 
     if (newGeometry != geometry()) {
@@ -772,7 +773,8 @@ void UbuntuWindow::propagateSizeHints()
 
 bool UbuntuWindow::isExposed() const
 {
-    return mWindowVisible && mWindowExposed;
+    // mNeedsExposeCatchup because we need to render a frame to get the expose surface event from mir.
+    return mWindowVisible && (mWindowExposed || (mSurface && mSurface->mNeedsExposeCatchup));
 }
 
 QSurfaceFormat UbuntuWindow::format() const
