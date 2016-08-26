@@ -1,3 +1,11 @@
+qtubuntu (0.63+16.10.20160826-0ubuntu1) yakkety; urgency=medium
+
+  [ Nick Dedekind ]
+  * Fixed panel position shifting and initial surface exposure. (LP:
+    #1616968)
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Fri, 26 Aug 2016 13:14:10 +0000
+
 qtubuntu (0.63+16.10.20160809-0ubuntu1) yakkety; urgency=medium
 
   [ Daniel van Vugt ]
