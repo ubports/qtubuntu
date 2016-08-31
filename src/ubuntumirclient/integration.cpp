@@ -74,7 +74,6 @@ UbuntuClientIntegration::UbuntuClientIntegration()
     , mNativeInterface(new UbuntuNativeInterface(this))
     , mFontDb(new QGenericUnixFontDatabase)
     , mServices(new UbuntuPlatformServices)
-    , mClipboard(new UbuntuClipboard)
     , mScaleFactor(1.0)
 {
     {
@@ -211,7 +210,7 @@ QByteArray UbuntuClientIntegration::generateSessionNameFromQmlFile(QStringList &
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) const
 {
-    return new UbuntuWindow(window, mClipboard, mInput, mNativeInterface, mEglDisplay, mMirConnection);
+    return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection);
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const
@@ -305,7 +304,11 @@ QVariant UbuntuClientIntegration::styleHint(StyleHint hint) const
 
 QPlatformClipboard* UbuntuClientIntegration::clipboard() const
 {
-    return mClipboard.data();
+    static QPlatformClipboard *clipboard = nullptr;
+    if (!clipboard) {
+        clipboard = new UbuntuClipboard;
+    }
+    return clipboard;
 }
 
 QPlatformNativeInterface* UbuntuClientIntegration::nativeInterface() const

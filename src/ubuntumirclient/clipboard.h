@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Canonical, Ltd.
+ * Copyright (C) 2014,2016 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -21,7 +21,15 @@
 
 #include <QMimeData>
 #include <QPointer>
-class QDBusInterface;
+
+namespace com {
+    namespace ubuntu {
+        namespace content {
+            class Hub;
+        }
+    }
+}
+
 class QDBusPendingCallWatcher;
 
 class UbuntuClipboard : public QObject, public QPlatformClipboard
@@ -37,31 +45,24 @@ public:
     bool supportsMode(QClipboard::Mode mode) const override;
     bool ownsMode(QClipboard::Mode mode) const override;
 
-    void requestDBusClipboardContents();
-
 private Q_SLOTS:
-    void onDBusClipboardGetContentsFinished(QDBusPendingCallWatcher*);
-    void onDBusClipboardSetContentsFinished(QDBusPendingCallWatcher*);
-    void updateMimeData(const QByteArray &serializedMimeData);
+    void onApplicationStateChanged(Qt::ApplicationState state);
 
 private:
-    void setupDBus();
-
-    QByteArray serializeMimeData(QMimeData *mimeData) const;
-    QMimeData *deserializeMimeData(const QByteArray &serializedMimeData) const;
-
-    void setDBusClipboardContents(const QByteArray &clipboardContents);
+    void updateMimeData();
+    void requestMimeData();
 
     QMimeData *mMimeData;
-    bool mIsOutdated;
 
-    QPointer<QDBusInterface> mDBusClipboard;
+    enum {
+        OutdatedClipboard, // Our mimeData is outdated, need to fetch latest from ContentHub
+        SyncingClipboard, // Our mimeData is outdated and we are waiting for ContentHub to reply with the latest paste
+        SyncedClipboard // Our mimeData is in sync with what ContentHub has
+    } mClipboardState{OutdatedClipboard};
 
-    QPointer<QDBusPendingCallWatcher> mPendingGetContentsCall;
-    QPointer<QDBusPendingCallWatcher> mPendingSetContentsCall;
+    com::ubuntu::content::Hub *mContentHub;
 
-    bool mUpdatesDisabled;
-    bool mDBusSetupDone;
+    QDBusPendingCallWatcher *mPasteReply{nullptr};
 };
 
 #endif // UBUNTU_CLIPBOARD_H
