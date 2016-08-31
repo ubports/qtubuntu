@@ -16,7 +16,6 @@
 
 // Local
 #include "window.h"
-#include "clipboard.h"
 #include "nativeinterface.h"
 #include "input.h"
 #include "screen.h"
@@ -401,6 +400,8 @@ public:
 
     bool mNeedsExposeCatchup;
 
+    QString persistentSurfaceId();
+
 private:
     static void surfaceEventCallback(MirSurface* surface, const MirEvent *event, void* context);
     void postEvent(const MirEvent *event);
@@ -422,6 +423,7 @@ private:
     QMutex mTargetSizeMutex;
     QSize mTargetSize;
     MirShellChrome mShellChrome;
+    QString mPersistentIdStr;
 };
 
 void UbuntuSurface::resize(const QSize& size)
@@ -575,12 +577,21 @@ void UbuntuSurface::setSurfaceParent(MirSurface* parent)
     mir_surface_apply_spec(mMirSurface, spec.get());
 }
 
-UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &clipboard,
-                           UbuntuInput *input, UbuntuNativeInterface *native, EGLDisplay eglDisplay, MirConnection *mirConnection)
+QString UbuntuSurface::persistentSurfaceId()
+{
+    if (mPersistentIdStr.isEmpty()) {
+        MirPersistentId* mirPermaId = mir_surface_request_persistent_id_sync(mMirSurface);
+        mPersistentIdStr = mir_persistent_id_as_string(mirPermaId);
+        mir_persistent_id_release(mirPermaId);
+    }
+    return mPersistentIdStr;
+}
+
+UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface *native,
+                           EGLDisplay eglDisplay, MirConnection *mirConnection)
     : QObject(nullptr)
     , QPlatformWindow(w)
     , mId(makeId())
-    , mClipboard(clipboard)
     , mWindowState(w->windowState())
     , mWindowFlags(w->flags())
     , mWindowVisible(false)
@@ -640,13 +651,6 @@ void UbuntuWindow::handleSurfaceFocused()
 {
     qCDebug(ubuntumirclient, "handleSurfaceFocused(window=%p)", window());
 
-    // System clipboard contents might have changed while this window was unfocused and without
-    // this process getting notified about it because it might have been suspended (due to
-    // application lifecycle policies), thus unable to listen to any changes notified through
-    // D-Bus.
-    // Therefore let's ensure we are up to date with the system clipboard now that we are getting
-    // focused again.
-    mClipboard->requestDBusClipboardContents();
 }
 
 void UbuntuWindow::handleSurfaceVisibilityChanged(bool visible)
@@ -841,4 +845,9 @@ void UbuntuWindow::updateSurfaceState()
         lock.unlock();
         updatePanelHeightHack(newState != mir_surface_state_fullscreen);
     }
+}
+
+QString UbuntuWindow::persistentSurfaceId()
+{
+    return mSurface->persistentSurfaceId();
 }
