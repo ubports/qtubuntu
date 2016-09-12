@@ -232,9 +232,9 @@ static const char* nativeEventTypeToStr(MirEventType t)
         return "mir_event_type_surface_output";
     case mir_event_type_input_device_state:
         return "mir_event_type_input_device_state";
-    default:
-        return "invalid";
     }
+
+    return "unknown/invalid";
 }
 
 void UbuntuInput::customEvent(QEvent* event)
