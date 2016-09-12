@@ -209,32 +209,31 @@ static const char* nativeEventTypeToStr(MirEventType t)
     switch (t)
     {
     case mir_event_type_key:
-        return "mir_event_type_key";
+        return "key";
     case mir_event_type_motion:
-        return "mir_event_type_motion";
+        return "motion";
     case mir_event_type_surface:
-        return "mir_event_type_surface";
+        return "surface";
     case mir_event_type_resize:
-        return "mir_event_type_resize";
+        return "resize";
     case mir_event_type_prompt_session_state_change:
-        return "mir_event_type_prompt_session_state_change";
+        return "prompt_session_state_change";
     case mir_event_type_orientation:
-        return "mir_event_type_orientation";
+        return "orientation";
     case mir_event_type_close_surface:
-        return "mir_event_type_close_surface";
+        return "close_surface";
     case mir_event_type_input:
-        return "mir_event_type_input";
+        return "input";
     case mir_event_type_keymap:
-        return "mir_event_type_keymap";
+        return "keymap";
     case mir_event_type_input_configuration:
-        return "mir_event_type_input_configuration";
+        return "input_configuration";
     case mir_event_type_surface_output:
-        return "mir_event_type_surface_output";
+        return "surface_output";
     case mir_event_type_input_device_state:
-        return "mir_event_type_input_device_state";
+        return "input_device_state";
     }
-
-    return "unknown/invalid";
+    return "invalid";
 }
 
 void UbuntuInput::customEvent(QEvent* event)
