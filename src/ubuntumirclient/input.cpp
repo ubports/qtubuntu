@@ -233,7 +233,7 @@ static const char* nativeEventTypeToStr(MirEventType t)
     case mir_event_type_input_device_state:
         return "input_device_state";
     }
-    return "invalid";
+    Q_UNREACHABLE();
 }
 
 void UbuntuInput::customEvent(QEvent* event)
@@ -339,8 +339,6 @@ void UbuntuInput::dispatchInputEvent(UbuntuWindow *window, const MirInputEvent *
     case mir_input_event_type_pointer:
         dispatchPointerEvent(window, ev);
         break;
-    default:
-        break;
     }
 }
 
@@ -382,7 +380,6 @@ void UbuntuInput::dispatchTouchEvent(UbuntuWindow *window, const MirInputEvent *
             touchPoint.state = Qt::TouchPointReleased;
             break;
         case mir_touch_action_change:
-        default:
             touchPoint.state = Qt::TouchPointMoved;
         }
 
@@ -542,8 +539,6 @@ void UbuntuInput::dispatchPointerEvent(UbuntuWindow *platformWindow, const MirIn
     case mir_pointer_action_leave:
         QWindowSystemInterface::handleLeaveEvent(window);
         break;
-    default:
-        qCDebug(ubuntumirclient, "Unrecognized pointer event");
     }
 }
 
@@ -552,19 +547,14 @@ static const char* nativeOrientationDirectionToStr(MirOrientation orientation)
     switch (orientation) {
     case mir_orientation_normal:
         return "Normal";
-        break;
     case mir_orientation_left:
         return "Left";
-        break;
     case mir_orientation_inverted:
         return "Inverted";
-        break;
     case mir_orientation_right:
         return "Right";
-        break;
-    default:
-        return "INVALID!";
     }
+    Q_UNREACHABLE();
 }
 
 void UbuntuInput::dispatchOrientationEvent(QWindow *window, const MirOrientationEvent *event)
