@@ -27,8 +27,10 @@
 #include <qpa/qwindowsysteminterface.h>
 #include <QMutexLocker>
 #include <QSize>
+#include <QAtomicInt>
 #include <QtMath>
 #include <private/qeglconvenience_p.h>
+#include <private/qguiapplication_p.h>
 
 // Platform API
 #include <ubuntu/application/instance.h>
@@ -179,7 +181,7 @@ Spec makeSurfaceSpec(QWindow *window, UbuntuInput *input, MirPixelFormat pixelFo
             //NOTE: We cannot have a parentless popup -
             //try using the last surface to receive input as that will most likely be
             //the one that caused this popup to be created
-            parent = input->lastFocusedWindow();
+            parent = input->lastInputWindow();
         }
         if (parent) {
             auto pos = geom.topLeft();
@@ -399,6 +401,7 @@ public:
     QSurfaceFormat format() const { return mFormat; }
 
     bool mNeedsExposeCatchup;
+    QAtomicInt mPendingFocusGainedEvents;
 
     QString persistentSurfaceId();
 
@@ -549,7 +552,8 @@ void UbuntuSurface::surfaceEventCallback(MirSurface *surface, const MirEvent *ev
 
 void UbuntuSurface::postEvent(const MirEvent *event)
 {
-    if (mir_event_type_resize == mir_event_get_type(event)) {
+    const auto eventType = mir_event_get_type(event);
+    if (mir_event_type_resize == eventType) {
         // TODO: The current event queue just accumulates all resize events;
         // It would be nicer if we could update just one event if that event has not been dispatched.
         // As a workaround, we use the width/height as an identifier of this latest event
@@ -562,6 +566,14 @@ void UbuntuSurface::postEvent(const MirEvent *event)
         QMutexLocker lock(&mTargetSizeMutex);
         mTargetSize.rwidth() = width;
         mTargetSize.rheight() = height;
+    } else if (mir_event_type_surface == eventType) {
+        auto surfaceEvent = mir_event_get_surface_event(event);
+        if (mir_surface_attrib_focus == mir_surface_event_get_attribute(surfaceEvent)) {
+            const bool focused = mir_surface_event_get_attribute_value(surfaceEvent) == mir_surface_focused;
+            if (focused) {
+                mPendingFocusGainedEvents++;
+            }
+        }
     }
 
     mInput->postEvent(mPlatformWindow, event);
@@ -647,15 +659,30 @@ void UbuntuWindow::handleSurfaceExposeChange(bool exposed)
     QWindowSystemInterface::handleExposeEvent(window(), QRect(QPoint(), geometry().size()));
 }
 
-void UbuntuWindow::handleSurfaceFocused()
+void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
 {
-    qCDebug(ubuntumirclient, "handleSurfaceFocused(window=%p)", window());
+    qCDebug(ubuntumirclient, "handleSurfaceFocusChanged(window=%p, focused=%d, pending=%d)", window(), focused, mSurface->mPendingFocusGainedEvents.load());
 
+    if (focused) {
+        mSurface->mPendingFocusGainedEvents--;
+        QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
+        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
+
+        // Flush events so that we update QGuiApplicationPrivate::focus_window immediately
+        QWindowSystemInterface::flushWindowSystemEvents();
+
+    } else if (mSurface->mPendingFocusGainedEvents == 0 && window() == QGuiApplicationPrivate::focus_window) {
+        QWindowSystemInterface::handleWindowActivated(nullptr, Qt::ActiveWindowFocusReason);
+        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
+
+        // Flush events so that we update QGuiApplicationPrivate::focus_window immediately
+        QWindowSystemInterface::flushWindowSystemEvents();
+    }
 }
 
 void UbuntuWindow::handleSurfaceVisibilityChanged(bool visible)
 {
-    qCDebug(ubuntumirclient, "handleSurfaceFocused(window=%p)", window());
+    qCDebug(ubuntumirclient, "handleSurfaceVisibilityChanged(window=%p)", window());
 
     if (mWindowVisible == visible) return;
     mWindowVisible = visible;
