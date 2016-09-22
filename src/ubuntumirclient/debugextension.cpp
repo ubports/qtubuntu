@@ -16,7 +16,7 @@
 
 #include "debugextension.h"
 
-#include <QDebug>
+#include "logging.h"
 
 // mir client debug
 #include <mir_toolkit/debug/surface.h>
@@ -25,14 +25,14 @@ UbuntuDebugExtension::UbuntuDebugExtension()
     : m_mirclientDebug(QStringLiteral("mirclient-debug-extension"), 1)
     , m_mapper(nullptr)
 {
-    qDebug() << "NOTICE: Loading mirclient-debug-extension";
+    qCDebug(ubuntumirclient) << "NOTICE: Loading mirclient-debug-extension";
     m_mapper = (MapperPrototype) m_mirclientDebug.resolve("mir_debug_surface_coords_to_screen");
 
     if (!m_mirclientDebug.isLoaded()) {
-        qWarning() << "ERROR: mirclient-debug-extension failed to load:" << m_mirclientDebug.errorString();
+        qCWarning(ubuntumirclient) << "ERROR: mirclient-debug-extension failed to load:" << m_mirclientDebug.errorString();
     } else if (!m_mapper) {
-        qWarning() << "ERROR: unable to find required symbols in mirclient-debug-extension:"
-                   << m_mirclientDebug.errorString();
+        qCWarning(ubuntumirclient) << "ERROR: unable to find required symbols in mirclient-debug-extension:"
+                                   << m_mirclientDebug.errorString();
     }
 }
 
