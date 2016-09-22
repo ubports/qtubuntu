@@ -1,3 +1,32 @@
+qtubuntu (0.63+16.10.20160831-0ubuntu1) yakkety; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Use content-hub for clipboard services (LP: #1471998)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 31 Aug 2016 01:51:46 +0000
+
+qtubuntu (0.63+16.10.20160826-0ubuntu1) yakkety; urgency=medium
+
+  [ Nick Dedekind ]
+  * Fixed panel position shifting and initial surface exposure. (LP:
+    #1616968)
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Fri, 26 Aug 2016 13:14:10 +0000
+
+qtubuntu (0.63+16.10.20160809-0ubuntu1) yakkety; urgency=medium
+
+  [ Daniel van Vugt ]
+  * Use correct scrolling scale of 120 as documented: (LP: #1607223,
+    #1607240)
+
+  [ Gerry Boland ]
+  * Reapply rev 324 plus fix: EGL convenience, plus workaround for
+    hybris not supporting GLESv3. (LP: #1507817, #1594198)
+  * Logging: separate graphics & cursor logging into their own logging
+    categories
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Tue, 09 Aug 2016 23:01:21 +0000
+
 qtubuntu (0.63+16.10.20160730-0ubuntu1) yakkety; urgency=medium
 
   [ Lukáš Tinkl ]

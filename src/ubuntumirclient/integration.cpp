@@ -31,7 +31,6 @@
 // Qt
 #include <QFileInfo>
 #include <QGuiApplication>
-#include <private/qguiapplication_p.h>
 #include <qpa/qplatformnativeinterface.h>
 #include <qpa/qplatforminputcontextfactory_p.h>
 #include <qpa/qplatforminputcontext.h>
@@ -77,7 +76,6 @@ UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     , mNativeInterface(new UbuntuNativeInterface(this))
     , mFontDb(new QGenericUnixFontDatabase)
     , mServices(new UbuntuPlatformServices)
-    , mClipboard(new UbuntuClipboard)
     , mScaleFactor(1.0)
 {
     {
@@ -97,31 +95,17 @@ UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
 
     mMirConnection = u_application_instance_get_mir_connection(mInstance);
 
-    // Initialize EGL.
-    ASSERT(eglBindAPI(EGL_OPENGL_ES_API) == EGL_TRUE);
+    // Choose the default surface format suited to the Mir platform
+    QSurfaceFormat defaultFormat;
+    defaultFormat.setRedBufferSize(8);
+    defaultFormat.setGreenBufferSize(8);
+    defaultFormat.setBlueBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(defaultFormat);
 
+    // Initialize EGL.
     mEglNativeDisplay = mir_connection_get_egl_native_display(mMirConnection);
     ASSERT((mEglDisplay = eglGetDisplay(mEglNativeDisplay)) != EGL_NO_DISPLAY);
     ASSERT(eglInitialize(mEglDisplay, nullptr, nullptr) == EGL_TRUE);
-
-    // Configure EGL buffers format for all Windows.
-    mSurfaceFormat.setRedBufferSize(8);
-    mSurfaceFormat.setGreenBufferSize(8);
-    mSurfaceFormat.setBlueBufferSize(8);
-    mSurfaceFormat.setAlphaBufferSize(8);
-    mSurfaceFormat.setDepthBufferSize(24);
-    mSurfaceFormat.setStencilBufferSize(8);
-    if (!qEnvironmentVariableIsEmpty("QTUBUNTU_MULTISAMPLE")) {
-        mSurfaceFormat.setSamples(4);
-        qCDebug(ubuntumirclient, "setting MSAA to 4 samples");
-    }
-#ifdef QTUBUNTU_USE_OPENGL
-    mSurfaceFormat.setRenderableType(QSurfaceFormat::OpenGL);
-#else
-    mSurfaceFormat.setRenderableType(QSurfaceFormat::OpenGLES);
-#endif
-
-    mEglConfig = q_configFromGLFormat(mEglDisplay, mSurfaceFormat, true);
 
     // Has debug mode been requsted, either with "-testability" switch or QT_LOAD_TESTABILITY env var
     bool testability = qEnvironmentVariableIsSet("QT_LOAD_TESTABILITY");
@@ -239,7 +223,7 @@ QByteArray UbuntuClientIntegration::generateSessionNameFromQmlFile(QStringList &
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) const
 {
-    return new UbuntuWindow(window, mClipboard, mInput, mNativeInterface, mEglDisplay, mEglConfig, mMirConnection, mDebugExtension.data());
+    return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection, mDebugExtension.data());
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const
@@ -282,8 +266,25 @@ QPlatformBackingStore* UbuntuClientIntegration::createPlatformBackingStore(QWind
 QPlatformOpenGLContext* UbuntuClientIntegration::createPlatformOpenGLContext(
         QOpenGLContext* context) const
 {
-    return new UbuntuOpenGLContext(mSurfaceFormat, static_cast<UbuntuOpenGLContext*>(context->shareHandle()),
-                                   mEglDisplay, mEglConfig);
+    QSurfaceFormat format(context->format());
+
+    auto platformContext = new UbuntuOpenGLContext(format, context->shareHandle(), mEglDisplay);
+    if (!platformContext->isValid()) {
+        // Older Intel Atom-based devices only support OpenGL 1.4 compatibility profile but by default
+        // QML asks for at least OpenGL 2.0. The XCB GLX backend ignores this request and returns a
+        // 1.4 context, but the XCB EGL backend tries to honour it, and fails. The 1.4 context appears to
+        // have sufficient capabilities on MESA (i915) to render correctly however. So reduce the default
+        // requested OpenGL version to 1.0 to ensure EGL will give us a working context (lp:1549455).
+        static const bool isMesa = QString(eglQueryString(mEglDisplay, EGL_VENDOR)).contains(QStringLiteral("Mesa"));
+        if (isMesa) {
+            qCDebug(ubuntumirclientGraphics, "Attempting to choose OpenGL 1.4 context which may suit Mesa");
+            format.setMajorVersion(1);
+            format.setMinorVersion(4);
+            delete platformContext;
+            platformContext = new UbuntuOpenGLContext(format, context->shareHandle(), mEglDisplay);
+        }
+    }
+    return platformContext;
 }
 
 QStringList UbuntuClientIntegration::themeNames() const
@@ -316,7 +317,11 @@ QVariant UbuntuClientIntegration::styleHint(StyleHint hint) const
 
 QPlatformClipboard* UbuntuClientIntegration::clipboard() const
 {
-    return mClipboard.data();
+    static QPlatformClipboard *clipboard = nullptr;
+    if (!clipboard) {
+        clipboard = new UbuntuClipboard;
+    }
+    return clipboard;
 }
 
 QPlatformNativeInterface* UbuntuClientIntegration::nativeInterface() const
