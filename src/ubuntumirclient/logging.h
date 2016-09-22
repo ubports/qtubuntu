@@ -26,5 +26,6 @@ Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientBufferSwap)
 Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientInput)
 Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientGraphics)
 Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientCursor)
+Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientDebug)
 
 #endif  // QUBUNTULOGGING_H
