@@ -27,7 +27,6 @@
 
 #include <EGL/egl.h>
 
-class UbuntuClipboard;
 class UbuntuDebugExtension;
 class UbuntuNativeInterface;
 class UbuntuInput;
@@ -40,8 +39,7 @@ class UbuntuWindow : public QObject, public QPlatformWindow
 {
     Q_OBJECT
 public:
-    UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &clipboard,
-                 UbuntuInput *input, UbuntuNativeInterface* native, EGLDisplay eglDisplay, EGLConfig eglConfig,
+    UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface* native, EGLDisplay eglDisplay,
                  MirConnection *mirConnection, UbuntuDebugExtension *debugExt);
     virtual ~UbuntuWindow();
 
@@ -56,6 +54,7 @@ public:
     bool isExposed() const override;
 
     QPoint mapToGlobal(const QPoint &pos) const override;
+    QSurfaceFormat format() const override;
 
     // Additional Window properties exposed by NativeInterface
     MirFormFactor formFactor() const { return mFormFactor; }
@@ -71,13 +70,13 @@ public:
     void handleSurfaceStateChanged(Qt::WindowState state);
     void onSwapBuffersDone();
     void handleScreenPropertiesChange(MirFormFactor formFactor, float scale);
+    QString persistentSurfaceId();
 
 private:
     void updatePanelHeightHack(bool enable);
     void updateSurfaceState();
     mutable QMutex mMutex;
     const WId mId;
-    const QSharedPointer<UbuntuClipboard> mClipboard;
     Qt::WindowState mWindowState;
     Qt::WindowFlags mWindowFlags;
     bool mWindowVisible;
