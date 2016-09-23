@@ -26,28 +26,29 @@ Q_LOGGING_CATEGORY(ubuntumirclientCursor, "ubuntumirclient.cursor", QtWarningMsg
 UbuntuCursor::UbuntuCursor(MirConnection *connection)
     : mConnection(connection)
 {
-    mShapeToCursorName[Qt::ArrowCursor] = "left_ptr";
-    mShapeToCursorName[Qt::UpArrowCursor] = "up_arrow";
-    mShapeToCursorName[Qt::CrossCursor] = "cross";
-    mShapeToCursorName[Qt::WaitCursor] = "watch";
-    mShapeToCursorName[Qt::IBeamCursor] = "xterm";
-    mShapeToCursorName[Qt::SizeVerCursor] = "size_ver";
-    mShapeToCursorName[Qt::SizeHorCursor] = "size_hor";
-    mShapeToCursorName[Qt::SizeBDiagCursor] = "size_bdiag";
-    mShapeToCursorName[Qt::SizeFDiagCursor] = "size_fdiag";
-    mShapeToCursorName[Qt::SizeAllCursor] = "size_all";
-    mShapeToCursorName[Qt::BlankCursor] = "blank";
-    mShapeToCursorName[Qt::SplitVCursor] = "split_v";
-    mShapeToCursorName[Qt::SplitHCursor] = "split_h";
-    mShapeToCursorName[Qt::PointingHandCursor] = "hand";
-    mShapeToCursorName[Qt::ForbiddenCursor] = "forbidden";
-    mShapeToCursorName[Qt::WhatsThisCursor] = "whats_this";
-    mShapeToCursorName[Qt::BusyCursor] = "left_ptr_watch";
-    mShapeToCursorName[Qt::OpenHandCursor] = "openhand";
-    mShapeToCursorName[Qt::ClosedHandCursor] = "closedhand";
-    mShapeToCursorName[Qt::DragCopyCursor] = "dnd-copy";
-    mShapeToCursorName[Qt::DragMoveCursor] = "dnd-move";
-    mShapeToCursorName[Qt::DragLinkCursor] = "dnd-link";
+    mShapeToCursorName[Qt::ArrowCursor] = mir_arrow_cursor_name;
+    mShapeToCursorName[Qt::UpArrowCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::CrossCursor] = mir_crosshair_cursor_name;
+    mShapeToCursorName[Qt::WaitCursor] = mir_busy_cursor_name;
+    mShapeToCursorName[Qt::IBeamCursor] = mir_caret_cursor_name;
+    mShapeToCursorName[Qt::SizeVerCursor] = mir_vertical_resize_cursor_name;
+    mShapeToCursorName[Qt::SizeHorCursor] = mir_horizontal_resize_cursor_name;
+    // FIXME: mir_toolkit/cursors.h contains typos which make these unclear:
+    mShapeToCursorName[Qt::SizeBDiagCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::SizeFDiagCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::SizeAllCursor] = mir_omnidirectional_resize_cursor_name;
+    mShapeToCursorName[Qt::BlankCursor] = mir_disabled_cursor_name;
+    mShapeToCursorName[Qt::SplitVCursor] = mir_vsplit_resize_cursor_name;
+    mShapeToCursorName[Qt::SplitHCursor] = mir_hsplit_resize_cursor_name;
+    mShapeToCursorName[Qt::PointingHandCursor] = mir_pointing_hand_cursor_name;
+    mShapeToCursorName[Qt::ForbiddenCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::WhatsThisCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::BusyCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::OpenHandCursor] = mir_open_hand_cursor_name;
+    mShapeToCursorName[Qt::ClosedHandCursor] = mir_closed_hand_cursor_name;
+    mShapeToCursorName[Qt::DragCopyCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::DragMoveCursor] = mir_default_cursor_name; // FIXME
+    mShapeToCursorName[Qt::DragLinkCursor] = mir_default_cursor_name; // FIXME
 }
 
 namespace {
