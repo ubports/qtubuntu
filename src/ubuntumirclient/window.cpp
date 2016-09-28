@@ -666,6 +666,10 @@ void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
     if (focused) {
         mSurface->mPendingFocusGainedEvents--;
         QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
+
+        // NB: Since processing of system events is queued, never check qGuiApp->applicationState()
+        //     as it might be outdated. Always call handleApplicationStateChanged() with the latest
+        //     state regardless.
         QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
 
         // Flush events so that we update QGuiApplicationPrivate::focus_window immediately
