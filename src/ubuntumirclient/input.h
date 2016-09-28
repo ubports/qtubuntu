@@ -19,7 +19,6 @@
 
 // Qt
 #include <qpa/qwindowsysteminterface.h>
-#include <QAtomicInt>
 #include <QLoggingCategory>
 
 #include <mir_toolkit/mir_client_library.h>
@@ -40,7 +39,7 @@ public:
 
     void postEvent(UbuntuWindow* window, const MirEvent *event);
     UbuntuClientIntegration* integration() const { return mIntegration; }
-    UbuntuWindow *lastFocusedWindow() const {return mLastFocusedWindow; }
+    UbuntuWindow *lastInputWindow() const {return mLastInputWindow; }
 
 protected:
     void dispatchKeyEvent(UbuntuWindow *window, const MirInputEvent *event);
@@ -58,8 +57,7 @@ private:
     const QByteArray mEventFilterType;
     const QEvent::Type mEventType;
 
-    UbuntuWindow *mLastFocusedWindow;
-    QAtomicInt mPendingFocusGainedEvents;
+    UbuntuWindow *mLastInputWindow;
 };
 
 #endif // UBUNTU_INPUT_H
