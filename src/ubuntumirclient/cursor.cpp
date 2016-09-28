@@ -53,7 +53,6 @@ UbuntuCursor::UbuntuCursor(MirConnection *connection)
     mShapeToCursorName[Qt::DragCopyCursor] = "dnd-copy";
     mShapeToCursorName[Qt::DragMoveCursor] = "dnd-move";
     mShapeToCursorName[Qt::DragLinkCursor] = "dnd-link";
-
 }
 
 namespace {
