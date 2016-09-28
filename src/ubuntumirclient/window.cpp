@@ -688,7 +688,7 @@ void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
 
 void UbuntuWindow::handleSurfaceVisibilityChanged(bool visible)
 {
-    qCDebug(ubuntumirclient, "handleSurfaceVisibilityChanged(window=%p)", window());
+    qCDebug(ubuntumirclient, "handleSurfaceFocused(window=%p)", window());
 
     if (mWindowVisible == visible) return;
     mWindowVisible = visible;
