@@ -663,6 +663,8 @@ void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
 {
     qCDebug(ubuntumirclient, "handleSurfaceFocusChanged(window=%p, focused=%d, pending=%d)", window(), focused, mSurface->mPendingFocusGainedEvents.load());
 
+    // Mir may have sent a pair of focus lost/gained events, so we need to "peek" into the queue
+    // so that we don't deactivate windows prematurely.
     if (focused) {
         mSurface->mPendingFocusGainedEvents--;
         QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
