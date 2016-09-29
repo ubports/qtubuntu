@@ -16,7 +16,6 @@
 
 // Local
 #include "window.h"
-#include "clipboard.h"
 #include "nativeinterface.h"
 #include "input.h"
 #include "screen.h"
@@ -353,9 +352,9 @@ public:
         geom.setWidth(parameters.width);
         geom.setHeight(parameters.height);
         if (mWindow->windowState() == Qt::WindowFullScreen) {
-            geom.setY(0);
+            geom.moveTop(0);
         } else {
-            geom.setY(panelHeight());
+            geom.moveTop(panelHeight());
         }
 
         // Assume that the buffer size matches the surface size at creation time
@@ -409,6 +408,8 @@ public:
 
     bool mNeedsExposeCatchup;
 
+    QString persistentSurfaceId();
+
 private:
     static void surfaceEventCallback(MirSurface* surface, const MirEvent *event, void* context);
     void postEvent(const MirEvent *event);
@@ -431,6 +432,7 @@ private:
     QMutex mTargetSizeMutex;
     QSize mTargetSize;
     MirShellChrome mShellChrome;
+    QString mPersistentIdStr;
 };
 
 void UbuntuSurface::resize(const QSize& size)
@@ -584,25 +586,35 @@ void UbuntuSurface::setSurfaceParent(MirSurface* parent)
     mir_surface_apply_spec(mMirSurface, spec.get());
 }
 
-UbuntuWindow::UbuntuWindow(QWindow *w, const QSharedPointer<UbuntuClipboard> &clipboard,
-                           UbuntuInput *input, UbuntuNativeInterface *native, EGLDisplay eglDisplay, MirConnection *mirConnection)
+QString UbuntuSurface::persistentSurfaceId()
+{
+    if (mPersistentIdStr.isEmpty()) {
+        MirPersistentId* mirPermaId = mir_surface_request_persistent_id_sync(mMirSurface);
+        mPersistentIdStr = mir_persistent_id_as_string(mirPermaId);
+        mir_persistent_id_release(mirPermaId);
+    }
+    return mPersistentIdStr;
+}
+
+UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface *native,
+                           EGLDisplay eglDisplay, MirConnection *mirConnection)
     : QObject(nullptr)
     , QPlatformWindow(w)
     , mId(makeId())
-    , mClipboard(clipboard)
     , mWindowState(w->windowState())
     , mWindowFlags(w->flags())
     , mWindowVisible(false)
-    , mWindowExposed(true)
     , mNativeInterface(native)
     , mSurface(new UbuntuSurface{this, eglDisplay, input, mirConnection})
     , mScale(1.0)
     , mFormFactor(mir_form_factor_unknown)
 {
+    mWindowExposed = mSurface->mNeedsExposeCatchup == false;
+
     qCDebug(ubuntumirclient, "UbuntuWindow(window=%p, screen=%p, input=%p, surf=%p) with title '%s', role: '%d'",
             w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()), roleFor(window()));
 
-    updatePanelHeightHack(w->windowState() != Qt::WindowFullScreen);
+    updatePanelHeightHack(mSurface->state() != mir_surface_state_fullscreen);
 
     // queue the windowPropertyChanged signal. If it's emitted directly, the platformWindow will not yet be set for the window.
     QMetaObject::invokeMethod(mNativeInterface, "windowPropertyChanged", Qt::QueuedConnection,
@@ -653,13 +665,6 @@ void UbuntuWindow::handleSurfaceFocused()
 {
     qCDebug(ubuntumirclient, "handleSurfaceFocused(window=%p)", window());
 
-    // System clipboard contents might have changed while this window was unfocused and without
-    // this process getting notified about it because it might have been suspended (due to
-    // application lifecycle policies), thus unable to listen to any changes notified through
-    // D-Bus.
-    // Therefore let's ensure we are up to date with the system clipboard now that we are getting
-    // focused again.
-    mClipboard->requestDBusClipboardContents();
 }
 
 void UbuntuWindow::handleSurfaceVisibilityChanged(bool visible)
@@ -717,9 +722,9 @@ void UbuntuWindow::updatePanelHeightHack(bool enable)
 
     QRect newGeometry = geometry();
     if (enable) {
-        newGeometry.setY(panelHeight());
+        newGeometry.moveTop(panelHeight());
     } else {
-        newGeometry.setY(0);
+        newGeometry.moveTop(0);
     }
 
     if (newGeometry != geometry()) {
@@ -786,7 +791,8 @@ void UbuntuWindow::propagateSizeHints()
 
 bool UbuntuWindow::isExposed() const
 {
-    return mWindowVisible && mWindowExposed;
+    // mNeedsExposeCatchup because we need to render a frame to get the expose surface event from mir.
+    return mWindowVisible && (mWindowExposed || (mSurface && mSurface->mNeedsExposeCatchup));
 }
 
 QByteArray UbuntuWindow::persistentSurfaceId() const
@@ -858,4 +864,9 @@ void UbuntuWindow::updateSurfaceState()
         lock.unlock();
         updatePanelHeightHack(newState != mir_surface_state_fullscreen);
     }
+}
+
+QString UbuntuWindow::persistentSurfaceId()
+{
+    return mSurface->persistentSurfaceId();
 }
