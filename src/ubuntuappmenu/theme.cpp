@@ -24,10 +24,14 @@
 Q_LOGGING_CATEGORY(ubuntuappmenu, "ubuntu.appmenu", QtWarningMsg)
 const char *UbuntuAppMenuTheme::name = "ubuntuappmenu";
 
+namespace {
+
 bool useLocalMenu() {
     QByteArray menuProxy = qgetenv("UBUNTU_MENUPROXY");
     bool menuProxyIsZero = !menuProxy.isEmpty() && menuProxy.at(0) == '0';
     return menuProxyIsZero;
+}
+
 }
 
 UbuntuAppMenuTheme::UbuntuAppMenuTheme()
@@ -44,7 +48,7 @@ QVariant UbuntuAppMenuTheme::themeHint(ThemeHint hint) const
     if (hint == QPlatformTheme::SystemIconThemeName) {
         QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
         if (iconTheme.isEmpty()) {
-            return QVariant(QStringLiteral("suru"));
+            return QVariant(QStringLiteral("ubuntu-mobile"));
         } else {
             return QVariant(QString(iconTheme));
         }

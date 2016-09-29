@@ -38,12 +38,11 @@ UbuntuMenuRegistry::UbuntuMenuRegistry(QObject* parent)
     , m_interface(new ComUbuntuMenuRegistrarInterface(REGISTRAR_SERVICE, REGISTRY_OBJECT_PATH, QDBusConnection::sessionBus(), this))
     , m_connected(m_interface->isValid())
 {
-    connect(m_serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &UbuntuMenuRegistry::serviceOwnerChanged);
+    connect(m_serviceWatcher.data(), &QDBusServiceWatcher::serviceOwnerChanged, this, &UbuntuMenuRegistry::serviceOwnerChanged);
 }
 
 UbuntuMenuRegistry::~UbuntuMenuRegistry()
 {
-    delete m_interface;
 }
 
 void UbuntuMenuRegistry::registerApplicationMenu(pid_t pid, QDBusObjectPath menuObjectPath, const QString &service)
@@ -89,7 +88,6 @@ void UbuntuMenuRegistry::serviceOwnerChanged(const QString &serviceName, const Q
 {
     qCDebug(ubuntuappmenuRegistrar, "UbuntuMenuRegistry::serviceOwnerChanged(newOwner=%s)", qPrintable(newOwner));
 
-    Q_UNUSED(oldOwner);
     if (serviceName != REGISTRAR_SERVICE) return;
 
     if (oldOwner != newOwner) {

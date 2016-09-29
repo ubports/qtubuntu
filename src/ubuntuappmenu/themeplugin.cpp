@@ -22,14 +22,13 @@
 ///////////////////////////////////////////////////////////
 
 UbuntuAppMenuThemePlugin::UbuntuAppMenuThemePlugin(QObject *parent)
+    : QPlatformThemePlugin(parent)
 {
-    Q_UNUSED(parent);
 }
 
 QPlatformTheme *
-UbuntuAppMenuThemePlugin::create(const QString &key, const QStringList &paramList)
+UbuntuAppMenuThemePlugin::create(const QString &key, const QStringList&)
 {
-    Q_UNUSED(paramList);
     if (key.compare(QLatin1String(UbuntuAppMenuTheme::name), Qt::CaseInsensitive))
         return 0;
 

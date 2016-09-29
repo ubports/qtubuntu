@@ -17,7 +17,9 @@
 #ifndef UBUNTU_MENU_REGISTRY_H
 #define UBUNTU_MENU_REGISTRY_H
 
- #include <QObject>
+#include <QObject>
+#include <QScopedPointer>
+
 class ComUbuntuMenuRegistrarInterface;
 class QDBusObjectPath;
 class QDBusServiceWatcher;
@@ -46,8 +48,8 @@ private Q_SLOTS:
     void serviceOwnerChanged(const QString &serviceName, const QString& oldOwner, const QString &newOwner);
 
 private:
-    QDBusServiceWatcher* m_serviceWatcher;
-    ComUbuntuMenuRegistrarInterface* m_interface;
+    QScopedPointer<QDBusServiceWatcher> m_serviceWatcher;
+    QScopedPointer<ComUbuntuMenuRegistrarInterface> m_interface;
     bool m_connected;
 };
 
