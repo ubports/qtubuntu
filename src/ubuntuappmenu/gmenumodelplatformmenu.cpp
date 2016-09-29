@@ -82,7 +82,8 @@ GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before
             }
         }
     }
-    connect(menu, SIGNAL(structureChanged()), this, SIGNAL(structureChanged()));
+    connect(static_cast<GMenuModelPlatformMenu*>(menu), &GMenuModelPlatformMenu::structureChanged,
+            this, &GMenuModelPlatformMenuBar::structureChanged);
     Q_EMIT menuInserted(menu);
 }
 
@@ -98,7 +99,8 @@ GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
             break;
         }
     }
-    disconnect(menu, SIGNAL(structureChanged()), this, SIGNAL(structureChanged()));
+    disconnect(static_cast<GMenuModelPlatformMenu*>(menu), &GMenuModelPlatformMenu::structureChanged,
+            this, &GMenuModelPlatformMenuBar::structureChanged);
     Q_EMIT menuRemoved(menu);
 }
 
