@@ -72,8 +72,8 @@ Multi-Arch: same
 Build-Depends: ${misc:Depends},
                ${shlibs:Depends},
 Description: Qt platform theme for application menus
- appmenutheme provides you with an integrated application menu in your global
- menu bar. It functions as a QPA platformtheme plugin.
+ Appmenutheme enables the export of application menus to a global menu bar.
+ It is implemented in a QPA platform theme plugin.
  .
- appmenu-qt5 will work for applications designed for Qt5, as well as QML
+ This package will work for applications designed for Qt5, as well as QML
  applications

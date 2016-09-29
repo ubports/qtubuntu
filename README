@@ -48,8 +48,8 @@
   * ubuntu.mirclient.input       - Messages related to input and other Mir events.
   * ubuntu.mirclient.graphics    - Messages related to graphics, GL and EGL.
   * ubuntu.mirclient.swapBuffers - Messages related to surface buffer swapping.
-  * ubuntu.mirclient             - For all other messages frm the ubuntumirclient QPA.
-  * ubuntu.appmenu               - For all messages frm the ubuntuappmenu QPA theme.
+  * ubuntu.mirclient             - For all other messages form the ubuntumirclient QPA.
+  * ubuntu.appmenu               - For all messages form the ubuntuappmenu QPA theme.
 
   The QT_QPA_EGLFS_DEBUG environment variable prints a little more information
   from Qt's internals.
