@@ -54,8 +54,8 @@ private:
     void setReady(bool);
 
     QList<QPlatformMenu*> m_menus;
-    GMenuModelExporter* m_exporter;
-    MenuRegistrar* m_registrar;
+    QScopedPointer<GMenuModelExporter> m_exporter;
+    QScopedPointer<MenuRegistrar> m_registrar;
     bool m_ready;
 };
 
@@ -113,8 +113,8 @@ private:
     quintptr m_tag;
     QList<QPlatformMenuItem*> m_menuItems;
     const QWindow* m_parentWindow;
-    GMenuModelExporter* m_exporter;
-    MenuRegistrar* m_registrar;
+    QScopedPointer<GMenuModelExporter> m_exporter;
+    QScopedPointer<MenuRegistrar> m_registrar;
 
     friend class GMenuModelExporter;
 };

@@ -60,7 +60,7 @@ protected:
     QTimer m_structureTimer;
     QString m_menuPath;
 
-    QList<QMetaObject::Connection> m_propertyConnections;
+    QVector<QMetaObject::Connection> m_propertyConnections;
 };
 
 // Class which exports a qt platform menu bar.

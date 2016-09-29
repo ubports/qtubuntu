@@ -24,8 +24,12 @@
 #include <qpa/qplatformnativeinterface.h>
 #include <qpa/qplatformwindow.h>
 
+namespace {
+
 bool isMirClient() {
     return qgetenv("QT_QPA_PLATFORM") == "ubuntumirclient";
+}
+
 }
 
 MenuRegistrar::MenuRegistrar()
@@ -105,12 +109,9 @@ void MenuRegistrar::registerSurfaceMenu()
 
 void MenuRegistrar::unregisterSurfaceMenu()
 {
-    if (!UbuntuMenuRegistry::instance()->isConnected()) {
-        m_registeredSurfaceId.clear();
-        return;
+    if (UbuntuMenuRegistry::instance()->isConnected()) {
+        UbuntuMenuRegistry::instance()->unregisterSurfaceMenu(m_registeredSurfaceId, m_path);
     }
-
-    UbuntuMenuRegistry::instance()->unregisterSurfaceMenu(m_registeredSurfaceId, m_path);
     m_registeredSurfaceId.clear();
 }
 
@@ -123,11 +124,9 @@ void MenuRegistrar::registerApplicationMenu()
 
 void MenuRegistrar::unregisterApplicationMenu()
 {
-    if (!UbuntuMenuRegistry::instance()->isConnected()) {
-        m_registeredProcessId = ~0;
-        return;
+    if (UbuntuMenuRegistry::instance()->isConnected()) {
+        UbuntuMenuRegistry::instance()->unregisterApplicationMenu(m_registeredProcessId, m_path);
     }
-    UbuntuMenuRegistry::instance()->unregisterApplicationMenu(m_registeredProcessId, m_path);
     m_registeredProcessId = ~0;
 }
 

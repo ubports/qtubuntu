@@ -30,7 +30,11 @@
 #define MENU_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenu[" << (void*)this <<"]::" << __func__
 #define ITEM_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenuItem[" << (void*)this <<"]::" << __func__
 
+namespace {
+
 int logRecusion = 0;
+
+}
 
 QDebug operator<<(QDebug stream, GMenuModelPlatformMenuBar* bar) {
     if (bar) return bar->operator<<(stream);
@@ -59,12 +63,6 @@ GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar()
 GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
 {
     BAR_DEBUG_MSG << "()";
-
-    delete m_registrar;
-    m_registrar = nullptr;
-
-    delete m_exporter;
-    m_exporter = nullptr;
 }
 
 void
@@ -93,13 +91,14 @@ GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 {
     BAR_DEBUG_MSG << "(menu=" << menu << ")";
 
-    for (auto iter = m_menus.begin(); iter != m_menus.end(); ++iter) {
-        if (*iter == menu) {
-            m_menus.erase(iter);
+    QMutableListIterator<QPlatformMenu*> iterator(m_menus);
+    while(iterator.hasNext()) {
+        if (iterator.next() == menu) {
+            iterator.remove();
             break;
         }
     }
-    connect(menu, SIGNAL(structureChanged()), this, SIGNAL(structureChanged()));
+    disconnect(menu, SIGNAL(structureChanged()), this, SIGNAL(structureChanged()));
     Q_EMIT menuRemoved(menu);
 }
 
@@ -123,9 +122,9 @@ GMenuModelPlatformMenuBar::handleReparent(QWindow *parentWindow)
 QPlatformMenu *
 GMenuModelPlatformMenuBar::menuForTag(quintptr tag) const
 {
-    for (auto iter = m_menus.begin(); iter != m_menus.end(); ++iter) {
-        if ((*iter)->tag() == tag) {
-            return *iter;
+    Q_FOREACH(QPlatformMenu* menu, m_menus) {
+        if (menu->tag() == tag) {
+            return menu;
         }
     }
     return nullptr;
@@ -152,10 +151,10 @@ QDebug GMenuModelPlatformMenuBar::operator<<(QDebug stream)
     return stream;
 }
 
-void GMenuModelPlatformMenuBar::setReady(bool _ready)
+void GMenuModelPlatformMenuBar::setReady(bool isReady)
 {
-    if (m_ready != _ready) {
-        m_ready = _ready;
+    if (m_ready != isReady) {
+        m_ready = isReady;
         Q_EMIT ready();
     }
 }
@@ -202,9 +201,10 @@ void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 {
     MENU_DEBUG_MSG << "(menuItem=" << menuItem << ")";
 
-    for (auto iter = m_menuItems.begin(); iter != m_menuItems.end(); ++iter) {
-        if (*iter == menuItem) {
-            m_menuItems.erase(iter);
+    QMutableListIterator<QPlatformMenuItem*> iterator(m_menuItems);
+    while(iterator.hasNext()) {
+        if (iterator.next() == menuItem) {
+            iterator.remove();
             break;
         }
     }
@@ -293,7 +293,7 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
     MENU_DEBUG_MSG << "(parentWindow=" << parentWindow << ", targetRect=" << targetRect << ", item=" << item << ")";
 
     if (!m_exporter) {
-        m_exporter = new GMenuModelMenuExporter(this);
+        m_exporter.reset(new GMenuModelMenuExporter(this));
         m_exporter->exportModels();
     }
 
@@ -305,7 +305,7 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
         m_parentWindow = parentWindow;
 
         if (m_parentWindow) {
-            if (!m_registrar) m_registrar = new MenuRegistrar;
+            if (!m_registrar) m_registrar.reset(new MenuRegistrar);
             m_registrar->registerMenuForWindow(const_cast<QWindow*>(m_parentWindow),
                                                       QDBusObjectPath(m_exporter->menuPath()));
         }
@@ -332,9 +332,9 @@ QPlatformMenuItem *GMenuModelPlatformMenu::menuItemAt(int position) const
 
 QPlatformMenuItem *GMenuModelPlatformMenu::menuItemForTag(quintptr tag) const
 {
-    for (auto iter = m_menuItems.begin(); iter != m_menuItems.end(); ++iter) {
-        if ((*iter)->tag() == tag) {
-            return *iter;
+    Q_FOREACH(QPlatformMenuItem* menuItem, m_menuItems) {
+        if (menuItem->tag() == tag) {
+            return menuItem;
         }
     }
     return nullptr;
