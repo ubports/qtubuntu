@@ -25,28 +25,32 @@
 
 namespace {
 
-inline QString getActionString(const QString& label) {
+// Derive an action name from the label by removing spaces and Capitilizing the words.
+// Also remove mnemonics from the label.
+inline QString getActionString(QString label)
+{
     QRegExp re("\\W");
+    label = label.replace(QRegExp("(&|_)"), "");
     QStringList parts = label.split(re, QString::SkipEmptyParts);
-    for(auto iter = parts.begin(); iter != parts.end(); ++iter) {
-        QString& part = *iter;
-        QChar* ch = part.data();
-        if (!ch) continue;
-        *ch = ch->toUpper();
+
+    QString result;
+    Q_FOREACH(const QString& part, parts) {
+        result += part[0].toUpper();
+        result += part.right(part.length()-1);
     }
-    return parts.join("").replace(QRegExp("(&|_)"), "");
+    return result;
 }
 
 static void activate_cb(GSimpleAction *action, GVariant *, gpointer user_data)
 {
     qCDebug(ubuntuappmenu, "Activate menu action '%s'", g_action_get_name(G_ACTION(action)));
-    auto item = (GMenuModelPlatformMenuItem*)user_data;
+    auto item = static_cast<GMenuModelPlatformMenuItem*>(user_data);
     item->activated();
 }
 
 static uint s_menuId = 0;
 
-#define MENU_OBJECT_PATH QString("/com/ubuntu/Menu/%1")
+#define MENU_OBJECT_PATH "/com/ubuntu/Menu/%1"
 
 } // namespace
 
@@ -61,9 +65,8 @@ GMenuModelBarExporter::GMenuModelBarExporter(GMenuModelPlatformMenuBar * bar)
     });
     connect(&m_structureTimer, &QTimer::timeout, this, [this, bar]() {
         clear();
-        auto iter = bar->menus().begin();
-        for (; iter != bar->menus().end(); ++iter) {
-            GMenuItem* item = createSubmenu(*iter, nullptr);
+        Q_FOREACH(QPlatformMenu *platformMenu, bar->menus()) {
+            GMenuItem* item = createSubmenu(platformMenu, nullptr);
             if (item) {
                 g_menu_append_item(m_gmainMenu, item);
                 g_object_unref(item);
@@ -93,11 +96,12 @@ GMenuModelMenuExporter::GMenuModelMenuExporter(GMenuModelPlatformMenu *menu)
 
 GMenuModelExporter::GMenuModelExporter(QObject *parent)
     : QObject(parent)
+    , m_connection(nullptr)
     , m_gmainMenu(g_menu_new())
     , m_gactionGroup(g_simple_action_group_new())
-    , m_exportedModel(-1)
-    , m_exportedActions(-1)
-    , m_menuPath(MENU_OBJECT_PATH.arg(s_menuId++))
+    , m_exportedModel(0)
+    , m_exportedActions(0)
+    , m_menuPath(QStringLiteral(MENU_OBJECT_PATH).arg(s_menuId++))
 {
     m_structureTimer.setSingleShot(true);
     m_structureTimer.setInterval(0);
@@ -114,6 +118,7 @@ GMenuModelExporter::~GMenuModelExporter()
     g_object_unref(m_gactionGroup);
 }
 
+// Clear the menu and actions that have been created.
 void GMenuModelExporter::clear()
 {
     Q_FOREACH(const QMetaObject::Connection& connection, m_propertyConnections) {
@@ -122,68 +127,75 @@ void GMenuModelExporter::clear()
 
     g_menu_remove_all(m_gmainMenu);
 
-    for (auto iter = m_actions.begin(); iter != m_actions.end(); ++iter) {
-        g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), (*iter).constData());
+    Q_FOREACH(const QByteArray& action, m_actions) {
+        g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
     }
     m_actions.clear();
 }
 
+// Export the model on dbus
 void GMenuModelExporter::exportModels()
 {
-    GError *error = NULL;
-    GDBusConnection *bus;
-    bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
-    if (!bus) {
+    GError *error = nullptr;
+    m_connection = g_bus_get_sync (G_BUS_TYPE_SESSION, nullptr, &error);
+    if (!m_connection) {
         qCWarning(ubuntuappmenu, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
+        g_error_free (error);
         return;
     }
 
     QByteArray menuPath(m_menuPath.toUtf8());
 
-    if (m_exportedModel == -1) {
-        m_exportedModel = g_dbus_connection_export_menu_model(bus, menuPath.constData(), G_MENU_MODEL(m_gmainMenu), &error);
-        if (!m_exportedModel) {
+    if (m_exportedModel == 0) {
+        m_exportedModel = g_dbus_connection_export_menu_model(m_connection, menuPath.constData(), G_MENU_MODEL(m_gmainMenu), &error);
+        if (m_exportedModel == 0) {
             qCWarning(ubuntuappmenu, "Failed to export menu - %s", error ? error->message : "unknown error");
-            error = NULL;
+            g_error_free (error);
+            error = nullptr;
         } else {
-            qCDebug(ubuntuappmenu, "Exported menu on %s", g_dbus_connection_get_unique_name(bus));
+            qCDebug(ubuntuappmenu, "Exported menu on %s", g_dbus_connection_get_unique_name(m_connection));
         }
     }
 
-    if (m_exportedActions == -1) {
-        m_exportedActions = g_dbus_connection_export_action_group(bus, menuPath.constData(), G_ACTION_GROUP(m_gactionGroup), &error);
-        if (!m_exportedActions) {
+    if (m_exportedActions == 0) {
+        m_exportedActions = g_dbus_connection_export_action_group(m_connection, menuPath.constData(), G_ACTION_GROUP(m_gactionGroup), &error);
+        if (m_exportedActions == 0) {
             qCWarning(ubuntuappmenu, "Failed to export actions - %s", error ? error->message : "unknown error");
-            error = NULL;
+            g_error_free (error);
+            error = nullptr;
         } else {
-            qCDebug(ubuntuappmenu, "Exported actions on %s", g_dbus_connection_get_unique_name(bus));
+            qCDebug(ubuntuappmenu, "Exported actions on %s", g_dbus_connection_get_unique_name(m_connection));
         }
     }
 }
 
+// Unexport the model
 void GMenuModelExporter::unexportModels()
 {
-    GError *error = NULL;
-    GDBusConnection *bus;
-    bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
-    if (!bus) {
+    GError *error = nullptr;
+    if (!m_connection) {
         qCWarning(ubuntuappmenu, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
         return;
     }
 
-    if (m_exportedModel != -1) {
-        g_dbus_connection_unexport_menu_model(bus, m_exportedModel);
-        m_exportedModel = -1;
+    if (m_exportedModel != 0) {
+        g_dbus_connection_unexport_menu_model(m_connection, m_exportedModel);
+        m_exportedModel = 0;
     }
-    if (m_exportedActions != -1) {
-        g_dbus_connection_unexport_action_group(bus, m_exportedActions);
-        m_exportedActions = -1;
+    if (m_exportedActions != 0) {
+        g_dbus_connection_unexport_action_group(m_connection, m_exportedActions);
+        m_exportedActions = 0;
     }
+    g_object_unref(m_connection);
+    m_connection = nullptr;
 }
 
+// Create a submenu for the given platform menu.
+// Returns a gmenuitem entry for the menu, which must be cleaned up using g_object_unref.
+// If forItem is suplied, use it's label.
 GMenuItem *GMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, GMenuModelPlatformMenuItem *forItem)
 {
-    GMenuModelPlatformMenu* gplatformMenu = qobject_cast<GMenuModelPlatformMenu*>(platformMenu);
+    GMenuModelPlatformMenu* gplatformMenu = static_cast<GMenuModelPlatformMenu*>(platformMenu);
     if (!gplatformMenu) return nullptr;
     GMenu* menu = g_menu_new();
 
@@ -201,15 +213,18 @@ GMenuItem *GMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, GMenuM
     return gmenuItem;
 }
 
+// Add a platform menu's items to the given gmenu.
+// The items are inserted into menus sections, split by the menu separators.
 void GMenuModelExporter::addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, GMenu* menu)
 {
     auto iter = gplatformMenu->menuItems().begin();
     auto lastSectionStart = iter;
+    // Iterate through all the menu items adding sections when a separator is found.
     for (; iter != gplatformMenu->menuItems().end(); ++iter) {
-        GMenuModelPlatformMenuItem* gplatformMenuItem = qobject_cast<GMenuModelPlatformMenuItem*>(*iter);
+        GMenuModelPlatformMenuItem* gplatformMenuItem = static_cast<GMenuModelPlatformMenuItem*>(*iter);
         if (!gplatformMenuItem) continue;
 
-        // don't add section until we have separator
+        // don't add a section until we have separator
         if (GMenuModelPlatformMenuItem::get_separator(gplatformMenuItem)) {
             if (lastSectionStart != gplatformMenu->menuItems().begin()) {
                 GMenuItem* section = createSection(lastSectionStart, iter);
@@ -222,6 +237,7 @@ void GMenuModelExporter::addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, 
         }
     }
 
+    // Add the last section
     if (lastSectionStart != gplatformMenu->menuItems().begin() &&
             lastSectionStart != gplatformMenu->menuItems().end()) {
         GMenuItem* gsectionItem = createSection(lastSectionStart, gplatformMenu->menuItems().end());
@@ -230,16 +246,18 @@ void GMenuModelExporter::addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, 
     }
 }
 
+// Create and return a gmenu item for the given platform menu item.
+// Returned GMenuItem must be cleaned up using g_object_unref
 GMenuItem *GMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuItem)
 {
-    GMenuModelPlatformMenuItem* gplatformMenuItem = qobject_cast<GMenuModelPlatformMenuItem*>(platformMenuItem);
+    GMenuModelPlatformMenuItem* gplatformMenuItem = static_cast<GMenuModelPlatformMenuItem*>(platformMenuItem);
     if (!gplatformMenuItem) return nullptr;
 
     QByteArray label(GMenuModelPlatformMenuItem::get_text(gplatformMenuItem).toUtf8());
     QByteArray actionLabel(getActionString(GMenuModelPlatformMenuItem::get_text(gplatformMenuItem)).toUtf8());
     QByteArray shortcut(GMenuModelPlatformMenuItem::get_shortcut(gplatformMenuItem).toString(QKeySequence::NativeText).toUtf8());
 
-    GMenuItem* gmenuItem = g_menu_item_new(label.constData(), NULL);
+    GMenuItem* gmenuItem = g_menu_item_new(label.constData(), nullptr);
     g_menu_item_set_attribute(gmenuItem, "accel", "s", shortcut.constData());
     g_menu_item_set_detailed_action(gmenuItem, ("unity." + actionLabel).constData());
 
@@ -247,6 +265,8 @@ GMenuItem *GMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuIte
     return gmenuItem;
 }
 
+// Create a menu section for a section of separated menu items.
+// Returned GMenuItem must be cleaned up using g_object_unref
 GMenuItem *GMenuModelExporter::createSection(QList<QPlatformMenuItem *>::const_iterator iter, QList<QPlatformMenuItem *>::const_iterator end)
 {
     GMenu* gsectionMenu = g_menu_new();
@@ -258,9 +278,11 @@ GMenuItem *GMenuModelExporter::createSection(QList<QPlatformMenuItem *>::const_i
     return gsectionItem;
 }
 
+// Add the given platform menu item to the menu.
+// If it has an attached submenu, then create and add the submenu.
 void GMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMenuItem, GMenu *gmenu)
 {
-    GMenuModelPlatformMenuItem* gplatformMenuItem = qobject_cast<GMenuModelPlatformMenuItem*>(platformMenuItem);
+    GMenuModelPlatformMenuItem* gplatformMenuItem = static_cast<GMenuModelPlatformMenuItem*>(platformMenuItem);
     if (!gplatformMenuItem) return;
 
     GMenuItem* gmenuItem = gplatformMenuItem->menu() ? createSubmenu(gplatformMenuItem->menu(), gplatformMenuItem) :
@@ -271,6 +293,7 @@ void GMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMenuItem
     }
 }
 
+// Create and add an action for a menu item.
 void GMenuModelExporter::addAction(const QByteArray &name, GMenuModelPlatformMenuItem *gplatformMenuItem)
 {
     disconnect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkedChanged, this, 0);
@@ -281,12 +304,12 @@ void GMenuModelExporter::addAction(const QByteArray &name, GMenuModelPlatformMen
         m_actions.remove(name);
     }
 
-    bool checkable(GMenuModelPlatformMenuItem::get_checkable(gplatformMenuItem));
+    bool checkable = GMenuModelPlatformMenuItem::get_checkable(gplatformMenuItem);
 
     GSimpleAction* action = nullptr;
     if (checkable) {
-        bool checked(GMenuModelPlatformMenuItem::get_checked(gplatformMenuItem));
-        action = g_simple_action_new_stateful(name.constData(), NULL, g_variant_new_boolean(checked));
+        bool checked = GMenuModelPlatformMenuItem::get_checked(gplatformMenuItem);
+        action = g_simple_action_new_stateful(name.constData(), nullptr, g_variant_new_boolean(checked));
 
         std::function<void(bool)> updateChecked = [gplatformMenuItem, action](bool checked) {
             auto type = g_action_get_state_type(G_ACTION(action));
@@ -297,7 +320,7 @@ void GMenuModelExporter::addAction(const QByteArray &name, GMenuModelPlatformMen
         // save the connection to disconnect in GMenuModelExporter::clear()
         m_propertyConnections << connect(gplatformMenuItem, &GMenuModelPlatformMenuItem::checkedChanged, this, updateChecked);
     } else {
-        action = g_simple_action_new(name.constData(), NULL);
+        action = g_simple_action_new(name.constData(), nullptr);
     }
 
     // Enabled update

@@ -22,6 +22,8 @@
 #include <QPointer>
 #include <QDBusObjectPath>
 
+#include <gio/gio.h>
+
 class MenuRegistrar : public QObject
 {
     Q_OBJECT
@@ -44,6 +46,7 @@ private:
 
     void unregisterSurfaceMenu();
 
+    GDBusConnection *m_connection;
     QString m_service;
     QDBusObjectPath m_path;
     QPointer<QWindow> m_window;

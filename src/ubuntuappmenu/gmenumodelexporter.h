@@ -25,6 +25,7 @@
 #include <QSet>
 #include <QMetaObject>
 
+// Base class for a gmenumodel exporter
 class GMenuModelExporter : public QObject
 {
     Q_OBJECT
@@ -50,23 +51,27 @@ protected:
     void clear();
 
 protected:
-    GMenu* m_gmainMenu;
-    GSimpleActionGroup* m_gactionGroup;
+    GDBusConnection *m_connection;
+    GMenu *m_gmainMenu;
+    GSimpleActionGroup *m_gactionGroup;
     QSet<QByteArray> m_actions;
-    int m_exportedModel;
-    int m_exportedActions;
+    guint m_exportedModel;
+    guint m_exportedActions;
     QTimer m_structureTimer;
     QString m_menuPath;
 
     QList<QMetaObject::Connection> m_propertyConnections;
 };
 
+// Class which exports a qt platform menu bar.
 class GMenuModelBarExporter : public GMenuModelExporter
 {
 public:
     GMenuModelBarExporter(GMenuModelPlatformMenuBar *parent);
 };
 
+// Class which exports a qt platform menu.
+// This will allow exporting of context menus.
 class GMenuModelMenuExporter : public GMenuModelExporter
 {
 public:

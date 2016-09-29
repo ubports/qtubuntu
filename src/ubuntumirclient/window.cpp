@@ -335,12 +335,6 @@ public:
         mMirSurface = createMirSurface(mWindow, outputId, input, pixelFormat, connection, surfaceEventCallback, this);
         mEglSurface = eglCreateWindowSurface(mEglDisplay, config, nativeWindowFor(mMirSurface), nullptr);
 
-        auto persistent_id = mir_surface_request_persistent_id_sync(mMirSurface);
-        if (mir_persistent_id_is_valid(persistent_id)) {
-            mPersistentSurfaceId = mir_persistent_id_as_string(persistent_id);
-            mir_persistent_id_release(persistent_id);
-        }
-
         mNeedsExposeCatchup = mir_surface_get_visibility(mMirSurface) == mir_surface_visibility_occluded;
 
         // Window manager can give us a final size different from what we asked for
@@ -402,8 +396,6 @@ public:
     void setSurfaceParent(MirSurface*);
     bool hasParent() const { return mParented; }
 
-    QByteArray persistentSurfaceId() const { return mPersistentSurfaceId; }
-
     QSurfaceFormat format() const { return mFormat; }
 
     bool mNeedsExposeCatchup;
@@ -422,7 +414,6 @@ private:
     MirSurface* mMirSurface;
     const EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
-    QByteArray mPersistentSurfaceId;
 
     bool mNeedsRepaint;
     bool mParented;
@@ -793,11 +784,6 @@ bool UbuntuWindow::isExposed() const
 {
     // mNeedsExposeCatchup because we need to render a frame to get the expose surface event from mir.
     return mWindowVisible && (mWindowExposed || (mSurface && mSurface->mNeedsExposeCatchup));
-}
-
-QByteArray UbuntuWindow::persistentSurfaceId() const
-{
-    return mSurface->persistentSurfaceId();
 }
 
 QSurfaceFormat UbuntuWindow::format() const

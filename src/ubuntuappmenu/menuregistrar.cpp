@@ -24,23 +24,22 @@
 #include <qpa/qplatformnativeinterface.h>
 #include <qpa/qplatformwindow.h>
 
-#include <gio/gio.h>
-
 bool isMirClient() {
     return qgetenv("QT_QPA_PLATFORM") == "ubuntumirclient";
 }
 
 MenuRegistrar::MenuRegistrar()
-    : m_registeredProcessId(~0)
+    : m_connection(nullptr)
+    , m_registeredProcessId(~0)
 {
     GError *error = NULL;
-    GDBusConnection *bus;
-    bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
-    if (!bus) {
+    m_connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
+    if (!m_connection) {
         qCWarning(ubuntuappmenuRegistrar, "Failed to retreive session bus - %s", error ? error->message : "unknown error");
+        g_error_free (error);
         return;
     }
-    m_service = g_dbus_connection_get_unique_name(bus);
+    m_service = g_dbus_connection_get_unique_name(m_connection);
     connect(UbuntuMenuRegistry::instance(), &UbuntuMenuRegistry::serviceChanged, this, &MenuRegistrar::onRegistrarServiceChanged);
 
     if (isMirClient()) {
@@ -58,6 +57,9 @@ MenuRegistrar::MenuRegistrar()
 
 MenuRegistrar::~MenuRegistrar()
 {
+    if (m_connection) {
+        g_object_unref(m_connection);
+    }
     unregisterMenu();
 }
 

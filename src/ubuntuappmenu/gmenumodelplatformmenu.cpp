@@ -141,7 +141,7 @@ QDebug GMenuModelPlatformMenuBar::operator<<(QDebug stream)
     stream.nospace().noquote() << QString("%1").arg("", logRecusion, QLatin1Char('\t'))
             << "GMenuModelPlatformMenuBar(this=" << (void*)this << ")" << endl;
     Q_FOREACH(QPlatformMenu* menu, m_menus) {
-        auto myMenu = qobject_cast<GMenuModelPlatformMenu*>(menu);
+        auto myMenu = static_cast<GMenuModelPlatformMenu*>(menu);
         if (myMenu) {
             logRecusion++;
             stream << myMenu;
@@ -351,7 +351,7 @@ QDebug GMenuModelPlatformMenu::operator<<(QDebug stream)
             << "GMenuModelPlatformMenu(this=" << (void*)this << ", text=\"" << m_text << "\")" << endl;
     Q_FOREACH(QPlatformMenuItem* item, m_menuItems) {
         logRecusion++;
-        auto myItem = qobject_cast<GMenuModelPlatformMenuItem*>(item);
+        auto myItem = static_cast<GMenuModelPlatformMenuItem*>(item);
         if (myItem) {
             stream << myItem;
         }
@@ -499,7 +499,7 @@ QDebug GMenuModelPlatformMenuItem::operator<<(QDebug stream)
             << "GMenuModelPlatformMenuItem(this=" << (void*)this << ", "
             << (m_separator ? "Separator" : properties) << ")" << endl;
     if (m_menu) {
-        auto myMenu = qobject_cast<GMenuModelPlatformMenu*>(m_menu);
+        auto myMenu = static_cast<GMenuModelPlatformMenu*>(m_menu);
         if (myMenu) {
             logRecusion++;
             stream << myMenu;
