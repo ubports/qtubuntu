@@ -35,7 +35,7 @@
 
 #include <EGL/egl.h>
 
-Q_LOGGING_CATEGORY(ubuntumirclientBufferSwap, "ubuntu.mirclient.bufferSwap", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntumirclientBufferSwap, "ubuntumirclient.bufferSwap", QtWarningMsg)
 
 const Qt::WindowType LowChromeWindowHint = (Qt::WindowType)0x00800000;
 

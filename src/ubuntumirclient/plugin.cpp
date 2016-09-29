@@ -19,7 +19,7 @@
 #include "logging.h"
 #include "qpa/qplatformwindow.h"
 
-Q_LOGGING_CATEGORY(ubuntumirclient, "ubuntu.mirclient", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntumirclient, "ubuntumirclient", QtWarningMsg)
 
 QStringList UbuntuMirClientIntegrationPlugin::keys() const
 {

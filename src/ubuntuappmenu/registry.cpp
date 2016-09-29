@@ -21,7 +21,7 @@
 #include <QDBusObjectPath>
 #include <QDBusServiceWatcher>
 
-Q_LOGGING_CATEGORY(ubuntuappmenuRegistrar, "ubuntu.appmenu.registrar", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntuappmenuRegistrar, "ubuntuappmenu.registrar", QtWarningMsg)
 
 #define REGISTRAR_SERVICE "com.ubuntu.MenuRegistrar"
 #define REGISTRY_OBJECT_PATH "/com/ubuntu/MenuRegistrar"

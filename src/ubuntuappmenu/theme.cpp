@@ -21,7 +21,7 @@
 #include <QtCore/QVariant>
 #include <QDebug>
 
-Q_LOGGING_CATEGORY(ubuntuappmenu, "ubuntu.appmenu", QtWarningMsg)
+Q_LOGGING_CATEGORY(ubuntuappmenu, "ubuntuappmenu", QtWarningMsg)
 const char *UbuntuAppMenuTheme::name = "ubuntuappmenu";
 
 namespace {
