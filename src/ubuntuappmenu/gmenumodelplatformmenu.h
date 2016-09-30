@@ -20,16 +20,16 @@
 #include <qpa/qplatformmenu.h>
 
 // Local
-class GMenuModelExporter;
-class MenuRegistrar;
+class UbuntuGMenuModelExporter;
+class UbuntuMenuRegistrar;
 class QWindow;
 
-class GMenuModelPlatformMenuBar : public QPlatformMenuBar
+class UbuntuPlatformMenuBar : public QPlatformMenuBar
 {
     Q_OBJECT
 public:
-    GMenuModelPlatformMenuBar();
-    ~GMenuModelPlatformMenuBar();
+    UbuntuPlatformMenuBar();
+    ~UbuntuPlatformMenuBar();
 
     QString exportedPath() const;
 
@@ -54,8 +54,8 @@ private:
     void setReady(bool);
 
     QList<QPlatformMenu*> m_menus;
-    QScopedPointer<GMenuModelExporter> m_exporter;
-    QScopedPointer<MenuRegistrar> m_registrar;
+    QScopedPointer<UbuntuGMenuModelExporter> m_exporter;
+    QScopedPointer<UbuntuMenuRegistrar> m_registrar;
     bool m_ready;
 };
 
@@ -63,12 +63,12 @@ private:
     static type get_##name(const class *menuItem) { return menuItem->m_##name; } \
     type m_##name = defaultValue;
 
-class Q_DECL_EXPORT GMenuModelPlatformMenu : public QPlatformMenu
+class Q_DECL_EXPORT UbuntuPlatformMenu : public QPlatformMenu
 {
     Q_OBJECT
 public:
-    GMenuModelPlatformMenu();
-    ~GMenuModelPlatformMenu();
+    UbuntuPlatformMenu();
+    ~UbuntuPlatformMenu();
 
     virtual void insertMenuItem(QPlatformMenuItem *menuItem, QPlatformMenuItem *before) override;
     virtual void removeMenuItem(QPlatformMenuItem *menuItem) override;
@@ -105,27 +105,27 @@ Q_SIGNALS:
     void propertyChanged();
 
 private:
-    MENU_PROPERTY(GMenuModelPlatformMenu, visible, bool, true)
-    MENU_PROPERTY(GMenuModelPlatformMenu, text, QString, QString())
-    MENU_PROPERTY(GMenuModelPlatformMenu, enabled, bool, true)
-    MENU_PROPERTY(GMenuModelPlatformMenu, icon, QIcon, QIcon())
+    MENU_PROPERTY(UbuntuPlatformMenu, visible, bool, true)
+    MENU_PROPERTY(UbuntuPlatformMenu, text, QString, QString())
+    MENU_PROPERTY(UbuntuPlatformMenu, enabled, bool, true)
+    MENU_PROPERTY(UbuntuPlatformMenu, icon, QIcon, QIcon())
 
     quintptr m_tag;
     QList<QPlatformMenuItem*> m_menuItems;
     const QWindow* m_parentWindow;
-    QScopedPointer<GMenuModelExporter> m_exporter;
-    QScopedPointer<MenuRegistrar> m_registrar;
+    QScopedPointer<UbuntuGMenuModelExporter> m_exporter;
+    QScopedPointer<UbuntuMenuRegistrar> m_registrar;
 
-    friend class GMenuModelExporter;
+    friend class UbuntuGMenuModelExporter;
 };
 
 
-class Q_DECL_EXPORT GMenuModelPlatformMenuItem : public QPlatformMenuItem
+class Q_DECL_EXPORT UbuntuPlatformMenuItem : public QPlatformMenuItem
 {
     Q_OBJECT
 public:
-    GMenuModelPlatformMenuItem();
-    ~GMenuModelPlatformMenuItem();
+    UbuntuPlatformMenuItem();
+    ~UbuntuPlatformMenuItem();
 
     virtual void setTag(quintptr tag) override;
     virtual quintptr tag() const override;
@@ -153,19 +153,19 @@ Q_SIGNALS:
     void propertyChanged();
 
 private:
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, separator, bool, false)
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, visible, bool, true)
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, text, QString, QString())
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, enabled, bool, true)
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, checkable, bool, false)
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, checked, bool, false)
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, shortcut, QKeySequence, QKeySequence())
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, icon, QIcon, QIcon())
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, iconSize, int, 16)
-    MENU_PROPERTY(GMenuModelPlatformMenuItem, menu, QPlatformMenu*, nullptr)
+    MENU_PROPERTY(UbuntuPlatformMenuItem, separator, bool, false)
+    MENU_PROPERTY(UbuntuPlatformMenuItem, visible, bool, true)
+    MENU_PROPERTY(UbuntuPlatformMenuItem, text, QString, QString())
+    MENU_PROPERTY(UbuntuPlatformMenuItem, enabled, bool, true)
+    MENU_PROPERTY(UbuntuPlatformMenuItem, checkable, bool, false)
+    MENU_PROPERTY(UbuntuPlatformMenuItem, checked, bool, false)
+    MENU_PROPERTY(UbuntuPlatformMenuItem, shortcut, QKeySequence, QKeySequence())
+    MENU_PROPERTY(UbuntuPlatformMenuItem, icon, QIcon, QIcon())
+    MENU_PROPERTY(UbuntuPlatformMenuItem, iconSize, int, 16)
+    MENU_PROPERTY(UbuntuPlatformMenuItem, menu, QPlatformMenu*, nullptr)
 
 
     quintptr m_tag;
-    friend class GMenuModelExporter;
+    friend class UbuntuGMenuModelExporter;
 };
 #endif // EXPORTEDPLATFORMMENUBAR_H

@@ -26,9 +26,9 @@
 #include <QWindow>
 #include <QCoreApplication>
 
-#define BAR_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenuBar[" << (void*)this <<"]::" << __func__
-#define MENU_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenu[" << (void*)this <<"]::" << __func__
-#define ITEM_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "GMenuModelPlatformMenuItem[" << (void*)this <<"]::" << __func__
+#define BAR_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "UbuntuPlatformMenuBar[" << (void*)this <<"]::" << __func__
+#define MENU_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "UbuntuPlatformMenu[" << (void*)this <<"]::" << __func__
+#define ITEM_DEBUG_MSG qCDebug(ubuntuappmenu).nospace() << "UbuntuPlatformMenuItem[" << (void*)this <<"]::" << __func__
 
 namespace {
 
@@ -36,37 +36,37 @@ int logRecusion = 0;
 
 }
 
-QDebug operator<<(QDebug stream, GMenuModelPlatformMenuBar* bar) {
+QDebug operator<<(QDebug stream, UbuntuPlatformMenuBar* bar) {
     if (bar) return bar->operator<<(stream);
     return stream;
 }
-QDebug operator<<(QDebug stream, GMenuModelPlatformMenu* menu) {
+QDebug operator<<(QDebug stream, UbuntuPlatformMenu* menu) {
     if (menu) return menu->operator<<(stream);
     return stream;
 }
-QDebug operator<<(QDebug stream, GMenuModelPlatformMenuItem* menuItem) {
+QDebug operator<<(QDebug stream, UbuntuPlatformMenuItem* menuItem) {
     if (menuItem) return menuItem->operator<<(stream);
     return stream;
 }
 
-GMenuModelPlatformMenuBar::GMenuModelPlatformMenuBar()
-    : m_exporter(new GMenuModelBarExporter(this))
-    , m_registrar(new MenuRegistrar())
+UbuntuPlatformMenuBar::UbuntuPlatformMenuBar()
+    : m_exporter(new UbuntuMenuBarExporter(this))
+    , m_registrar(new UbuntuMenuRegistrar())
     , m_ready(false)
 {
     BAR_DEBUG_MSG << "()";
 
-    connect(this, &GMenuModelPlatformMenuBar::menuInserted, this, &GMenuModelPlatformMenuBar::structureChanged);
-    connect(this,&GMenuModelPlatformMenuBar::menuRemoved, this, &GMenuModelPlatformMenuBar::structureChanged);
+    connect(this, &UbuntuPlatformMenuBar::menuInserted, this, &UbuntuPlatformMenuBar::structureChanged);
+    connect(this,&UbuntuPlatformMenuBar::menuRemoved, this, &UbuntuPlatformMenuBar::structureChanged);
 }
 
-GMenuModelPlatformMenuBar::~GMenuModelPlatformMenuBar()
+UbuntuPlatformMenuBar::~UbuntuPlatformMenuBar()
 {
     BAR_DEBUG_MSG << "()";
 }
 
 void
-GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
+UbuntuPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
 {
     BAR_DEBUG_MSG << "(menu=" << menu << ", before=" <<  before << ")";
 
@@ -82,13 +82,13 @@ GMenuModelPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before
             }
         }
     }
-    connect(static_cast<GMenuModelPlatformMenu*>(menu), &GMenuModelPlatformMenu::structureChanged,
-            this, &GMenuModelPlatformMenuBar::structureChanged);
+    connect(static_cast<UbuntuPlatformMenu*>(menu), &UbuntuPlatformMenu::structureChanged,
+            this, &UbuntuPlatformMenuBar::structureChanged);
     Q_EMIT menuInserted(menu);
 }
 
 void
-GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
+UbuntuPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 {
     BAR_DEBUG_MSG << "(menu=" << menu << ")";
 
@@ -99,13 +99,13 @@ GMenuModelPlatformMenuBar::removeMenu(QPlatformMenu *menu)
             break;
         }
     }
-    disconnect(static_cast<GMenuModelPlatformMenu*>(menu), &GMenuModelPlatformMenu::structureChanged,
-            this, &GMenuModelPlatformMenuBar::structureChanged);
+    disconnect(static_cast<UbuntuPlatformMenu*>(menu), &UbuntuPlatformMenu::structureChanged,
+            this, &UbuntuPlatformMenuBar::structureChanged);
     Q_EMIT menuRemoved(menu);
 }
 
 void
-GMenuModelPlatformMenuBar::syncMenu(QPlatformMenu *menu)
+UbuntuPlatformMenuBar::syncMenu(QPlatformMenu *menu)
 {
     BAR_DEBUG_MSG << "(menu=" << menu << ")";
 
@@ -113,7 +113,7 @@ GMenuModelPlatformMenuBar::syncMenu(QPlatformMenu *menu)
 }
 
 void
-GMenuModelPlatformMenuBar::handleReparent(QWindow *parentWindow)
+UbuntuPlatformMenuBar::handleReparent(QWindow *parentWindow)
 {
     BAR_DEBUG_MSG << "(parentWindow=" << parentWindow << ")";
 
@@ -122,7 +122,7 @@ GMenuModelPlatformMenuBar::handleReparent(QWindow *parentWindow)
 }
 
 QPlatformMenu *
-GMenuModelPlatformMenuBar::menuForTag(quintptr tag) const
+UbuntuPlatformMenuBar::menuForTag(quintptr tag) const
 {
     Q_FOREACH(QPlatformMenu* menu, m_menus) {
         if (menu->tag() == tag) {
@@ -132,17 +132,17 @@ GMenuModelPlatformMenuBar::menuForTag(quintptr tag) const
     return nullptr;
 }
 
-const QList<QPlatformMenu *> GMenuModelPlatformMenuBar::menus() const
+const QList<QPlatformMenu *> UbuntuPlatformMenuBar::menus() const
 {
     return m_menus;
 }
 
-QDebug GMenuModelPlatformMenuBar::operator<<(QDebug stream)
+QDebug UbuntuPlatformMenuBar::operator<<(QDebug stream)
 {
     stream.nospace().noquote() << QString("%1").arg("", logRecusion, QLatin1Char('\t'))
-            << "GMenuModelPlatformMenuBar(this=" << (void*)this << ")" << endl;
+            << "UbuntuPlatformMenuBar(this=" << (void*)this << ")" << endl;
     Q_FOREACH(QPlatformMenu* menu, m_menus) {
-        auto myMenu = static_cast<GMenuModelPlatformMenu*>(menu);
+        auto myMenu = static_cast<UbuntuPlatformMenu*>(menu);
         if (myMenu) {
             logRecusion++;
             stream << myMenu;
@@ -153,7 +153,7 @@ QDebug GMenuModelPlatformMenuBar::operator<<(QDebug stream)
     return stream;
 }
 
-void GMenuModelPlatformMenuBar::setReady(bool isReady)
+void UbuntuPlatformMenuBar::setReady(bool isReady)
 {
     if (m_ready != isReady) {
         m_ready = isReady;
@@ -163,23 +163,23 @@ void GMenuModelPlatformMenuBar::setReady(bool isReady)
 
 //////////////////////////////////////////////////////////////
 
-GMenuModelPlatformMenu::GMenuModelPlatformMenu()
+UbuntuPlatformMenu::UbuntuPlatformMenu()
     : m_parentWindow(nullptr)
     , m_exporter(nullptr)
     , m_registrar(nullptr)
 {
     MENU_DEBUG_MSG << "()";
 
-    connect(this, &GMenuModelPlatformMenu::menuItemInserted, this, &GMenuModelPlatformMenu::structureChanged);
-    connect(this, &GMenuModelPlatformMenu::menuItemRemoved, this, &GMenuModelPlatformMenu::structureChanged);
+    connect(this, &UbuntuPlatformMenu::menuItemInserted, this, &UbuntuPlatformMenu::structureChanged);
+    connect(this, &UbuntuPlatformMenu::menuItemRemoved, this, &UbuntuPlatformMenu::structureChanged);
 }
 
-GMenuModelPlatformMenu::~GMenuModelPlatformMenu()
+UbuntuPlatformMenu::~UbuntuPlatformMenu()
 {
     MENU_DEBUG_MSG << "()";
 }
 
-void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatformMenuItem *before)
+void UbuntuPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatformMenuItem *before)
 {
     MENU_DEBUG_MSG << "(menuItem=" << menuItem << ", before=" << before << ")";
 
@@ -199,7 +199,7 @@ void GMenuModelPlatformMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatfo
     Q_EMIT menuItemInserted(menuItem);
 }
 
-void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
+void UbuntuPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 {
     MENU_DEBUG_MSG << "(menuItem=" << menuItem << ")";
 
@@ -213,31 +213,31 @@ void GMenuModelPlatformMenu::removeMenuItem(QPlatformMenuItem *menuItem)
     Q_EMIT menuItemRemoved(menuItem);
 }
 
-void GMenuModelPlatformMenu::syncMenuItem(QPlatformMenuItem *menuItem)
+void UbuntuPlatformMenu::syncMenuItem(QPlatformMenuItem *menuItem)
 {
     MENU_DEBUG_MSG << "(menuItem=" << menuItem << ")";
 
     Q_UNUSED(menuItem)
 }
 
-void GMenuModelPlatformMenu::syncSeparatorsCollapsible(bool enable)
+void UbuntuPlatformMenu::syncSeparatorsCollapsible(bool enable)
 {
     MENU_DEBUG_MSG << "(enable=" << enable << ")";
     Q_UNUSED(enable)
 }
 
-void GMenuModelPlatformMenu::setTag(quintptr tag)
+void UbuntuPlatformMenu::setTag(quintptr tag)
 {
     MENU_DEBUG_MSG << "(tag=" << tag << ")";
     m_tag = tag;
 }
 
-quintptr GMenuModelPlatformMenu::tag() const
+quintptr UbuntuPlatformMenu::tag() const
 {
     return m_tag;
 }
 
-void GMenuModelPlatformMenu::setText(const QString &text)
+void UbuntuPlatformMenu::setText(const QString &text)
 {
     MENU_DEBUG_MSG << "(text=" << text << ")";
     if (m_text != text) {
@@ -246,7 +246,7 @@ void GMenuModelPlatformMenu::setText(const QString &text)
     }
 }
 
-void GMenuModelPlatformMenu::setIcon(const QIcon &icon)
+void UbuntuPlatformMenu::setIcon(const QIcon &icon)
 {
     MENU_DEBUG_MSG << "(icon=" << icon.name() << ")";
 
@@ -256,7 +256,7 @@ void GMenuModelPlatformMenu::setIcon(const QIcon &icon)
     }
 }
 
-void GMenuModelPlatformMenu::setEnabled(bool enabled)
+void UbuntuPlatformMenu::setEnabled(bool enabled)
 {
     MENU_DEBUG_MSG << "(enabled=" << enabled << ")";
 
@@ -266,7 +266,7 @@ void GMenuModelPlatformMenu::setEnabled(bool enabled)
     }
 }
 
-void GMenuModelPlatformMenu::setVisible(bool isVisible)
+void UbuntuPlatformMenu::setVisible(bool isVisible)
 {
     MENU_DEBUG_MSG << "(visible=" << isVisible << ")";
 
@@ -276,26 +276,26 @@ void GMenuModelPlatformMenu::setVisible(bool isVisible)
     }
 }
 
-void GMenuModelPlatformMenu::setMinimumWidth(int width)
+void UbuntuPlatformMenu::setMinimumWidth(int width)
 {
     MENU_DEBUG_MSG << "(width=" << width << ")";
 
     Q_UNUSED(width)
 }
 
-void GMenuModelPlatformMenu::setFont(const QFont &font)
+void UbuntuPlatformMenu::setFont(const QFont &font)
 {
     MENU_DEBUG_MSG << "(font=" << font << ")";
 
     Q_UNUSED(font)
 }
 
-void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect &targetRect, const QPlatformMenuItem *item)
+void UbuntuPlatformMenu::showPopup(const QWindow *parentWindow, const QRect &targetRect, const QPlatformMenuItem *item)
 {
     MENU_DEBUG_MSG << "(parentWindow=" << parentWindow << ", targetRect=" << targetRect << ", item=" << item << ")";
 
     if (!m_exporter) {
-        m_exporter.reset(new GMenuModelMenuExporter(this));
+        m_exporter.reset(new UbuntuMenuExporter(this));
         m_exporter->exportModels();
     }
 
@@ -307,7 +307,7 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
         m_parentWindow = parentWindow;
 
         if (m_parentWindow) {
-            if (!m_registrar) m_registrar.reset(new MenuRegistrar);
+            if (!m_registrar) m_registrar.reset(new UbuntuMenuRegistrar);
             m_registrar->registerMenuForWindow(const_cast<QWindow*>(m_parentWindow),
                                                       QDBusObjectPath(m_exporter->menuPath()));
         }
@@ -318,7 +318,7 @@ void GMenuModelPlatformMenu::showPopup(const QWindow *parentWindow, const QRect 
     setVisible(true);
 }
 
-void GMenuModelPlatformMenu::dismiss()
+void UbuntuPlatformMenu::dismiss()
 {
     MENU_DEBUG_MSG << "()";
 
@@ -326,13 +326,13 @@ void GMenuModelPlatformMenu::dismiss()
     if (m_exporter) { m_exporter->unexportModels(); }
 }
 
-QPlatformMenuItem *GMenuModelPlatformMenu::menuItemAt(int position) const
+QPlatformMenuItem *UbuntuPlatformMenu::menuItemAt(int position) const
 {
     if (position < 0 || position >= m_menuItems.count()) return nullptr;
     return m_menuItems.at(position);
 }
 
-QPlatformMenuItem *GMenuModelPlatformMenu::menuItemForTag(quintptr tag) const
+QPlatformMenuItem *UbuntuPlatformMenu::menuItemForTag(quintptr tag) const
 {
     Q_FOREACH(QPlatformMenuItem* menuItem, m_menuItems) {
         if (menuItem->tag() == tag) {
@@ -342,18 +342,18 @@ QPlatformMenuItem *GMenuModelPlatformMenu::menuItemForTag(quintptr tag) const
     return nullptr;
 }
 
-const QList<QPlatformMenuItem *> GMenuModelPlatformMenu::menuItems() const
+const QList<QPlatformMenuItem *> UbuntuPlatformMenu::menuItems() const
 {
     return m_menuItems;
 }
 
-QDebug GMenuModelPlatformMenu::operator<<(QDebug stream)
+QDebug UbuntuPlatformMenu::operator<<(QDebug stream)
 {
     stream.nospace().noquote() << QString("%1").arg("", logRecusion, QLatin1Char('\t'))
-            << "GMenuModelPlatformMenu(this=" << (void*)this << ", text=\"" << m_text << "\")" << endl;
+            << "UbuntuPlatformMenu(this=" << (void*)this << ", text=\"" << m_text << "\")" << endl;
     Q_FOREACH(QPlatformMenuItem* item, m_menuItems) {
         logRecusion++;
-        auto myItem = static_cast<GMenuModelPlatformMenuItem*>(item);
+        auto myItem = static_cast<UbuntuPlatformMenuItem*>(item);
         if (myItem) {
             stream << myItem;
         }
@@ -364,29 +364,29 @@ QDebug GMenuModelPlatformMenu::operator<<(QDebug stream)
 
 //////////////////////////////////////////////////////////////
 
-GMenuModelPlatformMenuItem::GMenuModelPlatformMenuItem()
+UbuntuPlatformMenuItem::UbuntuPlatformMenuItem()
     : m_menu(nullptr)
 {
     ITEM_DEBUG_MSG << "()";
 }
 
-GMenuModelPlatformMenuItem::~GMenuModelPlatformMenuItem()
+UbuntuPlatformMenuItem::~UbuntuPlatformMenuItem()
 {
     ITEM_DEBUG_MSG << "()";
 }
 
-void GMenuModelPlatformMenuItem::setTag(quintptr tag)
+void UbuntuPlatformMenuItem::setTag(quintptr tag)
 {
     ITEM_DEBUG_MSG << "(tag=" << tag << ")";
     m_tag = tag;
 }
 
-quintptr GMenuModelPlatformMenuItem::tag() const
+quintptr UbuntuPlatformMenuItem::tag() const
 {
     return m_tag;
 }
 
-void GMenuModelPlatformMenuItem::setText(const QString &text)
+void UbuntuPlatformMenuItem::setText(const QString &text)
 {
     ITEM_DEBUG_MSG << "(text=" << text << ")";
     if (m_text != text) {
@@ -395,7 +395,7 @@ void GMenuModelPlatformMenuItem::setText(const QString &text)
     }
 }
 
-void GMenuModelPlatformMenuItem::setIcon(const QIcon &icon)
+void UbuntuPlatformMenuItem::setIcon(const QIcon &icon)
 {
     ITEM_DEBUG_MSG << "(icon=" << icon.name() << ")";
 
@@ -405,7 +405,7 @@ void GMenuModelPlatformMenuItem::setIcon(const QIcon &icon)
     }
 }
 
-void GMenuModelPlatformMenuItem::setVisible(bool isVisible)
+void UbuntuPlatformMenuItem::setVisible(bool isVisible)
 {
     ITEM_DEBUG_MSG << "(visible=" << isVisible << ")";
     if (m_visible != isVisible) {
@@ -414,7 +414,7 @@ void GMenuModelPlatformMenuItem::setVisible(bool isVisible)
     }
 }
 
-void GMenuModelPlatformMenuItem::setIsSeparator(bool isSeparator)
+void UbuntuPlatformMenuItem::setIsSeparator(bool isSeparator)
 {
     ITEM_DEBUG_MSG << "(separator=" << isSeparator << ")";
     if (m_separator != isSeparator) {
@@ -423,19 +423,19 @@ void GMenuModelPlatformMenuItem::setIsSeparator(bool isSeparator)
     }
 }
 
-void GMenuModelPlatformMenuItem::setFont(const QFont &font)
+void UbuntuPlatformMenuItem::setFont(const QFont &font)
 {
     ITEM_DEBUG_MSG << "(font=" << font << ")";
     Q_UNUSED(font);
 }
 
-void GMenuModelPlatformMenuItem::setRole(QPlatformMenuItem::MenuRole role)
+void UbuntuPlatformMenuItem::setRole(QPlatformMenuItem::MenuRole role)
 {
     ITEM_DEBUG_MSG << "(role=" << role << ")";
     Q_UNUSED(role);
 }
 
-void GMenuModelPlatformMenuItem::setCheckable(bool checkable)
+void UbuntuPlatformMenuItem::setCheckable(bool checkable)
 {
     ITEM_DEBUG_MSG << "(checkable=" << checkable << ")";
     if (m_checkable != checkable) {
@@ -444,7 +444,7 @@ void GMenuModelPlatformMenuItem::setCheckable(bool checkable)
     }
 }
 
-void GMenuModelPlatformMenuItem::setChecked(bool isChecked)
+void UbuntuPlatformMenuItem::setChecked(bool isChecked)
 {
     ITEM_DEBUG_MSG << "(checked=" << isChecked << ")";
     if (m_checked != isChecked) {
@@ -454,7 +454,7 @@ void GMenuModelPlatformMenuItem::setChecked(bool isChecked)
     }
 }
 
-void GMenuModelPlatformMenuItem::setShortcut(const QKeySequence &shortcut)
+void UbuntuPlatformMenuItem::setShortcut(const QKeySequence &shortcut)
 {
     ITEM_DEBUG_MSG << "(shortcut=" << shortcut << ")";
     if (m_shortcut != shortcut) {
@@ -463,7 +463,7 @@ void GMenuModelPlatformMenuItem::setShortcut(const QKeySequence &shortcut)
     }
 }
 
-void GMenuModelPlatformMenuItem::setEnabled(bool enabled)
+void UbuntuPlatformMenuItem::setEnabled(bool enabled)
 {
     ITEM_DEBUG_MSG << "(enabled=" << enabled << ")";
     if (m_enabled != enabled) {
@@ -473,13 +473,13 @@ void GMenuModelPlatformMenuItem::setEnabled(bool enabled)
     }
 }
 
-void GMenuModelPlatformMenuItem::setIconSize(int size)
+void UbuntuPlatformMenuItem::setIconSize(int size)
 {
     ITEM_DEBUG_MSG << "(size=" << size << ")";
     Q_UNUSED(size);
 }
 
-void GMenuModelPlatformMenuItem::setMenu(QPlatformMenu *menu)
+void UbuntuPlatformMenuItem::setMenu(QPlatformMenu *menu)
 {
     ITEM_DEBUG_MSG << "(menu=" << menu << ")";
     if (m_menu != menu) {
@@ -488,20 +488,20 @@ void GMenuModelPlatformMenuItem::setMenu(QPlatformMenu *menu)
     }
 }
 
-QPlatformMenu *GMenuModelPlatformMenuItem::menu() const
+QPlatformMenu *UbuntuPlatformMenuItem::menu() const
 {
     return m_menu;
 }
 
-QDebug GMenuModelPlatformMenuItem::operator<<(QDebug stream)
+QDebug UbuntuPlatformMenuItem::operator<<(QDebug stream)
 {
     QString properties = "text=\"" + m_text + "\"";
 
     stream.nospace().noquote() << QString("%1").arg("", logRecusion, QLatin1Char('\t'))
-            << "GMenuModelPlatformMenuItem(this=" << (void*)this << ", "
+            << "UbuntuPlatformMenuItem(this=" << (void*)this << ", "
             << (m_separator ? "Separator" : properties) << ")" << endl;
     if (m_menu) {
-        auto myMenu = static_cast<GMenuModelPlatformMenu*>(m_menu);
+        auto myMenu = static_cast<UbuntuPlatformMenu*>(m_menu);
         if (myMenu) {
             logRecusion++;
             stream << myMenu;

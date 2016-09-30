@@ -32,7 +32,7 @@ bool isMirClient() {
 
 }
 
-MenuRegistrar::MenuRegistrar()
+UbuntuMenuRegistrar::UbuntuMenuRegistrar()
     : m_connection(nullptr)
     , m_registeredProcessId(~0)
 {
@@ -44,7 +44,7 @@ MenuRegistrar::MenuRegistrar()
         return;
     }
     m_service = g_dbus_connection_get_unique_name(m_connection);
-    connect(UbuntuMenuRegistry::instance(), &UbuntuMenuRegistry::serviceChanged, this, &MenuRegistrar::onRegistrarServiceChanged);
+    connect(UbuntuMenuRegistry::instance(), &UbuntuMenuRegistry::serviceChanged, this, &UbuntuMenuRegistrar::onRegistrarServiceChanged);
 
     if (isMirClient()) {
         auto nativeInterface = qGuiApp->platformNativeInterface();
@@ -59,7 +59,7 @@ MenuRegistrar::MenuRegistrar()
     }
 }
 
-MenuRegistrar::~MenuRegistrar()
+UbuntuMenuRegistrar::~UbuntuMenuRegistrar()
 {
     if (m_connection) {
         g_object_unref(m_connection);
@@ -67,7 +67,7 @@ MenuRegistrar::~MenuRegistrar()
     unregisterMenu();
 }
 
-void MenuRegistrar::registerMenuForWindow(QWindow* window, const QDBusObjectPath& path)
+void UbuntuMenuRegistrar::registerMenuForWindow(QWindow* window, const QDBusObjectPath& path)
 {
     unregisterMenu();
 
@@ -77,7 +77,7 @@ void MenuRegistrar::registerMenuForWindow(QWindow* window, const QDBusObjectPath
     registerMenu();
 }
 
-void MenuRegistrar::registerMenu()
+void UbuntuMenuRegistrar::registerMenu()
 {
     if (UbuntuMenuRegistry::instance()->isConnected() && m_window) {
         if (isMirClient()) {
@@ -88,7 +88,7 @@ void MenuRegistrar::registerMenu()
     }
 }
 
-void MenuRegistrar::unregisterMenu()
+void UbuntuMenuRegistrar::unregisterMenu()
 {
     if (!m_registeredSurfaceId.isEmpty()) {
         unregisterSurfaceMenu();
@@ -97,7 +97,7 @@ void MenuRegistrar::unregisterMenu()
     }
 }
 
-void MenuRegistrar::registerSurfaceMenu()
+void UbuntuMenuRegistrar::registerSurfaceMenu()
 {
     auto nativeInterface = qGuiApp->platformNativeInterface();
     QByteArray persistentSurfaceId = nativeInterface->windowProperty(m_window->handle(), "persistentSurfaceId", QByteArray()).toByteArray();
@@ -107,7 +107,7 @@ void MenuRegistrar::registerSurfaceMenu()
     m_registeredSurfaceId = persistentSurfaceId;
 }
 
-void MenuRegistrar::unregisterSurfaceMenu()
+void UbuntuMenuRegistrar::unregisterSurfaceMenu()
 {
     if (UbuntuMenuRegistry::instance()->isConnected()) {
         UbuntuMenuRegistry::instance()->unregisterSurfaceMenu(m_registeredSurfaceId, m_path);
@@ -115,14 +115,14 @@ void MenuRegistrar::unregisterSurfaceMenu()
     m_registeredSurfaceId.clear();
 }
 
-void MenuRegistrar::registerApplicationMenu()
+void UbuntuMenuRegistrar::registerApplicationMenu()
 {
     pid_t pid = getpid();
     UbuntuMenuRegistry::instance()->registerApplicationMenu(pid, m_path, m_service);
     m_registeredProcessId = pid;
 }
 
-void MenuRegistrar::unregisterApplicationMenu()
+void UbuntuMenuRegistrar::unregisterApplicationMenu()
 {
     if (UbuntuMenuRegistry::instance()->isConnected()) {
         UbuntuMenuRegistry::instance()->unregisterApplicationMenu(m_registeredProcessId, m_path);
@@ -130,7 +130,7 @@ void MenuRegistrar::unregisterApplicationMenu()
     m_registeredProcessId = ~0;
 }
 
-void MenuRegistrar::onRegistrarServiceChanged()
+void UbuntuMenuRegistrar::onRegistrarServiceChanged()
 {
     unregisterMenu();
     registerMenu();

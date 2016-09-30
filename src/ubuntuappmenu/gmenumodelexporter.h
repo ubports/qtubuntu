@@ -26,11 +26,11 @@
 #include <QMetaObject>
 
 // Base class for a gmenumodel exporter
-class GMenuModelExporter : public QObject
+class UbuntuGMenuModelExporter : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~GMenuModelExporter();
+    virtual ~UbuntuGMenuModelExporter();
 
     void exportModels();
     void unexportModels();
@@ -38,14 +38,14 @@ public:
     QString menuPath() const { return m_menuPath;}
 
 protected:
-    GMenuModelExporter(QObject *parent);
+    UbuntuGMenuModelExporter(QObject *parent);
 
-    GMenuItem *createSubmenu(QPlatformMenu* platformMenu, GMenuModelPlatformMenuItem* forItem);
+    GMenuItem *createSubmenu(QPlatformMenu* platformMenu, UbuntuPlatformMenuItem* forItem);
     GMenuItem *createMenuItem(QPlatformMenuItem* platformMenuItem);
     GMenuItem *createSection(QList<QPlatformMenuItem*>::const_iterator iter, QList<QPlatformMenuItem*>::const_iterator end);
-    void addAction(const QByteArray& name, GMenuModelPlatformMenuItem* gplatformItem);
+    void addAction(const QByteArray& name, UbuntuPlatformMenuItem* gplatformItem);
 
-    void addSubmenuItems(GMenuModelPlatformMenu* gplatformMenu, GMenu* menu);
+    void addSubmenuItems(UbuntuPlatformMenu* gplatformMenu, GMenu* menu);
     void processItemForGMenu(QPlatformMenuItem* item, GMenu* gmenu);
 
     void clear();
@@ -64,18 +64,20 @@ protected:
 };
 
 // Class which exports a qt platform menu bar.
-class GMenuModelBarExporter : public GMenuModelExporter
+class UbuntuMenuBarExporter : public UbuntuGMenuModelExporter
 {
 public:
-    GMenuModelBarExporter(GMenuModelPlatformMenuBar *parent);
+    UbuntuMenuBarExporter(UbuntuPlatformMenuBar *parent);
+    ~UbuntuMenuBarExporter();
 };
 
 // Class which exports a qt platform menu.
 // This will allow exporting of context menus.
-class GMenuModelMenuExporter : public GMenuModelExporter
+class UbuntuMenuExporter : public UbuntuGMenuModelExporter
 {
 public:
-    GMenuModelMenuExporter(GMenuModelPlatformMenu *parent);
+    UbuntuMenuExporter(UbuntuPlatformMenu *parent);
+    ~UbuntuMenuExporter();
 };
 
 #endif // GMENUMODELEXPORTER_H

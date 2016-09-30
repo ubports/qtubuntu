@@ -60,18 +60,18 @@ QVariant UbuntuAppMenuTheme::themeHint(ThemeHint hint) const
 QPlatformMenuItem *UbuntuAppMenuTheme::createPlatformMenuItem() const
 {
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenuItem();
-    return new GMenuModelPlatformMenuItem();
+    return new UbuntuPlatformMenuItem();
 }
 
 QPlatformMenu *UbuntuAppMenuTheme::createPlatformMenu() const
 {
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenu();
-    return new GMenuModelPlatformMenu();
+    return new UbuntuPlatformMenu();
 }
 
 QPlatformMenuBar *
 UbuntuAppMenuTheme::createPlatformMenuBar() const
 {
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenuBar();
-    return new GMenuModelPlatformMenuBar();
+    return new UbuntuPlatformMenuBar();
 }

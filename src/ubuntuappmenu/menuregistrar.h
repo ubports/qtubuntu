@@ -24,12 +24,12 @@
 
 #include <gio/gio.h>
 
-class MenuRegistrar : public QObject
+class UbuntuMenuRegistrar : public QObject
 {
     Q_OBJECT
 public:
-    MenuRegistrar();
-    ~MenuRegistrar();
+    UbuntuMenuRegistrar();
+    ~UbuntuMenuRegistrar();
 
     void registerMenuForWindow(QWindow* window, const QDBusObjectPath& path);
     void unregisterMenu();
