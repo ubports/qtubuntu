@@ -27,7 +27,7 @@
 namespace {
 
 bool isMirClient() {
-    return qgetenv("QT_QPA_PLATFORM") == "ubuntumirclient";
+    return qGuiApp->platformName() == "ubuntumirclient";
 }
 
 }
