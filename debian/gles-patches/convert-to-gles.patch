@@ -8,7 +8,7 @@ Index: qtubuntu/debian/control
  Priority: optional
  Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
  Build-Depends: debhelper (>= 9),
-@@ -11,11 +11,20 @@ Build-Depends: debhelper (>= 9),
+@@ -12,11 +12,20 @@ Build-Depends: debhelper (>= 9),
                 libinput-dev,
                 libmirclient-dev (>= 0.13.0),
                 libmtdev-dev,
@@ -29,7 +29,7 @@ Index: qtubuntu/debian/control
                 quilt,
  # if you don't have have commit access to this branch but would like to upload
  # directly to Ubuntu, don't worry: your changes will be merged back into the
-@@ -25,7 +34,7 @@ Standards-Version: 3.9.6
+@@ -26,7 +35,7 @@ Standards-Version: 3.9.6
  Section: libs
  
  Package: qtubuntu-android
@@ -38,7 +38,7 @@ Index: qtubuntu/debian/control
  Multi-Arch: same
  Conflicts: qtubuntu-desktop,
  Replaces: qtubuntu (<< 0.52),
-@@ -36,34 +45,15 @@ Provides: qtubuntu,
+@@ -37,34 +46,15 @@ Provides: qtubuntu,
  Depends: ubuntu-application-api3-touch,
           ${misc:Depends},
           ${shlibs:Depends},
