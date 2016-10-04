@@ -16,11 +16,11 @@
 
 #include "glcontext.h"
 #include "logging.h"
-#include "offscreensurface.h"
 #include "window.h"
 
 #include <QOpenGLFramebufferObject>
 #include <QtPlatformSupport/private/qeglconvenience_p.h>
+#include <QtPlatformSupport/private/qeglpbuffer_p.h>
 #include <QtGui/private/qopenglcontext_p.h>
 
 Q_LOGGING_CATEGORY(ubuntumirclientGraphics, "ubuntumirclient.graphics", QtWarningMsg)
@@ -76,40 +76,35 @@ bool UbuntuOpenGLContext::makeCurrent(QPlatformSurface* surface)
 {
     Q_ASSERT(surface->surface()->surfaceType() == QSurface::OpenGLSurface);
 
-    if (surface->surface()->surfaceClass() == QSurface::Offscreen) {
-        auto offscreen = static_cast<UbuntuOffscreenSurface *>(surface);
-        if (!offscreen->buffer()) {
-            auto buffer = new QOpenGLFramebufferObject(surface->surface()->size());
-            offscreen->setBuffer(buffer);
-        }
-        return offscreen->buffer()->bind();
-    } else {
-        const bool ret = QEGLPlatformContext::makeCurrent(surface);
+    const bool ret = QEGLPlatformContext::makeCurrent(surface);
 
-        if (Q_LIKELY(ret)) {
-            QOpenGLContextPrivate *ctx_d = QOpenGLContextPrivate::get(context());
-            if (!ctx_d->workaround_brokenFBOReadBack && needsFBOReadBackWorkaround()) {
-                ctx_d->workaround_brokenFBOReadBack = true;
-            }
+    if (Q_LIKELY(ret)) {
+        QOpenGLContextPrivate *ctx_d = QOpenGLContextPrivate::get(context());
+        if (!ctx_d->workaround_brokenFBOReadBack && needsFBOReadBackWorkaround()) {
+            ctx_d->workaround_brokenFBOReadBack = true;
         }
-
-        return ret;
     }
+    return ret;
 }
 
 // Following method used internally in the base class QEGLPlatformContext to access
 // the egl surface of a QPlatformSurface/UbuntuWindow
 EGLSurface UbuntuOpenGLContext::eglSurfaceForPlatformSurface(QPlatformSurface *surface)
 {
-    auto ubuntuWindow = static_cast<UbuntuWindow *>(surface);
-    return ubuntuWindow->eglSurface();
+    if (surface->surface()->surfaceClass() == QSurface::Window) {
+        return static_cast<UbuntuWindow *>(surface)->eglSurface();
+    } else {
+        return static_cast<QEGLPbuffer *>(surface)->pbuffer();
+    }
 }
 
 void UbuntuOpenGLContext::swapBuffers(QPlatformSurface *surface)
 {
     QEGLPlatformContext::swapBuffers(surface);
 
-    // notify window on swap completion
-    auto ubuntuWindow = static_cast<UbuntuWindow *>(surface);
-    ubuntuWindow->onSwapBuffersDone();
+    if (surface->surface()->surfaceClass() == QSurface::Window) {
+        // notify window on swap completion
+        auto ubuntuWindow = static_cast<UbuntuWindow *>(surface);
+        ubuntuWindow->onSwapBuffersDone();
+    }
 }
