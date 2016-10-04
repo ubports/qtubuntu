@@ -19,6 +19,7 @@ SOURCES = \
     clipboard.cpp \
     cursor.cpp \
     debugextension.cpp \
+    desktopwindow.cpp \
     glcontext.cpp \
     input.cpp \
     integration.cpp \
@@ -35,6 +36,7 @@ HEADERS = \
     clipboard.h \
     cursor.h \
     debugextension.h \
+    desktopwindow.h \
     glcontext.h \
     input.h \
     integration.h \
