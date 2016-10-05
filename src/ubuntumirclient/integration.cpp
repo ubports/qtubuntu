@@ -22,7 +22,6 @@
 #include "input.h"
 #include "logging.h"
 #include "nativeinterface.h"
-#include "offscreensurface.h"
 #include "screen.h"
 #include "window.h"
 
@@ -35,8 +34,10 @@
 #include <QtPlatformSupport/private/qeglconvenience_p.h>
 #include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
 #include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
+#include <QtPlatformSupport/private/qeglpbuffer_p.h>
 #include <QtPlatformSupport/private/qgenericunixthemes_p.h>
 #include <QOpenGLContext>
+#include <QOffscreenSurface>
 
 // platform-api
 #include <ubuntu/application/lifecycle_delegate.h>
@@ -340,7 +341,7 @@ QPlatformNativeInterface* UbuntuClientIntegration::nativeInterface() const
 QPlatformOffscreenSurface *UbuntuClientIntegration::createPlatformOffscreenSurface(
         QOffscreenSurface *surface) const
 {
-    return new UbuntuOffscreenSurface(surface);
+    return new QEGLPbuffer(mEglDisplay, surface->requestedFormat(), surface);
 }
 
 void UbuntuClientIntegration::destroyScreen(UbuntuScreen *screen)
