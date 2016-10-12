@@ -17,6 +17,8 @@
 #ifndef UBUNTUAPPSTATECONTROLLER_H
 #define UBUNTUAPPSTATECONTROLLER_H
 
+#include <QTimer>
+
 class UbuntuAppStateController
 {
 public:
@@ -30,6 +32,7 @@ public:
 private:
     bool m_suspended;
     bool m_lastActive;
+    QTimer m_inactiveTimer;
 };
 
 #endif // UBUNTUAPPSTATECONTROLLER_H
