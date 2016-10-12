@@ -25,6 +25,7 @@
 
 // Qt
 #include <qpa/qwindowsysteminterface.h>
+#include <qpa/qwindowsysteminterface_p.h>
 #include <QMutexLocker>
 #include <QSize>
 #include <QtMath>
@@ -654,27 +655,20 @@ void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
     qCDebug(ubuntumirclient, "handleSurfaceFocusChanged(window=%p, focused=%d)", window(), focused);
 
     if (focused) {
-        // Check if Mir previously sent an unfocus event to another Window, and if so, remove it from the queue
-        // as Qt is happier if focus just transferred
-        auto *queuedActiveWindowEvent =
-            static_cast<QWindowSystemInterfacePrivate::ActivatedWindowEvent *>
-            (QWindowSystemInterfacePrivate::peekWindowSystemEvent(QWindowSystemInterfacePrivate::ActivatedWindow));
+        // Check if there are ApplicationInactive events in the queue, and remove them if so.
+        QWindowSystemInterfacePrivate::ApplicationStateChangedEvent *queuedApplicationStateEvent = nullptr;
+        do {
+            queuedApplicationStateEvent =
+                static_cast<QWindowSystemInterfacePrivate::ApplicationStateChangedEvent *>
+                (QWindowSystemInterfacePrivate::peekWindowSystemEvent(QWindowSystemInterfacePrivate::ApplicationStateChanged));
 
-        if (queuedActiveWindowEvent && !queuedActiveWindowEvent->activated) {
-            QWindowSystemInterfacePrivate::removeWindowSystemEvent(queuedActiveWindowEvent);
-        }
+            if (queuedApplicationStateEvent) {
+                QWindowSystemInterfacePrivate::removeWindowSystemEvent(queuedApplicationStateEvent);
+            }
 
-        // Similarly, check if an ApplicationInactive event is in the queue, and remove it if so.
-        auto *queuedApplicationStateEvent =
-            static_cast<QWindowSystemInterfacePrivate::ApplicationStateChangedEvent *>
-            (QWindowSystemInterfacePrivate::peekWindowSystemEvent(QWindowSystemInterfacePrivate::ApplicationStateChanged));
+        } while (queuedApplicationStateEvent);
 
-        if (queuedApplicationStateEvent && queuedApplicationStateEvent->newState == Qt::ApplicationInactive) {
-            QWindowSystemInterfacePrivate::removeWindowSystemEvent(queuedApplicationStateEvent);
-        } else {
-            QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
-        }
-
+        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
         QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
     } else {
         QWindowSystemInterface::handleWindowActivated(nullptr, Qt::ActiveWindowFocusReason);
