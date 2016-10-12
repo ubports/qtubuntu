@@ -38,7 +38,7 @@ Index: qtubuntu/debian/control
  Multi-Arch: same
  Conflicts: qtubuntu-desktop,
  Replaces: qtubuntu (<< 0.52),
-@@ -37,34 +46,15 @@ Provides: qtubuntu,
+@@ -37,43 +46,12 @@ Provides: qtubuntu,
  Depends: ubuntu-application-api3-touch,
           ${misc:Depends},
           ${shlibs:Depends},
@@ -71,16 +71,25 @@ Index: qtubuntu/debian/control
 - plugins.
 - .
 - This variant of the package is for GNU-based desktops.
+-
+-Package: qtubuntu-appmenutheme
+-Architecture: any
+-Multi-Arch: same
+-Depends: ${misc:Depends},
+-         ${shlibs:Depends},
+-Description: Qt platform theme for exported application menus
+- Appmenutheme enables the export of application menus to a global menu bar.
+- It is implemented in a QPA platform theme plugin.
+- .
+- This package will work for applications designed for Qt5, as well as QML
+- applications
 + This variant of the package is for Android-based phones and tablets (built
 + against the OpenGLES variant of qtbase).
- 
- Package: qtubuntu-appmenutheme
- Architecture: any
 Index: qtubuntu/debian/rules
 ===================================================================
 --- qtubuntu.orig/debian/rules
 +++ qtubuntu/debian/rules
-@@ -5,61 +5,36 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL=4
+@@ -5,61 +5,35 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL=4
  export QT_SELECT=5
  
  ANDROID_DIR = build-android
@@ -143,4 +152,3 @@ Index: qtubuntu/debian/rules
 -endif
 -	dh_install --sourcedir=$(TMP2_DIR) -pqtubuntu-desktop
 -	dh_install --sourcedir=$(TMP2_DIR) -pqtubuntu-appmenutheme
-+	dh_install --sourcedir=$(TMP1_DIR) -pqtubuntu-appmenutheme
