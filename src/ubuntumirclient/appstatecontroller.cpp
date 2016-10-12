@@ -17,15 +17,22 @@
 #include "appstatecontroller.h"
 
 #include <qpa/qwindowsysteminterface.h>
-#include <qpa/qwindowsysteminterface_p.h>
 
 UbuntuAppStateController::UbuntuAppStateController()
     : m_suspended(false)
     , m_lastActive(true)
-{}
+{
+    m_inactiveTimer.setSingleShot(true);
+    m_inactiveTimer.setInterval(10);
+    QObject::connect(&m_inactiveTimer, &QTimer::timeout, []()
+    {
+        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
+    });
+}
 
 void UbuntuAppStateController::setSuspended()
 {
+    m_inactiveTimer.stop();
     if (!m_suspended) {
         m_suspended = true;
 
@@ -35,6 +42,7 @@ void UbuntuAppStateController::setSuspended()
 
 void UbuntuAppStateController::setResumed()
 {
+    m_inactiveTimer.stop();
     if (m_suspended) {
         m_suspended = false;
 
@@ -53,23 +61,10 @@ void UbuntuAppStateController::setWindowFocused(bool focused)
     }
 
     if (focused) {
-        // Check if there are ApplicationInactive events in the queue, and remove them if so, to
-        // avoid active-inactive-active invocations, which confuse some applications
-        QWindowSystemInterfacePrivate::ApplicationStateChangedEvent *queuedApplicationStateEvent = nullptr;
-        do {
-            queuedApplicationStateEvent =
-                static_cast<QWindowSystemInterfacePrivate::ApplicationStateChangedEvent *>
-                (QWindowSystemInterfacePrivate::peekWindowSystemEvent(QWindowSystemInterfacePrivate::ApplicationStateChanged));
-
-            if (queuedApplicationStateEvent) {
-                QWindowSystemInterfacePrivate::removeWindowSystemEvent(queuedApplicationStateEvent);
-            }
-
-        } while (queuedApplicationStateEvent);
-
+        m_inactiveTimer.stop();
         QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
     } else {
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
+        m_inactiveTimer.start();
     }
 
     m_lastActive = focused;
