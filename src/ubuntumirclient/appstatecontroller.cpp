@@ -18,6 +18,13 @@
 
 #include <qpa/qwindowsysteminterface.h>
 
+/*
+ * UbuntuAppStateController - updates Qt's QApplication::applicationState property.
+ *
+ * Tries to avoid active-inactive-active invocations using a timer. The rapid state
+ * change can confuse some applications.
+ */
+
 UbuntuAppStateController::UbuntuAppStateController()
     : m_suspended(false)
     , m_lastActive(true)
