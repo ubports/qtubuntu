@@ -25,7 +25,6 @@
 
 // Qt
 #include <qpa/qwindowsysteminterface.h>
-#include <qpa/qwindowsysteminterface_p.h>
 #include <QMutexLocker>
 #include <QSize>
 #include <QtMath>
@@ -591,7 +590,8 @@ QString UbuntuSurface::persistentSurfaceId()
 }
 
 UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface *native,
-                           EGLDisplay eglDisplay, MirConnection *mirConnection)
+                           UbuntuAppStateController *appState, EGLDisplay eglDisplay,
+                           MirConnection *mirConnection)
     : QObject(nullptr)
     , QPlatformWindow(w)
     , mId(makeId())
@@ -599,6 +599,7 @@ UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface
     , mWindowFlags(w->flags())
     , mWindowVisible(false)
     , mNativeInterface(native)
+    , mAppStateController(appState)
     , mSurface(new UbuntuSurface{this, eglDisplay, input, mirConnection})
     , mScale(1.0)
     , mFormFactor(mir_form_factor_unknown)
@@ -655,24 +656,11 @@ void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
     qCDebug(ubuntumirclient, "handleSurfaceFocusChanged(window=%p, focused=%d)", window(), focused);
 
     if (focused) {
-        // Check if there are ApplicationInactive events in the queue, and remove them if so.
-        QWindowSystemInterfacePrivate::ApplicationStateChangedEvent *queuedApplicationStateEvent = nullptr;
-        do {
-            queuedApplicationStateEvent =
-                static_cast<QWindowSystemInterfacePrivate::ApplicationStateChangedEvent *>
-                (QWindowSystemInterfacePrivate::peekWindowSystemEvent(QWindowSystemInterfacePrivate::ApplicationStateChanged));
-
-            if (queuedApplicationStateEvent) {
-                QWindowSystemInterfacePrivate::removeWindowSystemEvent(queuedApplicationStateEvent);
-            }
-
-        } while (queuedApplicationStateEvent);
-
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
+        mAppStateController->setWindowFocused(true);
         QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
     } else {
         QWindowSystemInterface::handleWindowActivated(nullptr, Qt::ActiveWindowFocusReason);
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
+        mAppStateController->setWindowFocused(false);
     }
 }
 

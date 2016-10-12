@@ -27,6 +27,7 @@
 
 #include <EGL/egl.h>
 
+class UbuntuAppStateController;
 class UbuntuNativeInterface;
 class UbuntuInput;
 class UbuntuScreen;
@@ -38,7 +39,8 @@ class UbuntuWindow : public QObject, public QPlatformWindow
 {
     Q_OBJECT
 public:
-    UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface* native, EGLDisplay eglDisplay,
+    UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface *native,
+                 UbuntuAppStateController *appState, EGLDisplay eglDisplay,
                  MirConnection *mirConnection);
     virtual ~UbuntuWindow();
 
@@ -80,6 +82,7 @@ private:
     bool mWindowVisible;
     bool mWindowExposed;
     UbuntuNativeInterface *mNativeInterface;
+    UbuntuAppStateController *mAppStateController;
     std::unique_ptr<UbuntuSurface> mSurface;
     float mScale;
     MirFormFactor mFormFactor;
