@@ -35,7 +35,10 @@ UbuntuBackingStore::UbuntuBackingStore(QWindow* window)
     window->setSurfaceType(QSurface::OpenGLSurface);
 }
 
-UbuntuBackingStore::~UbuntuBackingStore() = default;
+UbuntuBackingStore::~UbuntuBackingStore()
+{
+    mContext->makeCurrent(window()); // needed as QOpenGLTexture destructor assumes current context
+}
 
 void UbuntuBackingStore::flush(QWindow* window, const QRegion& region, const QPoint& offset)
 {
@@ -114,6 +117,8 @@ void UbuntuBackingStore::beginPaint(const QRegion& region)
 void UbuntuBackingStore::resize(const QSize& size, const QRegion& /*staticContents*/)
 {
     mImage = QImage(size, QImage::Format_RGB32);
+
+    mContext->makeCurrent(window());
 
     if (mTexture->isCreated())
         mTexture->destroy();
