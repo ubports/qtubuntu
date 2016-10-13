@@ -280,6 +280,7 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, UbuntuWindow *
         break;
     case mir_surface_type_inputmethod:
         spec = Spec{mir_connection_create_spec_for_input_method(connection, width, height, pixelFormat)};
+        break;
     default:
         spec = Spec{mir_connection_create_spec_for_normal_surface(connection, width, height, pixelFormat)};
         break;
