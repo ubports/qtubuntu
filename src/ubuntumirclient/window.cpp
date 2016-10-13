@@ -270,7 +270,7 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, UbuntuWindow *
         spec = Spec{mir_connection_create_spec_for_dialog(connection, width, height, pixelFormat)};
         break;
     case mir_surface_type_tip:
-#if MIR_SERVER_VERSION < MIR_VERSION_NUMBER(0, 25, 0)
+#if MIR_CLIENT_VERSION < MIR_VERSION_NUMBER(3, 4, 0)
         spec = Spec{mir_connection_create_spec_for_tooltip(connection, width, height, pixelFormat, parent,
                     &location)};
 #else
