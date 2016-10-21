@@ -36,6 +36,7 @@
 #include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
 #include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
 #include <QtPlatformSupport/private/qeglpbuffer_p.h>
+#include <QtPlatformSupport/private/bridge_p.h>
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
 
@@ -352,4 +353,12 @@ void UbuntuClientIntegration::destroyScreen(UbuntuScreen *screen)
 #else
     QPlatformIntegration::destroyScreen(screen);
 #endif
+}
+
+QPlatformAccessibility *UbuntuClientIntegration::accessibility() const
+{
+    if (!m_accessibility) {
+        m_accessibility.reset(new QSpiAccessibleBridge());
+    }
+    return m_accessibility.data();
 }
