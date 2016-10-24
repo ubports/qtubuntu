@@ -83,9 +83,8 @@ const char *qtWindowStateToStr(Qt::WindowState state)
         return "Minimized";
     case Qt::WindowActive:
         return "Active";
-    default:
-        return "!?";
     }
+    Q_UNREACHABLE();
 }
 
 const char *mirSurfaceStateToStr(MirSurfaceState surfaceState)
@@ -99,8 +98,9 @@ const char *mirSurfaceStateToStr(MirSurfaceState surfaceState)
     case mir_surface_state_fullscreen: return "fullscreen";
     case mir_surface_state_horizmaximized: return "horizmaximized";
     case mir_surface_state_hidden: return "hidden";
-    default: return "!?";
+    case mir_surface_states: Q_UNREACHABLE();
     }
+    Q_UNREACHABLE();
 }
 
 const char *mirPixelFormatToStr(MirPixelFormat pixelFormat)
@@ -116,15 +116,16 @@ const char *mirPixelFormatToStr(MirPixelFormat pixelFormat)
     case mir_pixel_format_rgb_565:   return "RGB565";
     case mir_pixel_format_rgba_5551: return "RGBA5551";
     case mir_pixel_format_rgba_4444: return "RGBA4444";
-    case mir_pixel_formats:
-    default:                         return "???";
+    case mir_pixel_formats:          Q_UNREACHABLE();
     }
+    Q_UNREACHABLE();
 }
 
 MirSurfaceState qtWindowStateToMirSurfaceState(Qt::WindowState state)
 {
     switch (state) {
     case Qt::WindowNoState:
+    case Qt::WindowActive:
         return mir_surface_state_restored;
     case Qt::WindowFullScreen:
         return mir_surface_state_fullscreen;
@@ -132,10 +133,8 @@ MirSurfaceState qtWindowStateToMirSurfaceState(Qt::WindowState state)
         return mir_surface_state_maximized;
     case Qt::WindowMinimized:
         return mir_surface_state_minimized;
-    default:
-        qCWarning(ubuntumirclient, "Unexpected Qt::WindowState: %d", state);
-        return mir_surface_state_restored;
     }
+    return mir_surface_state_unknown; // should never be reached
 }
 
 WId makeId()
