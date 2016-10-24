@@ -224,11 +224,17 @@ static const char* nativeEventTypeToStr(MirEventType t)
         return "mir_event_type_close_surface";
     case mir_event_type_input:
         return "mir_event_type_input";
+    case mir_event_type_keymap:
+        return "mir_event_type_keymap";
+    case mir_event_type_input_configuration:
+        return "mir_event_type_input_configuration";
     case mir_event_type_surface_output:
         return "mir_event_type_surface_output";
-    default:
-        return "invalid";
+    case mir_event_type_input_device_state:
+        return "mir_event_type_input_device_state";
     }
+
+    return "unknown/invalid";
 }
 
 void UbuntuInput::customEvent(QEvent* event)
