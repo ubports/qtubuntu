@@ -16,8 +16,10 @@
 
 // Local
 #include "window.h"
+#include "debugextension.h"
 #include "nativeinterface.h"
 #include "input.h"
+#include "integration.h"
 #include "screen.h"
 #include "logging.h"
 
@@ -599,13 +601,14 @@ QString UbuntuSurface::persistentSurfaceId()
 }
 
 UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface *native,
-                           EGLDisplay eglDisplay, MirConnection *mirConnection)
+                           EGLDisplay eglDisplay, MirConnection *mirConnection, UbuntuDebugExtension *debugExt)
     : QObject(nullptr)
     , QPlatformWindow(w)
     , mId(makeId())
     , mWindowState(w->windowState())
     , mWindowFlags(w->flags())
     , mWindowVisible(false)
+    , mDebugExtention(debugExt)
     , mNativeInterface(native)
     , mSurface(new UbuntuSurface{this, eglDisplay, input, mirConnection})
     , mScale(1.0)
@@ -816,6 +819,15 @@ bool UbuntuWindow::isExposed() const
 QSurfaceFormat UbuntuWindow::format() const
 {
     return mSurface->format();
+}
+
+QPoint UbuntuWindow::mapToGlobal(const QPoint &pos) const
+{
+    if (mDebugExtention) {
+        return mDebugExtention->mapSurfacePointToScreen(mSurface->mirSurface(), pos);
+    } else {
+        return pos;
+    }
 }
 
 void* UbuntuWindow::eglSurface() const
