@@ -18,6 +18,7 @@
 #include "integration.h"
 #include "backingstore.h"
 #include "clipboard.h"
+#include "debugextension.h"
 #include "glcontext.h"
 #include "input.h"
 #include "logging.h"
@@ -70,7 +71,8 @@ static void aboutToStopCallback(UApplicationArchive *archive, void* context)
     QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationSuspended);
 }
 
-UbuntuClientIntegration::UbuntuClientIntegration()
+
+UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     : QPlatformIntegration()
     , mNativeInterface(new UbuntuNativeInterface(this))
     , mFontDb(new QGenericUnixFontDatabase)
@@ -105,6 +107,17 @@ UbuntuClientIntegration::UbuntuClientIntegration()
     mEglNativeDisplay = mir_connection_get_egl_native_display(mMirConnection);
     ASSERT((mEglDisplay = eglGetDisplay(mEglNativeDisplay)) != EGL_NO_DISPLAY);
     ASSERT(eglInitialize(mEglDisplay, nullptr, nullptr) == EGL_TRUE);
+
+    // Has debug mode been requsted, either with "-testability" switch or QT_LOAD_TESTABILITY env var
+    bool testability = qEnvironmentVariableIsSet("QT_LOAD_TESTABILITY");
+    for (int i=1; !testability && i<argc; i++) {
+        if (strcmp(argv[i], "-testability") == 0) {
+            testability = true;
+        }
+    }
+    if (testability) {
+        mDebugExtension.reset(new UbuntuDebugExtension);
+    }
 }
 
 void UbuntuClientIntegration::initialize()
@@ -211,7 +224,7 @@ QByteArray UbuntuClientIntegration::generateSessionNameFromQmlFile(QStringList &
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) const
 {
-    return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection);
+    return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection, mDebugExtension.data());
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Canonical, Ltd.
+ * Copyright (C) 2014-2016 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -25,8 +25,7 @@ class UbuntuMirClientIntegrationPlugin : public QPlatformIntegrationPlugin
     Q_PLUGIN_METADATA(IID QPlatformIntegrationFactoryInterface_iid FILE "ubuntumirclient.json")
 
 public:
-    QStringList keys() const;
-    QPlatformIntegration* create(const QString&, const QStringList&);
+    QPlatformIntegration *create(const QString &system, const QStringList &paramList, int &argc, char **argv) override;
 };
 
 #endif // UBUNTU_CLIENT_PLUGIN_H

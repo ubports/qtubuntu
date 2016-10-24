@@ -18,6 +18,7 @@ SOURCES = \
     backingstore.cpp \
     clipboard.cpp \
     cursor.cpp \
+    debugextension.cpp \
     glcontext.cpp \
     input.cpp \
     integration.cpp \
@@ -33,6 +34,7 @@ HEADERS = \
     backingstore.h \
     clipboard.h \
     cursor.h \
+    debugextension.h \
     glcontext.h \
     input.h \
     integration.h \
