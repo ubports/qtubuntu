@@ -18,6 +18,7 @@
 #include "integration.h"
 #include "backingstore.h"
 #include "clipboard.h"
+#include "desktopwindow.h"
 #include "debugextension.h"
 #include "glcontext.h"
 #include "input.h"
@@ -30,6 +31,7 @@
 // Qt
 #include <QFileInfo>
 #include <QGuiApplication>
+#include <private/qeglpbuffer_p.h>
 #include <qpa/qplatformnativeinterface.h>
 #include <qpa/qplatforminputcontextfactory_p.h>
 #include <qpa/qplatforminputcontext.h>
@@ -224,21 +226,17 @@ QByteArray UbuntuClientIntegration::generateSessionNameFromQmlFile(QStringList &
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) const
 {
-    return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection, mDebugExtension.data());
+    if (window->type() == Qt::Desktop) {
+        // Desktop windows should not be backed up by a mir surface as they don't draw anything (nor should).
+        return new UbuntuDesktopWindow(window);
+    } else {
+        return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection, mDebugExtension.data());
+    }
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const
 {
     switch (cap) {
-    case ThreadedPixmaps:
-        return true;
-
-    case OpenGL:
-        return true;
-
-    case ApplicationState:
-        return true;
-
     case ThreadedOpenGL:
         if (qEnvironmentVariableIsEmpty("QTUBUNTU_NO_THREADED_OPENGL")) {
             return true;
@@ -246,8 +244,16 @@ bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap
             qCDebug(ubuntumirclient, "disabled threaded OpenGL");
             return false;
         }
+
+    case ThreadedPixmaps:
+    case OpenGL:
+    case ApplicationState:
     case MultipleWindows:
     case NonFullScreenWindows:
+#if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
+    case SwitchableWidgetComposition:
+#endif
+    case RasterGLSurface: // needed for QQuickWidget
         return true;
     default:
         return QPlatformIntegration::hasCapability(cap);

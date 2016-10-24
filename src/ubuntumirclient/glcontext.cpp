@@ -74,8 +74,6 @@ static bool needsFBOReadBackWorkaround()
 
 bool UbuntuOpenGLContext::makeCurrent(QPlatformSurface* surface)
 {
-    Q_ASSERT(surface->surface()->surfaceType() == QSurface::OpenGLSurface);
-
     const bool ret = QEGLPlatformContext::makeCurrent(surface);
 
     if (Q_LIKELY(ret)) {
