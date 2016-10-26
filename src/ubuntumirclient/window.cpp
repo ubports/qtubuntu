@@ -207,7 +207,7 @@ UbuntuWindow *transientParentFor(QWindow *window)
 bool requiresParent(const MirSurfaceType type)
 {
     switch (type) {
-    case mir_surface_type_dialog: #FIXME - not quite what the specification dictates
+    case mir_surface_type_dialog: //FIXME - not quite what the specification dictates, but is what Mir's api dictates
     case mir_surface_type_utility:
     case mir_surface_type_gloss:
     case mir_surface_type_menu:
