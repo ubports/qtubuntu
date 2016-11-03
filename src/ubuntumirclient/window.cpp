@@ -867,7 +867,10 @@ void UbuntuWindow::setGeometry(const QRect &rect)
 
     qCDebug(ubuntumirclient, "setGeometry (window=%p, position=(%d, %d)dp, size=(%dx%d)dp)",
             window(), rect.x(), rect.y(), rect.width(), rect.height());
-    QPlatformWindow::setGeometry(rect); // Immediately update internal geometry so Qt believes position updated
+    // Immediately update internal geometry so Qt believes position updated
+    QRect newPosition(geometry());
+    newPosition.moveTo(rect.topLeft());
+    QPlatformWindow::setGeometry(newPosition);
 
     mSurface->updateGeometry(rect);
     // Note: don't call handleGeometryChange here, wait to see what Mir replies with.
