@@ -376,8 +376,8 @@ void UbuntuClientIntegration::destroyScreen(UbuntuScreen *screen)
 
 QPlatformAccessibility *UbuntuClientIntegration::accessibility() const
 {
-    if (!m_accessibility) {
-        m_accessibility.reset(new QSpiAccessibleBridge());
+    if (!mAccessibility) {
+        mAccessibility.reset(new QSpiAccessibleBridge());
     }
-    return m_accessibility.data();
+    return mAccessibility.data();
 }
