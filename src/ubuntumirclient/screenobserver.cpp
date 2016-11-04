@@ -47,7 +47,7 @@ namespace {
         case mir_form_factor_tv: return "tv";
         case mir_form_factor_projector: return "projector";
         }
-        return "";
+        Q_UNREACHABLE();
     }
 } // anonymous namespace
 
