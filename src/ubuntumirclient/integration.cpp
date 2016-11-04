@@ -18,6 +18,8 @@
 #include "integration.h"
 #include "backingstore.h"
 #include "clipboard.h"
+#include "desktopwindow.h"
+#include "debugextension.h"
 #include "glcontext.h"
 #include "input.h"
 #include "logging.h"
@@ -29,6 +31,7 @@
 // Qt
 #include <QFileInfo>
 #include <QGuiApplication>
+#include <private/qeglpbuffer_p.h>
 #include <qpa/qplatformnativeinterface.h>
 #include <qpa/qplatforminputcontextfactory_p.h>
 #include <qpa/qplatforminputcontext.h>
@@ -62,7 +65,8 @@ static void aboutToStopCallback(UApplicationArchive */*archive*/, void *context)
     integration->appStateController()->setSuspended();
 }
 
-UbuntuClientIntegration::UbuntuClientIntegration()
+
+UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     : QPlatformIntegration()
     , mNativeInterface(new UbuntuNativeInterface(this))
     , mFontDb(new QGenericUnixFontDatabase)
@@ -98,6 +102,17 @@ UbuntuClientIntegration::UbuntuClientIntegration()
     mEglNativeDisplay = mir_connection_get_egl_native_display(mMirConnection);
     ASSERT((mEglDisplay = eglGetDisplay(mEglNativeDisplay)) != EGL_NO_DISPLAY);
     ASSERT(eglInitialize(mEglDisplay, nullptr, nullptr) == EGL_TRUE);
+
+    // Has debug mode been requsted, either with "-testability" switch or QT_LOAD_TESTABILITY env var
+    bool testability = qEnvironmentVariableIsSet("QT_LOAD_TESTABILITY");
+    for (int i=1; !testability && i<argc; i++) {
+        if (strcmp(argv[i], "-testability") == 0) {
+            testability = true;
+        }
+    }
+    if (testability) {
+        mDebugExtension.reset(new UbuntuDebugExtension);
+    }
 }
 
 void UbuntuClientIntegration::initialize()
@@ -204,22 +219,18 @@ QByteArray UbuntuClientIntegration::generateSessionNameFromQmlFile(QStringList &
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) const
 {
-    return new UbuntuWindow(window, mInput, mNativeInterface, mAppStateController.data(),
-                            mEglDisplay, mMirConnection);
+    if (window->type() == Qt::Desktop) {
+        // Desktop windows should not be backed up by a mir surface as they don't draw anything (nor should).
+        return new UbuntuDesktopWindow(window);
+    } else {
+        return new UbuntuWindow(window, mInput, mNativeInterface, mAppStateController.data(),
+                                mEglDisplay, mMirConnection, mDebugExtension.data());
+    }
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const
 {
     switch (cap) {
-    case ThreadedPixmaps:
-        return true;
-
-    case OpenGL:
-        return true;
-
-    case ApplicationState:
-        return true;
-
     case ThreadedOpenGL:
         if (qEnvironmentVariableIsEmpty("QTUBUNTU_NO_THREADED_OPENGL")) {
             return true;
@@ -227,8 +238,16 @@ bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap
             qCDebug(ubuntumirclient, "disabled threaded OpenGL");
             return false;
         }
+
+    case ThreadedPixmaps:
+    case OpenGL:
+    case ApplicationState:
     case MultipleWindows:
     case NonFullScreenWindows:
+#if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
+    case SwitchableWidgetComposition:
+#endif
+    case RasterGLSurface: // needed for QQuickWidget
         return true;
     default:
         return QPlatformIntegration::hasCapability(cap);

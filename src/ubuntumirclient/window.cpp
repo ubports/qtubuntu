@@ -16,8 +16,10 @@
 
 // Local
 #include "window.h"
+#include "debugextension.h"
 #include "nativeinterface.h"
 #include "input.h"
+#include "integration.h"
 #include "screen.h"
 #include "logging.h"
 
@@ -82,9 +84,8 @@ const char *qtWindowStateToStr(Qt::WindowState state)
         return "Minimized";
     case Qt::WindowActive:
         return "Active";
-    default:
-        return "!?";
     }
+    Q_UNREACHABLE();
 }
 
 const char *mirSurfaceStateToStr(MirSurfaceState surfaceState)
@@ -98,8 +99,9 @@ const char *mirSurfaceStateToStr(MirSurfaceState surfaceState)
     case mir_surface_state_fullscreen: return "fullscreen";
     case mir_surface_state_horizmaximized: return "horizmaximized";
     case mir_surface_state_hidden: return "hidden";
-    default: return "!?";
+    case mir_surface_states: Q_UNREACHABLE();
     }
+    Q_UNREACHABLE();
 }
 
 const char *mirPixelFormatToStr(MirPixelFormat pixelFormat)
@@ -115,15 +117,16 @@ const char *mirPixelFormatToStr(MirPixelFormat pixelFormat)
     case mir_pixel_format_rgb_565:   return "RGB565";
     case mir_pixel_format_rgba_5551: return "RGBA5551";
     case mir_pixel_format_rgba_4444: return "RGBA4444";
-    case mir_pixel_formats:
-    default:                         return "???";
+    case mir_pixel_formats:          Q_UNREACHABLE();
     }
+    Q_UNREACHABLE();
 }
 
 MirSurfaceState qtWindowStateToMirSurfaceState(Qt::WindowState state)
 {
     switch (state) {
     case Qt::WindowNoState:
+    case Qt::WindowActive:
         return mir_surface_state_restored;
     case Qt::WindowFullScreen:
         return mir_surface_state_fullscreen;
@@ -131,10 +134,8 @@ MirSurfaceState qtWindowStateToMirSurfaceState(Qt::WindowState state)
         return mir_surface_state_maximized;
     case Qt::WindowMinimized:
         return mir_surface_state_minimized;
-    default:
-        qCWarning(ubuntumirclient, "Unexpected Qt::WindowState: %d", state);
-        return mir_surface_state_restored;
     }
+    return mir_surface_state_unknown; // should never be reached
 }
 
 WId makeId()
@@ -591,13 +592,14 @@ QString UbuntuSurface::persistentSurfaceId()
 
 UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface *native,
                            UbuntuAppStateController *appState, EGLDisplay eglDisplay,
-                           MirConnection *mirConnection)
+                           MirConnection *mirConnection, UbuntuDebugExtension *debugExt)
     : QObject(nullptr)
     , QPlatformWindow(w)
     , mId(makeId())
     , mWindowState(w->windowState())
     , mWindowFlags(w->flags())
     , mWindowVisible(false)
+    , mDebugExtention(debugExt)
     , mNativeInterface(native)
     , mAppStateController(appState)
     , mSurface(new UbuntuSurface{this, eglDisplay, input, mirConnection})
@@ -666,7 +668,7 @@ void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
 
 void UbuntuWindow::handleSurfaceVisibilityChanged(bool visible)
 {
-    qCDebug(ubuntumirclient, "handleSurfaceFocused(window=%p)", window());
+    qCDebug(ubuntumirclient, "handleSurfaceVisibilityChanged(visible=%d)", visible);
 
     if (mWindowVisible == visible) return;
     mWindowVisible = visible;
@@ -795,6 +797,15 @@ bool UbuntuWindow::isExposed() const
 QSurfaceFormat UbuntuWindow::format() const
 {
     return mSurface->format();
+}
+
+QPoint UbuntuWindow::mapToGlobal(const QPoint &pos) const
+{
+    if (mDebugExtention) {
+        return mDebugExtention->mapSurfacePointToScreen(mSurface->mirSurface(), pos);
+    } else {
+        return pos;
+    }
 }
 
 void* UbuntuWindow::eglSurface() const
