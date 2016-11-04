@@ -46,9 +46,8 @@ static const char *orientationToStr(Qt::ScreenOrientation orientation) {
             return "inverted portrait";
         case Qt::InvertedLandscapeOrientation:
             return "inverted landscape";
-        default:
-            return "INVALID!";
     }
+    Q_UNREACHABLE();
 }
 
 const QEvent::Type OrientationChangeEvent::mType =
@@ -96,10 +95,6 @@ void UbuntuScreen::customEvent(QEvent* event) {
             mCurrentOrientation = (screen()->primaryOrientation() == Qt::LandscapeOrientation) ?
                         Qt::InvertedLandscapeOrientation : Qt::InvertedPortraitOrientation;
             break;
-        }
-        default: {
-            qCDebug(ubuntumirclient, "UbuntuScreen::customEvent - Unknown orientation.");
-            return;
         }
     }
 
