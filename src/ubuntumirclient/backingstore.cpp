@@ -35,9 +35,7 @@ UbuntuBackingStore::UbuntuBackingStore(QWindow* window)
     window->setSurfaceType(QSurface::OpenGLSurface);
 }
 
-UbuntuBackingStore::~UbuntuBackingStore()
-{
-}
+UbuntuBackingStore::~UbuntuBackingStore() = default;
 
 void UbuntuBackingStore::flush(QWindow* window, const QRegion& region, const QPoint& offset)
 {
@@ -124,4 +122,10 @@ void UbuntuBackingStore::resize(const QSize& size, const QRegion& /*staticConten
 QPaintDevice* UbuntuBackingStore::paintDevice()
 {
     return &mImage;
+}
+
+QImage UbuntuBackingStore::toImage() const
+{
+    // used by QPlatformBackingStore::composeAndFlush
+    return mImage;
 }
