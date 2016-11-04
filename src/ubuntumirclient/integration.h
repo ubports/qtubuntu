@@ -84,9 +84,9 @@ private:
 
     UbuntuInput* mInput;
     QPlatformInputContext* mInputContext;
+    mutable QScopedPointer<QPlatformAccessibility> mAccessibility;
     QScopedPointer<UbuntuDebugExtension> mDebugExtension;
     QScopedPointer<UbuntuScreenObserver> mScreenObserver;
-    mutable QScopedPointer<QPlatformAccessibility> m_accessibility;
     qreal mScaleFactor;
 
     MirConnection *mMirConnection;
