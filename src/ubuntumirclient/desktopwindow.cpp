@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Canonical, Ltd.
+ * Copyright (C) 2016 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -14,18 +14,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QUBUNTULOGGING_H
-#define QUBUNTULOGGING_H
+#include "desktopwindow.h"
 
-#include <QLoggingCategory>
+// local
+#include "logging.h"
 
-#define ASSERT(cond) ((!(cond)) ? qt_assert(#cond,__FILE__,__LINE__) : qt_noop())
-
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclient)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientBufferSwap)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientInput)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientGraphics)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientCursor)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientDebug)
-
-#endif  // QUBUNTULOGGING_H
+UbuntuDesktopWindow::UbuntuDesktopWindow(QWindow *window)
+    : QPlatformWindow(window)
+{
+    qCDebug(ubuntumirclient, "UbuntuDesktopWindow(window=%p)", window);
+}

@@ -29,6 +29,7 @@
 
 #include <EGL/egl.h>
 
+class UbuntuDebugExtension;
 class UbuntuInput;
 class UbuntuNativeInterface;
 class UbuntuScreen;
@@ -39,7 +40,7 @@ class UbuntuClientIntegration : public QObject, public QPlatformIntegration
     Q_OBJECT
 
 public:
-    UbuntuClientIntegration();
+    UbuntuClientIntegration(int argc, char **argv);
     virtual ~UbuntuClientIntegration();
 
     // QPlatformIntegration methods.
@@ -65,6 +66,7 @@ public:
     EGLDisplay eglDisplay() const { return mEglDisplay; }
     EGLNativeDisplayType eglNativeDisplay() const { return mEglNativeDisplay; }
     UbuntuScreenObserver *screenObserver() const { return mScreenObserver.data(); }
+    UbuntuDebugExtension *debugExtension() const { return mDebugExtension.data(); }
 
 private Q_SLOTS:
     void destroyScreen(UbuntuScreen *screen);
@@ -82,6 +84,7 @@ private:
 
     UbuntuInput* mInput;
     QPlatformInputContext* mInputContext;
+    QScopedPointer<UbuntuDebugExtension> mDebugExtension;
     QScopedPointer<UbuntuScreenObserver> mScreenObserver;
     mutable QScopedPointer<QPlatformAccessibility> m_accessibility;
     qreal mScaleFactor;
