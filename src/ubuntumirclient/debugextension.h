@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Canonical, Ltd.
+ * Copyright (C) 2016 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -14,18 +14,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QUBUNTULOGGING_H
-#define QUBUNTULOGGING_H
+#ifndef UBUNTU_DEBUG_EXTENSION_H
+#define UBUNTU_DEBUG_EXTENSION_H
 
-#include <QLoggingCategory>
+#include <QPoint>
+#include <QLibrary>
+struct MirSurface;
 
-#define ASSERT(cond) ((!(cond)) ? qt_assert(#cond,__FILE__,__LINE__) : qt_noop())
+typedef bool (*MapperPrototype)(MirSurface* surface, int x, int y, int* screenX, int* screenY);
 
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclient)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientBufferSwap)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientInput)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientGraphics)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientCursor)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientDebug)
 
-#endif  // QUBUNTULOGGING_H
+class UbuntuDebugExtension
+{
+public:
+    UbuntuDebugExtension();
+
+    QPoint mapSurfacePointToScreen(MirSurface *, const QPoint &point);
+
+private:
+    QLibrary m_mirclientDebug;
+    MapperPrototype m_mapper;
+};
+
+#endif // UBUNTU_DEBUG_EXTENSION_H
