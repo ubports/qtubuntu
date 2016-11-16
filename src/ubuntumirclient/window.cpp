@@ -755,6 +755,17 @@ void UbuntuWindow::updatePanelHeightHack(bool enable)
     }
 }
 
+QRect UbuntuWindow::geometry() const
+{
+    if (mDebugExtention) {
+        auto geom = QPlatformWindow::geometry();
+        geom.moveTopLeft(mDebugExtention->mapSurfacePointToScreen(mSurface->mirSurface(), QPoint(0,0)));
+        return geom;
+    } else {
+        return QPlatformWindow::geometry();
+    }
+}
+
 void UbuntuWindow::setGeometry(const QRect &rect)
 {
     QMutexLocker lock(&mMutex);
