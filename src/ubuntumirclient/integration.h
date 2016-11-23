@@ -60,6 +60,7 @@ public:
     QPlatformClipboard* clipboard() const override;
     void initialize() override;
     QPlatformOffscreenSurface *createPlatformOffscreenSurface(QOffscreenSurface *surface) const override;
+    QPlatformAccessibility *accessibility() const override;
 
     // New methods.
     MirConnection *mirConnection() const { return mMirConnection; }
@@ -85,6 +86,7 @@ private:
 
     UbuntuInput* mInput;
     QPlatformInputContext* mInputContext;
+    mutable QScopedPointer<QPlatformAccessibility> mAccessibility;
     QScopedPointer<UbuntuDebugExtension> mDebugExtension;
     QScopedPointer<UbuntuScreenObserver> mScreenObserver;
     QScopedPointer<UbuntuAppStateController> mAppStateController;
