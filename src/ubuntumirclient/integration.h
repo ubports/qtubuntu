@@ -20,6 +20,7 @@
 #include <qpa/qplatformintegration.h>
 #include <QSharedPointer>
 
+#include "appstatecontroller.h"
 #include "platformservices.h"
 #include "screenobserver.h"
 
@@ -64,6 +65,7 @@ public:
     MirConnection *mirConnection() const { return mMirConnection; }
     EGLDisplay eglDisplay() const { return mEglDisplay; }
     EGLNativeDisplayType eglNativeDisplay() const { return mEglNativeDisplay; }
+    UbuntuAppStateController *appStateController() const { return mAppStateController.data(); }
     UbuntuScreenObserver *screenObserver() const { return mScreenObserver.data(); }
     UbuntuDebugExtension *debugExtension() const { return mDebugExtension.data(); }
 
@@ -85,6 +87,7 @@ private:
     QPlatformInputContext* mInputContext;
     QScopedPointer<UbuntuDebugExtension> mDebugExtension;
     QScopedPointer<UbuntuScreenObserver> mScreenObserver;
+    QScopedPointer<UbuntuAppStateController> mAppStateController;
     qreal mScaleFactor;
 
     MirConnection *mMirConnection;
