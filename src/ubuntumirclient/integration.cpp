@@ -47,30 +47,22 @@
 #include <ubuntu/application/id.h>
 #include <ubuntu/application/options.h>
 
-static void resumedCallback(const UApplicationOptions *options, void* context)
+static void resumedCallback(const UApplicationOptions */*options*/, void *context)
 {
-    Q_UNUSED(options)
-    Q_UNUSED(context)
-    Q_ASSERT(context != NULL);
-    if (qGuiApp->focusWindow()) {
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
-    } else {
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
-    }
+    auto integration = static_cast<UbuntuClientIntegration*>(context);
+    integration->appStateController()->setResumed();
 }
 
-static void aboutToStopCallback(UApplicationArchive *archive, void* context)
+static void aboutToStopCallback(UApplicationArchive */*archive*/, void *context)
 {
-    Q_UNUSED(archive)
-    Q_ASSERT(context != NULL);
-    UbuntuClientIntegration* integration = static_cast<UbuntuClientIntegration*>(context);
-    QPlatformInputContext *inputContext = integration->inputContext();
+    auto integration = static_cast<UbuntuClientIntegration*>(context);
+    auto inputContext = integration->inputContext();
     if (inputContext) {
         inputContext->hideInputPanel();
     } else {
         qCWarning(ubuntumirclient) << "aboutToStopCallback(): no input context";
     }
-    QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationSuspended);
+    integration->appStateController()->setSuspended();
 }
 
 
@@ -79,6 +71,7 @@ UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     , mNativeInterface(new UbuntuNativeInterface(this))
     , mFontDb(new QGenericUnixFontDatabase)
     , mServices(new UbuntuPlatformServices)
+    , mAppStateController(new UbuntuAppStateController)
     , mScaleFactor(1.0)
 {
     {
@@ -230,7 +223,8 @@ QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) 
         // Desktop windows should not be backed up by a mir surface as they don't draw anything (nor should).
         return new UbuntuDesktopWindow(window);
     } else {
-        return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection, mDebugExtension.data());
+        return new UbuntuWindow(window, mInput, mNativeInterface, mAppStateController.data(),
+                                mEglDisplay, mMirConnection, mDebugExtension.data());
     }
 }
 

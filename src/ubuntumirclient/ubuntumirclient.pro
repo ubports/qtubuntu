@@ -29,7 +29,8 @@ SOURCES = \
     screen.cpp \
     screenobserver.cpp \
     theme.cpp \
-    window.cpp
+    window.cpp \
+    appstatecontroller.cpp
 
 HEADERS = \
     backingstore.h \
@@ -48,7 +49,8 @@ HEADERS = \
     screenobserver.h \
     screen.h \
     theme.h \
-    window.h
+    window.h \
+    appstatecontroller.h
 
 # Installation path
 target.path +=  $$[QT_INSTALL_PLUGINS]/platforms

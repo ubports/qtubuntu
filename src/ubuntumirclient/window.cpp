@@ -29,7 +29,6 @@
 #include <qpa/qwindowsysteminterface.h>
 #include <QMutexLocker>
 #include <QSize>
-#include <QAtomicInt>
 #include <QtMath>
 #include <private/qeglconvenience_p.h>
 #include <private/qguiapplication_p.h>
@@ -406,7 +405,6 @@ public:
     QSurfaceFormat format() const { return mFormat; }
 
     bool mNeedsExposeCatchup;
-    QAtomicInt mPendingFocusGainedEvents;
 
     QString persistentSurfaceId();
 
@@ -571,14 +569,6 @@ void UbuntuSurface::postEvent(const MirEvent *event)
         QMutexLocker lock(&mTargetSizeMutex);
         mTargetSize.rwidth() = width;
         mTargetSize.rheight() = height;
-    } else if (mir_event_type_surface == eventType) {
-        auto surfaceEvent = mir_event_get_surface_event(event);
-        if (mir_surface_attrib_focus == mir_surface_event_get_attribute(surfaceEvent)) {
-            const bool focused = mir_surface_event_get_attribute_value(surfaceEvent) == mir_surface_focused;
-            if (focused) {
-                mPendingFocusGainedEvents++;
-            }
-        }
     }
 
     mInput->postEvent(mPlatformWindow, event);
@@ -605,7 +595,8 @@ QString UbuntuSurface::persistentSurfaceId()
 }
 
 UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface *native,
-                           EGLDisplay eglDisplay, MirConnection *mirConnection, UbuntuDebugExtension *debugExt)
+                           UbuntuAppStateController *appState, EGLDisplay eglDisplay,
+                           MirConnection *mirConnection, UbuntuDebugExtension *debugExt)
     : QObject(nullptr)
     , QPlatformWindow(w)
     , mId(makeId())
@@ -614,6 +605,7 @@ UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface
     , mWindowVisible(false)
     , mDebugExtention(debugExt)
     , mNativeInterface(native)
+    , mAppStateController(appState)
     , mSurface(new UbuntuSurface{this, eglDisplay, input, mirConnection})
     , mScale(1.0)
     , mFormFactor(mir_form_factor_unknown)
@@ -667,28 +659,14 @@ void UbuntuWindow::handleSurfaceExposeChange(bool exposed)
 
 void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
 {
-    qCDebug(ubuntumirclient, "handleSurfaceFocusChanged(window=%p, focused=%d, pending=%d)", window(), focused, mSurface->mPendingFocusGainedEvents.load());
+    qCDebug(ubuntumirclient, "handleSurfaceFocusChanged(window=%p, focused=%d)", window(), focused);
 
-    // Mir may have sent a pair of focus lost/gained events, so we need to "peek" into the queue
-    // so that we don't deactivate windows prematurely.
     if (focused) {
-        mSurface->mPendingFocusGainedEvents--;
+        mAppStateController->setWindowFocused(true);
         QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
-
-        // NB: Since processing of system events is queued, never check qGuiApp->applicationState()
-        //     as it might be outdated. Always call handleApplicationStateChanged() with the latest
-        //     state regardless.
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
-
-        // Flush events so that we update QGuiApplicationPrivate::focus_window immediately
-        QWindowSystemInterface::flushWindowSystemEvents();
-
-    } else if (mSurface->mPendingFocusGainedEvents == 0 && window() == QGuiApplicationPrivate::focus_window) {
+    } else {
         QWindowSystemInterface::handleWindowActivated(nullptr, Qt::ActiveWindowFocusReason);
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
-
-        // Flush events so that we update QGuiApplicationPrivate::focus_window immediately
-        QWindowSystemInterface::flushWindowSystemEvents();
+        mAppStateController->setWindowFocused(false);
     }
 }
 
