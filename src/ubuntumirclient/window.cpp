@@ -251,6 +251,10 @@ MirSurface *createMirSurface(QWindow *window, int mirOutputId, UbuntuInput *inpu
         mir_surface_spec_set_shell_chrome(spec.get(), mir_shell_chrome_low);
     }
 
+    if (!window->isVisible()) {
+        mir_surface_spec_set_state(spec.get(), mir_surface_state_hidden);
+    }
+
     auto surface = mir_surface_create_sync(spec.get());
     Q_ASSERT(mir_surface_is_valid(surface));
     return surface;
