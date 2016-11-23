@@ -47,6 +47,7 @@ public:
 
     // QPlatformWindow methods.
     WId winId() const override;
+    QRect geometry() const override;
     void setGeometry(const QRect&) override;
     void setWindowState(Qt::WindowState state) override;
     void setWindowFlags(Qt::WindowFlags flags) override;
