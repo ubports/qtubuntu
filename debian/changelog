@@ -1,3 +1,19 @@
+qtubuntu (0.63+17.04.20161123-0ubuntu1) zesty; urgency=medium
+
+  [ Gerry Boland ]
+  * Create Mir surface with hidden state, as Qt expects. (LP: #1543467)
+  * Move all App State management logic to dedicated controller, use
+    Timer to compress active-inactive-active invocations (LP: #1543467)
+  * Small BackingStore fixes: call makeCurrent on texture changes, and
+    choose correct QImage format to avoid bit swizzling (LP: #1543467)
+  * Add support for more surface types and surface repositioning. (LP:
+    #1543467)
+  * Enable Accessibility
+  * Fix for Qt5.6 mapToGlobal: QPlatformWindow::geometry() expected to
+    be in absolute screens coordinates (LP: #1346633)
+
+ -- Andrea Cimitan <andrea.cimitan@canonical.com>  Wed, 23 Nov 2016 12:12:26 +0000
+
 qtubuntu (0.63+17.04.20161024-0ubuntu1) zesty; urgency=medium
 
   [ Daniel d'Andrada ]
