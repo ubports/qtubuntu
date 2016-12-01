@@ -113,6 +113,9 @@ UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     }
     if (testability) {
         mDebugExtension.reset(new UbuntuDebugExtension);
+        if (!mDebugExtension->isEnabled()) {
+            mDebugExtension.reset();
+        }
     }
 }
 

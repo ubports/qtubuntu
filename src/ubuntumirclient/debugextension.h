@@ -29,6 +29,8 @@ class UbuntuDebugExtension
 public:
     UbuntuDebugExtension();
 
+    bool isEnabled() const;
+
     QPoint mapSurfacePointToScreen(MirSurface *, const QPoint &point);
 
 private:
