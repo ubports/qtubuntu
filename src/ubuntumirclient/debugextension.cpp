@@ -39,6 +39,11 @@ UbuntuDebugExtension::UbuntuDebugExtension()
     }
 }
 
+bool UbuntuDebugExtension::isEnabled() const
+{
+    return m_mirclientDebug.isLoaded() && m_mapper;
+}
+
 QPoint UbuntuDebugExtension::mapSurfacePointToScreen(MirSurface *surface, const QPoint &point)
 {
     if (!m_mapper) {
