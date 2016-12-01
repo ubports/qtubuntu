@@ -1,3 +1,9 @@
+qtubuntu (0.63+17.04.20161201.1-0ubuntu1) zesty; urgency=medium
+
+  * Use debug extension only if mir-debug loaded
+
+ -- Gerry Boland <gerry.boland@canonical.com>  Thu, 01 Dec 2016 23:56:53 +0000
+
 qtubuntu (0.63+17.04.20161123-0ubuntu1) zesty; urgency=medium
 
   [ Gerry Boland ]
