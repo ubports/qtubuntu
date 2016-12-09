@@ -762,7 +762,7 @@ void UbuntuWindow::handleSurfaceFocusChanged(bool focused)
         QWindowSystemInterface::handleWindowActivated(window(), Qt::ActiveWindowFocusReason);
     } else {
         // Flush events so that we update QGuiApplicationPrivate::focus_window first
-        QWindowSystemInterface::flushWindowSystemEvents();
+        QWindowSystemInterface::flushWindowSystemEvents(QEventLoop::ExcludeUserInputEvents);
 
         if (window() == QGuiApplicationPrivate::focus_window) { // don't handle unfocus if this window wasn't currently focused.
             QWindowSystemInterface::handleWindowActivated(nullptr, Qt::ActiveWindowFocusReason);
