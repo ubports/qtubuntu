@@ -1,3 +1,42 @@
+qtubuntu (0.63+17.04.20161201.1-0ubuntu1) zesty; urgency=medium
+
+  * Use debug extension only if mir-debug loaded
+
+ -- Gerry Boland <gerry.boland@canonical.com>  Thu, 01 Dec 2016 23:56:53 +0000
+
+qtubuntu (0.63+17.04.20161123-0ubuntu1) zesty; urgency=medium
+
+  [ Gerry Boland ]
+  * Create Mir surface with hidden state, as Qt expects. (LP: #1543467)
+  * Move all App State management logic to dedicated controller, use
+    Timer to compress active-inactive-active invocations (LP: #1543467)
+  * Small BackingStore fixes: call makeCurrent on texture changes, and
+    choose correct QImage format to avoid bit swizzling (LP: #1543467)
+  * Add support for more surface types and surface repositioning. (LP:
+    #1543467)
+  * Enable Accessibility
+  * Fix for Qt5.6 mapToGlobal: QPlatformWindow::geometry() expected to
+    be in absolute screens coordinates (LP: #1346633)
+
+ -- Andrea Cimitan <andrea.cimitan@canonical.com>  Wed, 23 Nov 2016 12:12:26 +0000
+
+qtubuntu (0.63+17.04.20161024-0ubuntu1) zesty; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Some logging fixes
+
+  [ Daniel van Vugt ]
+  * Implement named cursors that Mir understands (LP: #1625853) (LP:
+    #1625853)
+
+  [ Gerry Boland ]
+  * Stricter enum use, avoid default switch case
+  * Use mir-client-debug to map window coordinates to screen coordinates
+    (LP: #1346633)
+  * Fix rendering of apps using QQuickWidget
+
+ -- Michael Zanetti <michael.zanetti@canonical.com>  Mon, 24 Oct 2016 11:33:40 +0000
+
 qtubuntu (0.63+16.10.20160928.1-0ubuntu1) yakkety; urgency=medium
 
   [ Nick Dedekind ]

@@ -37,6 +37,7 @@ UbuntuBackingStore::UbuntuBackingStore(QWindow* window)
 
 UbuntuBackingStore::~UbuntuBackingStore()
 {
+    mContext->makeCurrent(window()); // needed as QOpenGLTexture destructor assumes current context
 }
 
 void UbuntuBackingStore::flush(QWindow* window, const QRegion& region, const QPoint& offset)
@@ -52,7 +53,6 @@ void UbuntuBackingStore::flush(QWindow* window, const QRegion& region, const QPo
         mBlitter->create();
 
     mBlitter->bind();
-    mBlitter->setSwizzleRB(true);
     mBlitter->blit(mTexture->textureId(), QMatrix4x4(), QOpenGLTextureBlitter::OriginTopLeft);
     mBlitter->release();
 
@@ -115,7 +115,9 @@ void UbuntuBackingStore::beginPaint(const QRegion& region)
 
 void UbuntuBackingStore::resize(const QSize& size, const QRegion& /*staticContents*/)
 {
-    mImage = QImage(size, QImage::Format_RGB32);
+    mImage = QImage(size, QImage::Format_RGBA8888);
+
+    mContext->makeCurrent(window());
 
     if (mTexture->isCreated())
         mTexture->destroy();
@@ -124,4 +126,10 @@ void UbuntuBackingStore::resize(const QSize& size, const QRegion& /*staticConten
 QPaintDevice* UbuntuBackingStore::paintDevice()
 {
     return &mImage;
+}
+
+QImage UbuntuBackingStore::toImage() const
+{
+    // used by QPlatformBackingStore::composeAndFlush
+    return mImage;
 }

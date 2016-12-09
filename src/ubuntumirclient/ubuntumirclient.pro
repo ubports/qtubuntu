@@ -18,6 +18,8 @@ SOURCES = \
     backingstore.cpp \
     clipboard.cpp \
     cursor.cpp \
+    debugextension.cpp \
+    desktopwindow.cpp \
     glcontext.cpp \
     input.cpp \
     integration.cpp \
@@ -26,12 +28,15 @@ SOURCES = \
     plugin.cpp \
     screen.cpp \
     screenobserver.cpp \
-    window.cpp
+    window.cpp \
+    appstatecontroller.cpp
 
 HEADERS = \
     backingstore.h \
     clipboard.h \
     cursor.h \
+    debugextension.h \
+    desktopwindow.h \
     glcontext.h \
     input.h \
     integration.h \
@@ -42,7 +47,8 @@ HEADERS = \
     screenobserver.h \
     screen.h \
     window.h \
-    logging.h
+    logging.h \
+    appstatecontroller.h
 
 OTHER_FILES += \
     ubuntumirclient.json

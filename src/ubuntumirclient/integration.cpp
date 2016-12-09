@@ -18,6 +18,8 @@
 #include "integration.h"
 #include "backingstore.h"
 #include "clipboard.h"
+#include "desktopwindow.h"
+#include "debugextension.h"
 #include "glcontext.h"
 #include "input.h"
 #include "logging.h"
@@ -28,6 +30,7 @@
 // Qt
 #include <QFileInfo>
 #include <QGuiApplication>
+#include <private/qeglpbuffer_p.h>
 #include <qpa/qplatformnativeinterface.h>
 #include <qpa/qplatforminputcontextfactory_p.h>
 #include <qpa/qplatforminputcontext.h>
@@ -36,6 +39,7 @@
 #include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
 #include <QtPlatformSupport/private/qeglpbuffer_p.h>
 #include <QtPlatformSupport/private/qgenericunixthemes_p.h>
+#include <QtPlatformSupport/private/bridge_p.h>
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
 
@@ -65,37 +69,31 @@ public:
     }
 };
 
-static void resumedCallback(const UApplicationOptions *options, void* context)
+static void resumedCallback(const UApplicationOptions */*options*/, void *context)
 {
-    Q_UNUSED(options)
-    Q_UNUSED(context)
-    Q_ASSERT(context != NULL);
-    if (qGuiApp->focusWindow()) {
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
-    } else {
-        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
-    }
+    auto integration = static_cast<UbuntuClientIntegration*>(context);
+    integration->appStateController()->setResumed();
 }
 
-static void aboutToStopCallback(UApplicationArchive *archive, void* context)
+static void aboutToStopCallback(UApplicationArchive */*archive*/, void *context)
 {
-    Q_UNUSED(archive)
-    Q_ASSERT(context != NULL);
-    UbuntuClientIntegration* integration = static_cast<UbuntuClientIntegration*>(context);
-    QPlatformInputContext *inputContext = integration->inputContext();
+    auto integration = static_cast<UbuntuClientIntegration*>(context);
+    auto inputContext = integration->inputContext();
     if (inputContext) {
         inputContext->hideInputPanel();
     } else {
         qCWarning(ubuntumirclient) << "aboutToStopCallback(): no input context";
     }
-    QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationSuspended);
+    integration->appStateController()->setSuspended();
 }
 
-UbuntuClientIntegration::UbuntuClientIntegration()
+
+UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     : QPlatformIntegration()
     , mNativeInterface(new UbuntuNativeInterface(this))
     , mFontDb(new QGenericUnixFontDatabase)
     , mServices(new UbuntuPlatformServices)
+    , mAppStateController(new UbuntuAppStateController)
     , mScaleFactor(1.0)
 {
     {
@@ -126,6 +124,20 @@ UbuntuClientIntegration::UbuntuClientIntegration()
     mEglNativeDisplay = mir_connection_get_egl_native_display(mMirConnection);
     ASSERT((mEglDisplay = eglGetDisplay(mEglNativeDisplay)) != EGL_NO_DISPLAY);
     ASSERT(eglInitialize(mEglDisplay, nullptr, nullptr) == EGL_TRUE);
+
+    // Has debug mode been requsted, either with "-testability" switch or QT_LOAD_TESTABILITY env var
+    bool testability = qEnvironmentVariableIsSet("QT_LOAD_TESTABILITY");
+    for (int i=1; !testability && i<argc; i++) {
+        if (strcmp(argv[i], "-testability") == 0) {
+            testability = true;
+        }
+    }
+    if (testability) {
+        mDebugExtension.reset(new UbuntuDebugExtension);
+        if (!mDebugExtension->isEnabled()) {
+            mDebugExtension.reset();
+        }
+    }
 }
 
 void UbuntuClientIntegration::initialize()
@@ -232,21 +244,18 @@ QByteArray UbuntuClientIntegration::generateSessionNameFromQmlFile(QStringList &
 
 QPlatformWindow* UbuntuClientIntegration::createPlatformWindow(QWindow* window) const
 {
-    return new UbuntuWindow(window, mInput, mNativeInterface, mEglDisplay, mMirConnection);
+    if (window->type() == Qt::Desktop) {
+        // Desktop windows should not be backed up by a mir surface as they don't draw anything (nor should).
+        return new UbuntuDesktopWindow(window);
+    } else {
+        return new UbuntuWindow(window, mInput, mNativeInterface, mAppStateController.data(),
+                                mEglDisplay, mMirConnection, mDebugExtension.data());
+    }
 }
 
 bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap) const
 {
     switch (cap) {
-    case ThreadedPixmaps:
-        return true;
-
-    case OpenGL:
-        return true;
-
-    case ApplicationState:
-        return true;
-
     case ThreadedOpenGL:
         if (qEnvironmentVariableIsEmpty("QTUBUNTU_NO_THREADED_OPENGL")) {
             return true;
@@ -254,8 +263,16 @@ bool UbuntuClientIntegration::hasCapability(QPlatformIntegration::Capability cap
             qCDebug(ubuntumirclient, "disabled threaded OpenGL");
             return false;
         }
+
+    case ThreadedPixmaps:
+    case OpenGL:
+    case ApplicationState:
     case MultipleWindows:
     case NonFullScreenWindows:
+#if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
+    case SwitchableWidgetComposition:
+#endif
+    case RasterGLSurface: // needed for QQuickWidget
         return true;
     default:
         return QPlatformIntegration::hasCapability(cap);
@@ -373,4 +390,12 @@ void UbuntuClientIntegration::destroyScreen(UbuntuScreen *screen)
 #else
     QPlatformIntegration::destroyScreen(screen);
 #endif
+}
+
+QPlatformAccessibility *UbuntuClientIntegration::accessibility() const
+{
+    if (!mAccessibility) {
+        mAccessibility.reset(new QSpiAccessibleBridge());
+    }
+    return mAccessibility.data();
 }

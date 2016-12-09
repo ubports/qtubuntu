@@ -20,6 +20,7 @@
 #include <qpa/qplatformintegration.h>
 #include <QSharedPointer>
 
+#include "appstatecontroller.h"
 #include "platformservices.h"
 #include "screenobserver.h"
 
@@ -29,6 +30,7 @@
 
 #include <EGL/egl.h>
 
+class UbuntuDebugExtension;
 class UbuntuInput;
 class UbuntuNativeInterface;
 class UbuntuScreen;
@@ -39,7 +41,7 @@ class UbuntuClientIntegration : public QObject, public QPlatformIntegration
     Q_OBJECT
 
 public:
-    UbuntuClientIntegration();
+    UbuntuClientIntegration(int argc, char **argv);
     virtual ~UbuntuClientIntegration();
 
     // QPlatformIntegration methods.
@@ -58,12 +60,15 @@ public:
     QPlatformClipboard* clipboard() const override;
     void initialize() override;
     QPlatformOffscreenSurface *createPlatformOffscreenSurface(QOffscreenSurface *surface) const override;
+    QPlatformAccessibility *accessibility() const override;
 
     // New methods.
     MirConnection *mirConnection() const { return mMirConnection; }
     EGLDisplay eglDisplay() const { return mEglDisplay; }
     EGLNativeDisplayType eglNativeDisplay() const { return mEglNativeDisplay; }
+    UbuntuAppStateController *appStateController() const { return mAppStateController.data(); }
     UbuntuScreenObserver *screenObserver() const { return mScreenObserver.data(); }
+    UbuntuDebugExtension *debugExtension() const { return mDebugExtension.data(); }
 
 private Q_SLOTS:
     void destroyScreen(UbuntuScreen *screen);
@@ -81,7 +86,10 @@ private:
 
     UbuntuInput* mInput;
     QPlatformInputContext* mInputContext;
+    mutable QScopedPointer<QPlatformAccessibility> mAccessibility;
+    QScopedPointer<UbuntuDebugExtension> mDebugExtension;
     QScopedPointer<UbuntuScreenObserver> mScreenObserver;
+    QScopedPointer<UbuntuAppStateController> mAppStateController;
     qreal mScaleFactor;
 
     MirConnection *mMirConnection;

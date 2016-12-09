@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Canonical, Ltd.
+ * Copyright (C) 2016 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -14,18 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QUBUNTULOGGING_H
-#define QUBUNTULOGGING_H
+#ifndef UBUNTUAPPSTATECONTROLLER_H
+#define UBUNTUAPPSTATECONTROLLER_H
 
-#include <QLoggingCategory>
+#include <QTimer>
 
-#define ASSERT(cond) ((!(cond)) ? qt_assert(#cond,__FILE__,__LINE__) : qt_noop())
+class UbuntuAppStateController
+{
+public:
+    UbuntuAppStateController();
 
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclient)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientBufferSwap)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientInput)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientGraphics)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientCursor)
-Q_DECLARE_LOGGING_CATEGORY(ubuntumirclientDebug)
+    void setSuspended();
+    void setResumed();
 
-#endif  // QUBUNTULOGGING_H
+    void setWindowFocused(bool focused);
+
+private:
+    bool m_suspended;
+    bool m_lastActive;
+    QTimer m_inactiveTimer;
+};
+
+#endif // UBUNTUAPPSTATECONTROLLER_H
