@@ -69,8 +69,7 @@ QPlatformMenu *UbuntuAppMenuTheme::createPlatformMenu() const
     return new UbuntuPlatformMenu();
 }
 
-QPlatformMenuBar *
-UbuntuAppMenuTheme::createPlatformMenuBar() const
+QPlatformMenuBar *UbuntuAppMenuTheme::createPlatformMenuBar() const
 {
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenuBar();
     return new UbuntuPlatformMenuBar();

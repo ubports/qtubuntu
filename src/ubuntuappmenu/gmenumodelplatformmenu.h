@@ -43,6 +43,10 @@ public:
 
     QDebug operator<<(QDebug stream);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    virtual QPlatformMenu *createMenu() const override;
+#endif
+
 Q_SIGNALS:
     void menuInserted(QPlatformMenu *menu);
     void menuRemoved(QPlatformMenu *menu);
@@ -91,6 +95,11 @@ public:
 
     virtual QPlatformMenuItem *menuItemAt(int position) const override;
     virtual QPlatformMenuItem *menuItemForTag(quintptr tag) const override;
+
+    virtual QPlatformMenuItem *createMenuItem() const override;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    virtual QPlatformMenu *createSubMenu() const override;
+#endif
 
     int id() const;
 
@@ -168,4 +177,5 @@ private:
     quintptr m_tag;
     friend class UbuntuGMenuModelExporter;
 };
+
 #endif // EXPORTEDPLATFORMMENUBAR_H

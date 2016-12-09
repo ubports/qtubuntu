@@ -65,8 +65,7 @@ UbuntuPlatformMenuBar::~UbuntuPlatformMenuBar()
     BAR_DEBUG_MSG << "()";
 }
 
-void
-UbuntuPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
+void UbuntuPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
 {
     BAR_DEBUG_MSG << "(menu=" << menu << ", before=" <<  before << ")";
 
@@ -87,8 +86,7 @@ UbuntuPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *before)
     Q_EMIT menuInserted(menu);
 }
 
-void
-UbuntuPlatformMenuBar::removeMenu(QPlatformMenu *menu)
+void UbuntuPlatformMenuBar::removeMenu(QPlatformMenu *menu)
 {
     BAR_DEBUG_MSG << "(menu=" << menu << ")";
 
@@ -104,16 +102,14 @@ UbuntuPlatformMenuBar::removeMenu(QPlatformMenu *menu)
     Q_EMIT menuRemoved(menu);
 }
 
-void
-UbuntuPlatformMenuBar::syncMenu(QPlatformMenu *menu)
+void UbuntuPlatformMenuBar::syncMenu(QPlatformMenu *menu)
 {
     BAR_DEBUG_MSG << "(menu=" << menu << ")";
 
     Q_UNUSED(menu)
 }
 
-void
-UbuntuPlatformMenuBar::handleReparent(QWindow *parentWindow)
+void UbuntuPlatformMenuBar::handleReparent(QWindow *parentWindow)
 {
     BAR_DEBUG_MSG << "(parentWindow=" << parentWindow << ")";
 
@@ -121,8 +117,7 @@ UbuntuPlatformMenuBar::handleReparent(QWindow *parentWindow)
     m_registrar->registerMenuForWindow(parentWindow, QDBusObjectPath(m_exporter->menuPath()));
 }
 
-QPlatformMenu *
-UbuntuPlatformMenuBar::menuForTag(quintptr tag) const
+QPlatformMenu *UbuntuPlatformMenuBar::menuForTag(quintptr tag) const
 {
     Q_FOREACH(QPlatformMenu* menu, m_menus) {
         if (menu->tag() == tag) {
@@ -152,6 +147,13 @@ QDebug UbuntuPlatformMenuBar::operator<<(QDebug stream)
 
     return stream;
 }
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+QPlatformMenu *UbuntuPlatformMenuBar::createMenu() const
+{
+    return new UbuntuPlatformMenu();
+}
+#endif
 
 void UbuntuPlatformMenuBar::setReady(bool isReady)
 {
@@ -341,6 +343,18 @@ QPlatformMenuItem *UbuntuPlatformMenu::menuItemForTag(quintptr tag) const
     }
     return nullptr;
 }
+
+QPlatformMenuItem *UbuntuPlatformMenu::createMenuItem() const
+{
+    return new UbuntuPlatformMenuItem();
+}
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+QPlatformMenu *UbuntuPlatformMenu::createSubMenu() const
+{
+    return new UbuntuPlatformMenu();
+}
+#endif
 
 const QList<QPlatformMenuItem *> UbuntuPlatformMenu::menuItems() const
 {
