@@ -232,6 +232,8 @@ static const char* nativeEventTypeToStr(MirEventType t)
         return "surface_output";
     case mir_event_type_input_device_state:
         return "input_device_state";
+    case mir_event_type_surface_placement:
+        return "surface_placement";
     }
     Q_UNREACHABLE();
 }
@@ -328,6 +330,8 @@ void UbuntuInput::dispatchInputEvent(UbuntuWindow *window, const MirInputEvent *
     case mir_input_event_type_pointer:
         dispatchPointerEvent(window, ev);
         break;
+    case mir_input_event_types:
+        Q_UNREACHABLE();
     }
 }
 
@@ -370,6 +374,9 @@ void UbuntuInput::dispatchTouchEvent(UbuntuWindow *window, const MirInputEvent *
             break;
         case mir_touch_action_change:
             touchPoint.state = Qt::TouchPointMoved;
+            break;
+        case mir_touch_actions:
+            Q_UNREACHABLE();
         }
 
         touchPoints.append(touchPoint);
@@ -530,6 +537,8 @@ void UbuntuInput::dispatchPointerEvent(UbuntuWindow *platformWindow, const MirIn
     case mir_pointer_action_leave:
         QWindowSystemInterface::handleLeaveEvent(window);
         break;
+    case mir_pointer_actions:
+        Q_UNREACHABLE();
     }
 }
 
