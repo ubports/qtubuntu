@@ -1,3 +1,11 @@
+qtubuntu (0.63+17.04.20170104-0ubuntu1) zesty; urgency=medium
+
+  [ Gerry Boland ]
+  * Remove mircommon specifier for header, fix other ftbfs with mir 0.25
+    (LP: #1653905)
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Wed, 04 Jan 2017 13:46:42 +0000
+
 qtubuntu (0.63+17.04.20161201.1-0ubuntu1) zesty; urgency=medium
 
   * Use debug extension only if mir-debug loaded
