@@ -1,3 +1,14 @@
+qtubuntu (0.63+17.04.20170110.1-0ubuntu1) zesty; urgency=medium
+
+  [ Timo Jyrinki ]
+  * Remove mircommon specifier for header, fix other ftbfs with mir 0.25
+    (LP: #1653905)
+
+  [ Nick Dedekind ]
+  * Added a QPlatformTheme for exporting gmenumodel for qt menus.
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Tue, 10 Jan 2017 06:42:48 +0000
+
 qtubuntu (0.63+17.04.20170104-0ubuntu1) zesty; urgency=medium
 
   [ Gerry Boland ]
