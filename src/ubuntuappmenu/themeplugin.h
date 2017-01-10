@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Canonical, Ltd.
+ * Copyright (C) 2016 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -14,20 +14,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UBUNTU_THEME_H
-#define UBUNTU_THEME_H
+#ifndef UBUNTUTHEMEPLUGIN_H
+#define UBUNTUTHEMEPLUGIN_H
 
-#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
+#include <qpa/qplatformthemeplugin.h>
 
-class UbuntuTheme : public QGenericUnixTheme
+class UbuntuAppMenuThemePlugin : public QPlatformThemePlugin
 {
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QPA.QPlatformThemeFactoryInterface.5.1" FILE "ubuntuappmenu.json")
 public:
-    static const char* name;
-    UbuntuTheme();
-    virtual ~UbuntuTheme();
+    UbuntuAppMenuThemePlugin(QObject *parent = 0);
 
-    // From QPlatformTheme
-    QVariant themeHint(ThemeHint hint) const override;
+    virtual QPlatformTheme *create(const QString &key, const QStringList &paramList);
+
+    static const char *name;
 };
 
-#endif // UBUNTU_THEME_H
+#endif

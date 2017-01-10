@@ -62,3 +62,4 @@ ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
 	dh_install --sourcedir=$(TMP1_DIR) -pqtubuntu-android
 endif
 	dh_install --sourcedir=$(TMP2_DIR) -pqtubuntu-desktop
+	dh_install --sourcedir=$(TMP2_DIR) -pqtubuntu-appmenutheme

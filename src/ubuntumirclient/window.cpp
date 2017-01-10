@@ -712,6 +712,11 @@ UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface
             w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()), roleFor(window()));
 
     updatePanelHeightHack(mSurface->state() != mir_surface_state_fullscreen);
+
+    // queue the windowPropertyChanged signal. If it's emitted directly, the platformWindow will not yet be set for the window.
+    QMetaObject::invokeMethod(mNativeInterface, "windowPropertyChanged", Qt::QueuedConnection,
+                              Q_ARG(QPlatformWindow*, this),
+                              Q_ARG(QString, "persistentSurfaceId"));
 }
 
 UbuntuWindow::~UbuntuWindow()
