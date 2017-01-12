@@ -89,9 +89,9 @@ UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     if (mInstance == nullptr) {
         qCritical("[QPA] UbuntuClientIntegration: connection to Mir server failed.\n");
 
-        // TODO: add API to platform-api to fetch Mir's error message. Workaround by retrying the connection
-        // here in order to get the message
-        auto mirConnection = mir_connect_sync(NULL, sessionName.data());
+        // TODO: add API to platform-api to fetch Mir's error message (bug:1655970).
+        // Workaround by retrying the connection here in order to get the message.
+        auto mirConnection = mir_connect_sync(nullptr, sessionName.data());
         qCritical("Mir returned: \"%s\"", mir_connection_get_error_message(mirConnection));
         mir_connection_release(mirConnection);
         exit(EXIT_FAILURE);
