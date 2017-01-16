@@ -25,7 +25,6 @@
 #include "logging.h"
 #include "nativeinterface.h"
 #include "screen.h"
-#include "theme.h"
 #include "window.h"
 
 // Qt
@@ -39,6 +38,7 @@
 #include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
 #include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
 #include <QtPlatformSupport/private/qeglpbuffer_p.h>
+#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
 #include <QtPlatformSupport/private/bridge_p.h>
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
@@ -47,6 +47,27 @@
 #include <ubuntu/application/lifecycle_delegate.h>
 #include <ubuntu/application/id.h>
 #include <ubuntu/application/options.h>
+
+
+class UbuntuIconTheme : public QGenericUnixTheme
+{
+public:
+    UbuntuIconTheme() {}
+
+    // From QPlatformTheme
+    QVariant themeHint(ThemeHint hint) const override {
+        if (hint == QPlatformTheme::SystemIconThemeName) {
+            QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
+            if (iconTheme.isEmpty()) {
+                return QVariant(QStringLiteral("ubuntu-mobile"));
+            } else {
+                return QVariant(QString(iconTheme));
+            }
+        } else {
+            return QGenericUnixTheme::themeHint(hint);
+        }
+    }
+};
 
 static void resumedCallback(const UApplicationOptions */*options*/, void *context)
 {
@@ -294,13 +315,13 @@ QPlatformOpenGLContext* UbuntuClientIntegration::createPlatformOpenGLContext(
 
 QStringList UbuntuClientIntegration::themeNames() const
 {
-    return QStringList(UbuntuTheme::name);
+    return QStringList(QStringLiteral("ubuntuappmenu"));
 }
 
 QPlatformTheme* UbuntuClientIntegration::createPlatformTheme(const QString& name) const
 {
     Q_UNUSED(name);
-    return new UbuntuTheme;
+    return new UbuntuIconTheme;
 }
 
 QVariant UbuntuClientIntegration::styleHint(StyleHint hint) const

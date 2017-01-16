@@ -1,14 +1,14 @@
-Index: cross-build-support/debian/control
+Index: qtubuntu/debian/control
 ===================================================================
---- cross-build-support.orig/debian/control
-+++ cross-build-support/debian/control
+--- qtubuntu.orig/debian/control
++++ qtubuntu/debian/control
 @@ -1,4 +1,4 @@
 -Source: qtubuntu
 +Source: qtubuntu-gles
  Priority: optional
  Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
  Build-Depends: debhelper (>= 9),
-@@ -11,11 +11,20 @@ Build-Depends: debhelper (>= 9),
+@@ -12,11 +12,20 @@ Build-Depends: debhelper (>= 9),
                 libinput-dev,
                 libmirclient-dev (>= 0.13.0),
                 libmtdev-dev,
@@ -29,7 +29,7 @@ Index: cross-build-support/debian/control
                 quilt,
  # if you don't have have commit access to this branch but would like to upload
  # directly to Ubuntu, don't worry: your changes will be merged back into the
-@@ -25,7 +34,7 @@ Standards-Version: 3.9.6
+@@ -26,7 +35,7 @@ Standards-Version: 3.9.6
  Section: libs
  
  Package: qtubuntu-android
@@ -38,7 +38,7 @@ Index: cross-build-support/debian/control
  Multi-Arch: same
  Conflicts: qtubuntu-desktop,
  Replaces: qtubuntu (<< 0.52),
-@@ -36,31 +45,12 @@ Provides: qtubuntu,
+@@ -37,43 +46,12 @@ Provides: qtubuntu,
  Depends: ubuntu-application-api3-touch,
           ${misc:Depends},
           ${shlibs:Depends},
@@ -71,13 +71,25 @@ Index: cross-build-support/debian/control
 - plugins.
 - .
 - This variant of the package is for GNU-based desktops.
+-
+-Package: qtubuntu-appmenutheme
+-Architecture: any
+-Multi-Arch: same
+-Depends: ${misc:Depends},
+-         ${shlibs:Depends},
+-Description: Qt platform theme for exported application menus
+- Appmenutheme enables the export of application menus to a global menu bar.
+- It is implemented in a QPA platform theme plugin.
+- .
+- This package will work for applications designed for Qt5, as well as QML
+- applications
 + This variant of the package is for Android-based phones and tablets (built
 + against the OpenGLES variant of qtbase).
-Index: cross-build-support/debian/rules
+Index: qtubuntu/debian/rules
 ===================================================================
---- cross-build-support.orig/debian/rules
-+++ cross-build-support/debian/rules
-@@ -5,60 +5,35 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL=4
+--- qtubuntu.orig/debian/rules
++++ qtubuntu/debian/rules
+@@ -5,61 +5,35 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL=4
  export QT_SELECT=5
  
  ANDROID_DIR = build-android
@@ -139,3 +151,4 @@ Index: cross-build-support/debian/rules
  	dh_install --sourcedir=$(TMP1_DIR) -pqtubuntu-android
 -endif
 -	dh_install --sourcedir=$(TMP2_DIR) -pqtubuntu-desktop
+-	dh_install --sourcedir=$(TMP2_DIR) -pqtubuntu-appmenutheme

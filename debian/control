@@ -66,3 +66,15 @@ Description: Qt plugins for Ubuntu Platform API (desktop)
  plugins.
  .
  This variant of the package is for GNU-based desktops.
+
+Package: qtubuntu-appmenutheme
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: Qt platform theme for exported application menus
+ Appmenutheme enables the export of application menus to a global menu bar.
+ It is implemented in a QPA platform theme plugin.
+ .
+ This package will work for applications designed for Qt5, as well as QML
+ applications
