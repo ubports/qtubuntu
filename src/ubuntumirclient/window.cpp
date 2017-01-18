@@ -222,18 +222,6 @@ bool requiresParent(const Qt::WindowType type)
     return requiresParent(qtWindowTypeToMirSurfaceType(type));
 }
 
-bool isMovable(const Qt::WindowType type)
-{
-    auto mirType = qtWindowTypeToMirSurfaceType(type);
-    switch (mirType) {
-    case mir_surface_type_menu:
-    case mir_surface_type_tip:
-        return true;
-    default:
-        return false;
-    }
-}
-
 Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, UbuntuWindow *parentWindowHandle,
                      MirConnection *connection)
 {
@@ -537,14 +525,10 @@ void UbuntuSurface::updateGeometry(const QRect &newGeometry)
     qCDebug(ubuntumirclient,"updateGeometry(window=%p, width=%d, height=%d)", mWindow,
             newGeometry.width(), newGeometry.height());
 
-    Spec spec;
-    if (isMovable(mWindow->type())) {
-        spec = Spec{makeSurfaceSpec(mWindow, mPixelFormat, mParentWindowHandle, mConnection)};
-    } else {
-        spec = Spec{mir_connection_create_spec_for_changes(mConnection)};
-        mir_surface_spec_set_width(spec.get(), newGeometry.width());
-        mir_surface_spec_set_height(spec.get(), newGeometry.height());
-    }
+    auto spec = Spec{mir_connection_create_spec_for_changes(mConnection)};
+    mir_surface_spec_set_width(spec.get(), newGeometry.width());
+    mir_surface_spec_set_height(spec.get(), newGeometry.height());
+
     mir_surface_apply_spec(mMirSurface, spec.get());
 }
 
