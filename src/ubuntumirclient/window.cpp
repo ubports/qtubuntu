@@ -522,25 +522,32 @@ UbuntuSurface::~UbuntuSurface()
 
 void UbuntuSurface::updateGeometry(const QRect &newGeometry)
 {
-    qCDebug(ubuntumirclient,"updateGeometry(window=%p, x=%d, y=%d, width=%d, height=%d)", mWindow,
-            newGeometry.x(), newGeometry.y(), newGeometry.width(), newGeometry.height());
 
     auto spec = Spec{mir_connection_create_spec_for_changes(mConnection)};
 
     mir_surface_spec_set_width(spec.get(), newGeometry.width());
     mir_surface_spec_set_height(spec.get(), newGeometry.height());
 
-    QWindow *parentWindow = mWindow->transientParent() ? mWindow->transientParent() : mWindow->parent();
-    if (parentWindow) {
-        MirRectangle mirRect;
+    MirRectangle mirRect {0,0,0,0};
 
-        mirRect.left = newGeometry.x() - parentWindow->x();
-        mirRect.top = newGeometry.y() - parentWindow->y();
+    if (mParentWindowHandle) {
+        qCDebug(ubuntumirclient,"updateGeometry(window=%p, x=%d, y=%d, width=%d, height=%d, child)", mWindow,
+                newGeometry.x(), newGeometry.y(), newGeometry.width(), newGeometry.height());
 
-        mir_surface_spec_set_placement(spec.get(), &mirRect,
-                mir_placement_gravity_northwest /* rect_gravity */, mir_placement_gravity_northwest /* surface_gravity */,
-                (MirPlacementHints)0, 0 /* offset_dx */, 0 /* offset_dy */);
+        mirRect.left = newGeometry.x() - mParentWindowHandle->window()->x();
+        mirRect.top = newGeometry.y() - mParentWindowHandle->window()->y();
+
+    } else {
+        qCDebug(ubuntumirclient,"updateGeometry(window=%p, x=%d, y=%d, width=%d, height=%d, top-level)", mWindow,
+                newGeometry.x(), newGeometry.y(), newGeometry.width(), newGeometry.height());
+
+        mirRect.left = newGeometry.x();
+        mirRect.top = newGeometry.y();
     }
+
+    mir_surface_spec_set_placement(spec.get(), &mirRect,
+            mir_placement_gravity_northwest /* rect_gravity */, mir_placement_gravity_northwest /* surface_gravity */,
+            (MirPlacementHints)0, 0 /* offset_dx */, 0 /* offset_dy */);
 
     mir_surface_apply_spec(mMirSurface, spec.get());
 }
