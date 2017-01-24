@@ -96,20 +96,27 @@ UbuntuClientIntegration::UbuntuClientIntegration(int argc, char **argv)
     , mAppStateController(new UbuntuAppStateController)
     , mScaleFactor(1.0)
 {
+    QByteArray sessionName;
     {
         QStringList args = QCoreApplication::arguments();
         setupOptions(args);
-        QByteArray sessionName = generateSessionName(args);
+        sessionName = generateSessionName(args);
         setupDescription(sessionName);
     }
 
     // Create new application instance
     mInstance = u_application_instance_new_from_description_with_options(mDesc, mOptions);
 
-    if (mInstance == nullptr)
-        qFatal("UbuntuClientIntegration: connection to Mir server failed. Check that a Mir server is\n"
-               "running, and the correct socket is being used and is accessible. The shell may have\n"
-               "rejected the incoming connection, so check its log file");
+    if (mInstance == nullptr) {
+        qCritical("[QPA] UbuntuClientIntegration: connection to Mir server failed.\n");
+
+        // TODO: add API to platform-api to fetch Mir's error message (bug:1655970).
+        // Workaround by retrying the connection here in order to get the message.
+        auto mirConnection = mir_connect_sync(nullptr, sessionName.data());
+        qCritical("Mir returned: \"%s\"", mir_connection_get_error_message(mirConnection));
+        mir_connection_release(mirConnection);
+        exit(EXIT_FAILURE);
+    }
 
     mMirConnection = u_application_instance_get_mir_connection(mInstance);
 
