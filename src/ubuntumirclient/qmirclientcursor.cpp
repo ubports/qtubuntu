@@ -133,6 +133,28 @@ const char *qtCursorShapeToStr(Qt::CursorShape shape)
         return "???";
     }
 }
+
+class CursorWindowSpec
+{
+public:
+    CursorWindowSpec(MirConnection *connection, const char *name)
+    :  spec(mir_create_window_spec(connection))
+    {
+        mir_window_spec_set_cursor_name(spec, name);
+    }
+
+    ~CursorWindowSpec()
+    {
+        mir_window_spec_release(spec);
+    }
+
+    void apply(MirWindow *window)
+    {
+        mir_window_apply_spec(window, spec);
+    }
+private:
+    MirWindowSpec * const spec;
+};
 } // anonymous namespace
 
 void QMirClientCursor::changeCursor(QCursor *windowCursor, QWindow *window)
@@ -157,12 +179,8 @@ void QMirClientCursor::changeCursor(QCursor *windowCursor, QWindow *window)
             applyDefaultCursorConfiguration(mirWindow);
         } else {
             const auto &cursorName = mShapeToCursorName.value(windowCursor->shape(), QByteArray("left_ptr"));
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-            auto cursorConfiguration = mir_cursor_configuration_from_name(cursorName.data());
-#pragma GCC diagnostic pop
-            mir_window_configure_cursor(mirWindow, cursorConfiguration);
-            mir_cursor_configuration_destroy(cursorConfiguration);
+            CursorWindowSpec spec(mConnection, cursorName.data());
+            spec.apply(mirWindow);
         }
     } else {
         applyDefaultCursorConfiguration(mirWindow);
@@ -206,10 +224,6 @@ void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirWindow *window, QC
 
 void QMirClientCursor::applyDefaultCursorConfiguration(MirWindow *window)
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    auto cursorConfiguration = mir_cursor_configuration_from_name("left_ptr");
-#pragma GCC diagnostic pop
-    mir_window_configure_cursor(window, cursorConfiguration);
-    mir_cursor_configuration_destroy(cursorConfiguration);
+    CursorWindowSpec spec(mConnection, "left_ptr");
+    spec.apply(window);
 }
