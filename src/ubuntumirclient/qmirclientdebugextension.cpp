@@ -43,42 +43,31 @@
 #include "qmirclientlogging.h"
 
 // mir client debug
-#include <mir_toolkit/debug/surface.h>
+#include <mir_toolkit/extensions/window_coordinate_translation.h>
 
 Q_LOGGING_CATEGORY(mirclientDebug, "qt.qpa.mirclient.debug")
 
-QMirClientDebugExtension::QMirClientDebugExtension()
-    : m_mirclientDebug(QStringLiteral("mirclient-debug-extension"), 1)
-    , m_mapper(nullptr)
+QMirClientDebugExtension::QMirClientDebugExtension(MirConnection *connection)
+    : mExtension(mir_extension_window_coordinate_translation_v1(connection))
 {
-    qCDebug(mirclientDebug) << "NOTICE: Loading mirclient-debug-extension";
-    m_mapper = (MapperPrototype) m_mirclientDebug.resolve("mir_extension_window_coordinate_translation");
-
-    if (!m_mirclientDebug.isLoaded()) {
-        qCWarning(mirclientDebug) << "ERROR: mirclient-debug-extension failed to load:"
-                                  << m_mirclientDebug.errorString();
-    } else if (!m_mapper) {
-        qCWarning(mirclientDebug) << "ERROR: unable to find required symbols in mirclient-debug-extension:"
-                                  << m_mirclientDebug.errorString();
+    if (mExtension == nullptr) {
+        qCWarning(mirclientDebug) << "ERROR: no window coordinate translation extension available";
     }
 }
 
 bool QMirClientDebugExtension::isEnabled() const
 {
-    return m_mirclientDebug.isLoaded() && m_mapper;
+    return mExtension != nullptr;
 }
 
 QPoint QMirClientDebugExtension::mapWindowPointToScreen(MirWindow *window, const QPoint &point)
 {
-    if (!m_mapper) {
+    if (!mExtension) {
         return point;
     }
 
     QPoint mappedPoint;
-    bool status = m_mapper(window, point.x(), point.y(), &mappedPoint.rx(), &mappedPoint.ry());
-    if (status) {
-        return mappedPoint;
-    } else {
-        return point;
-    }
+    mExtension->window_translate_coordinates(window, point.x(), point.y(), &mappedPoint.rx(), &mappedPoint.ry());
+
+    return mappedPoint;
 }
