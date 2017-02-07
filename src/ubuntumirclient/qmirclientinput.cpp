@@ -244,20 +244,20 @@ static const char* nativeEventTypeToStr(MirEventType t)
         return "prompt_session_state_change";
     case mir_event_type_orientation:
         return "orientation";
-    case mir_event_type_close_surface:
-        return "close_surface";
+    case mir_event_type_close_window:
+        return "close_window";
     case mir_event_type_input:
         return "input";
     case mir_event_type_keymap:
         return "keymap";
     case mir_event_type_input_configuration:
         return "input_configuration";
-    case mir_event_type_surface_output:
-        return "surface_output";
+    case mir_event_type_window_output:
+        return "window_output";
     case mir_event_type_input_device_state:
         return "input_device_state";
-    case mir_event_type_surface_placement:
-        return "surface_placement";
+    case mir_event_type_window_placement:
+        return "window_placement";
     }
     Q_UNREACHABLE();
 }
