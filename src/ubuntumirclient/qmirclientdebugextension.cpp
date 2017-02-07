@@ -52,7 +52,7 @@ QMirClientDebugExtension::QMirClientDebugExtension()
     , m_mapper(nullptr)
 {
     qCDebug(mirclientDebug) << "NOTICE: Loading mirclient-debug-extension";
-    m_mapper = (MapperPrototype) m_mirclientDebug.resolve("mir_debug_surface_coords_to_screen");
+    m_mapper = (MapperPrototype) m_mirclientDebug.resolve("mir_extension_window_coordinate_translation");
 
     if (!m_mirclientDebug.isLoaded()) {
         qCWarning(mirclientDebug) << "ERROR: mirclient-debug-extension failed to load:"
