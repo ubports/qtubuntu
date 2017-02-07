@@ -141,9 +141,9 @@ void QMirClientCursor::changeCursor(QCursor *windowCursor, QWindow *window)
         return;
     }
 
-    MirSurface *surface = static_cast<QMirClientWindow*>(window->handle())->mirSurface();
+    MirWindow *mirWindow = static_cast<QMirClientWindow*>(window->handle())->mirWindow();
 
-    if (!surface) {
+    if (!mirWindow) {
         return;
     }
 
@@ -151,23 +151,26 @@ void QMirClientCursor::changeCursor(QCursor *windowCursor, QWindow *window)
     if (windowCursor) {
         qCDebug(mirclientCursor, "changeCursor shape=%s, window=%p", qtCursorShapeToStr(windowCursor->shape()), window);
         if (!windowCursor->pixmap().isNull()) {
-            configureMirCursorWithPixmapQCursor(surface, *windowCursor);
+            configureMirCursorWithPixmapQCursor(mirWindow, *windowCursor);
         } else if (windowCursor->shape() == Qt::BitmapCursor) {
             // TODO: Implement bitmap cursor support
-            applyDefaultCursorConfiguration(surface);
+            applyDefaultCursorConfiguration(mirWindow);
         } else {
             const auto &cursorName = mShapeToCursorName.value(windowCursor->shape(), QByteArray("left_ptr"));
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             auto cursorConfiguration = mir_cursor_configuration_from_name(cursorName.data());
-            mir_surface_configure_cursor(surface, cursorConfiguration);
+#pragma GCC diagnostic pop
+            mir_window_configure_cursor(mirWindow, cursorConfiguration);
             mir_cursor_configuration_destroy(cursorConfiguration);
         }
     } else {
-        applyDefaultCursorConfiguration(surface);
+        applyDefaultCursorConfiguration(mirWindow);
     }
 
 }
 
-void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirSurface *surface, QCursor &cursor)
+void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirWindow *window, QCursor &cursor)
 {
     QImage image = cursor.pixmap().toImage();
 
@@ -194,16 +197,19 @@ void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirSurface *surface, 
 
     {
         auto configuration = mir_cursor_configuration_from_buffer_stream(bufferStream, cursor.hotSpot().x(), cursor.hotSpot().y());
-        mir_surface_configure_cursor(surface, configuration);
+        mir_window_configure_cursor(window, configuration);
         mir_cursor_configuration_destroy(configuration);
     }
 
     mir_buffer_stream_release_sync(bufferStream);
 }
 
-void QMirClientCursor::applyDefaultCursorConfiguration(MirSurface *surface)
+void QMirClientCursor::applyDefaultCursorConfiguration(MirWindow *window)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     auto cursorConfiguration = mir_cursor_configuration_from_name("left_ptr");
-    mir_surface_configure_cursor(surface, cursorConfiguration);
+#pragma GCC diagnostic pop
+    mir_window_configure_cursor(window, cursorConfiguration);
     mir_cursor_configuration_destroy(cursorConfiguration);
 }

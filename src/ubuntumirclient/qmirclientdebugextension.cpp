@@ -68,14 +68,14 @@ bool QMirClientDebugExtension::isEnabled() const
     return m_mirclientDebug.isLoaded() && m_mapper;
 }
 
-QPoint QMirClientDebugExtension::mapSurfacePointToScreen(MirSurface *surface, const QPoint &point)
+QPoint QMirClientDebugExtension::mapWindowPointToScreen(MirWindow *window, const QPoint &point)
 {
     if (!m_mapper) {
         return point;
     }
 
     QPoint mappedPoint;
-    bool status = m_mapper(surface, point.x(), point.y(), &mappedPoint.rx(), &mappedPoint.ry());
+    bool status = m_mapper(window, point.x(), point.y(), &mappedPoint.rx(), &mappedPoint.ry());
     if (status) {
         return mappedPoint;
     } else {

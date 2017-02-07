@@ -71,8 +71,8 @@ protected:
     void dispatchInputEvent(QMirClientWindow *window, const MirInputEvent *event);
 
     void dispatchOrientationEvent(QWindow* window, const MirOrientationEvent *event);
-    void handleSurfaceEvent(const QPointer<QMirClientWindow> &window, const MirSurfaceEvent *event);
-    void handleSurfaceOutputEvent(const QPointer<QMirClientWindow> &window, const MirSurfaceOutputEvent *event);
+    void handleWindowEvent(const QPointer<QMirClientWindow> &window, const MirWindowEvent *event);
+    void handleWindowOutputEvent(const QPointer<QMirClientWindow> &window, const MirWindowOutputEvent *event);
 
 private:
     QMirClientClientIntegration* mIntegration;

@@ -84,14 +84,14 @@ enum UAUiWindowRole {
 
 struct MirSpecDeleter
 {
-    void operator()(MirSurfaceSpec *spec) { mir_surface_spec_release(spec); }
+    void operator()(MirWindowSpec *spec) { mir_window_spec_release(spec); }
 };
 
-using Spec = std::unique_ptr<MirSurfaceSpec, MirSpecDeleter>;
+using Spec = std::unique_ptr<MirWindowSpec, MirSpecDeleter>;
 
-EGLNativeWindowType nativeWindowFor(MirSurface *surf)
+EGLNativeWindowType nativeWindowFor(MirWindow *surf)
 {
-    auto stream = mir_surface_get_buffer_stream(surf);
+    auto stream = mir_window_get_buffer_stream(surf);
     return reinterpret_cast<EGLNativeWindowType>(mir_buffer_stream_get_egl_native_window(stream));
 }
 
@@ -112,18 +112,18 @@ const char *qtWindowStateToStr(Qt::WindowState state)
     Q_UNREACHABLE();
 }
 
-const char *mirSurfaceStateToStr(MirSurfaceState surfaceState)
+const char *mirWindowStateToStr(MirWindowState windowState)
 {
-    switch (surfaceState) {
-    case mir_surface_state_unknown: return "unknown";
-    case mir_surface_state_restored: return "restored";
-    case mir_surface_state_minimized: return "minimized";
-    case mir_surface_state_maximized: return "vertmaximized";
-    case mir_surface_state_vertmaximized: return "vertmaximized";
-    case mir_surface_state_fullscreen: return "fullscreen";
-    case mir_surface_state_horizmaximized: return "horizmaximized";
-    case mir_surface_state_hidden: return "hidden";
-    case mir_surface_states: Q_UNREACHABLE();
+    switch (windowState) {
+    case mir_window_state_unknown: return "unknown";
+    case mir_window_state_restored: return "restored";
+    case mir_window_state_minimized: return "minimized";
+    case mir_window_state_maximized: return "vertmaximized";
+    case mir_window_state_vertmaximized: return "vertmaximized";
+    case mir_window_state_fullscreen: return "fullscreen";
+    case mir_window_state_horizmaximized: return "horizmaximized";
+    case mir_window_state_hidden: return "hidden";
+    case mir_window_states: Q_UNREACHABLE();
     }
     Q_UNREACHABLE();
 }
@@ -146,57 +146,57 @@ const char *mirPixelFormatToStr(MirPixelFormat pixelFormat)
     Q_UNREACHABLE();
 }
 
-const char *mirSurfaceTypeToStr(MirSurfaceType type)
+const char *mirWindowTypeToStr(MirWindowType type)
 {
     switch (type) {
-    case mir_surface_type_normal:       return "Normal";        /**< AKA "regular"                   */
-    case mir_surface_type_utility:      return "Utility";       /**< AKA "floating regular"          */
-    case mir_surface_type_dialog:       return "Dialog";
-    case mir_surface_type_gloss:        return "Gloss";
-    case mir_surface_type_freestyle:    return "Freestyle";
-    case mir_surface_type_menu:         return "Menu";
-    case mir_surface_type_inputmethod:  return "Input Method";  /**< AKA "OSK" or handwriting etc.   */
-    case mir_surface_type_satellite:    return "Satellite";     /**< AKA "toolbox"/"toolbar"         */
-    case mir_surface_type_tip:          return "Tip";           /**< AKA "tooltip"                   */
-    case mir_surface_types:             Q_UNREACHABLE();
+    case mir_window_type_normal:       return "Normal";        /**< AKA "regular"                   */
+    case mir_window_type_utility:      return "Utility";       /**< AKA "floating regular"          */
+    case mir_window_type_dialog:       return "Dialog";
+    case mir_window_type_gloss:        return "Gloss";
+    case mir_window_type_freestyle:    return "Freestyle";
+    case mir_window_type_menu:         return "Menu";
+    case mir_window_type_inputmethod:  return "Input Method";  /**< AKA "OSK" or handwriting etc.   */
+    case mir_window_type_satellite:    return "Satellite";     /**< AKA "toolbox"/"toolbar"         */
+    case mir_window_type_tip:          return "Tip";           /**< AKA "tooltip"                   */
+    case mir_window_types:             Q_UNREACHABLE();
     }
     return "";
 }
 
-MirSurfaceState qtWindowStateToMirSurfaceState(Qt::WindowState state)
+MirWindowState qtWindowStateToMirWindowState(Qt::WindowState state)
 {
     switch (state) {
     case Qt::WindowNoState:
     case Qt::WindowActive:
-        return mir_surface_state_restored;
+        return mir_window_state_restored;
     case Qt::WindowFullScreen:
-        return mir_surface_state_fullscreen;
+        return mir_window_state_fullscreen;
     case Qt::WindowMaximized:
-        return mir_surface_state_maximized;
+        return mir_window_state_maximized;
     case Qt::WindowMinimized:
-        return mir_surface_state_minimized;
+        return mir_window_state_minimized;
     }
-    return mir_surface_state_unknown; // should never be reached
+    return mir_window_state_unknown; // should never be reached
 }
 
-MirSurfaceType qtWindowTypeToMirSurfaceType(Qt::WindowType type)
+MirWindowType qtWindowTypeToMirWindowType(Qt::WindowType type)
 {
     switch (type & Qt::WindowType_Mask) {
     case Qt::Dialog:
-        return mir_surface_type_dialog;
+        return mir_window_type_dialog;
     case Qt::Sheet:
     case Qt::Drawer:
-        return mir_surface_type_utility;
+        return mir_window_type_utility;
     case Qt::Popup:
     case Qt::Tool:
-        return mir_surface_type_menu;
+        return mir_window_type_menu;
     case Qt::ToolTip:
-        return mir_surface_type_tip;
+        return mir_window_type_tip;
     case Qt::SplashScreen:
-        return mir_surface_type_freestyle;
+        return mir_window_type_freestyle;
     case Qt::Window:
     default:
-        return mir_surface_type_normal;
+        return mir_window_type_normal;
     }
 }
 
@@ -225,15 +225,15 @@ QMirClientWindow *transientParentFor(QWindow *window)
     return parent ? static_cast<QMirClientWindow *>(parent->handle()) : nullptr;
 }
 
-bool requiresParent(const MirSurfaceType type)
+bool requiresParent(const MirWindowType type)
 {
     switch (type) {
-    case mir_surface_type_dialog: //FIXME - not quite what the specification dictates, but is what Mir's api dictates
-    case mir_surface_type_utility:
-    case mir_surface_type_gloss:
-    case mir_surface_type_menu:
-    case mir_surface_type_satellite:
-    case mir_surface_type_tip:
+    case mir_window_type_dialog: //FIXME - not quite what the specification dictates, but is what Mir's api dictates
+    case mir_window_type_utility:
+    case mir_window_type_gloss:
+    case mir_window_type_menu:
+    case mir_window_type_satellite:
+    case mir_window_type_tip:
         return true;
     default:
         return false;
@@ -242,25 +242,28 @@ bool requiresParent(const MirSurfaceType type)
 
 bool requiresParent(const Qt::WindowType type)
 {
-    return requiresParent(qtWindowTypeToMirSurfaceType(type));
+    return requiresParent(qtWindowTypeToMirWindowType(type));
 }
 
 Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWindow *parentWindowHandle,
                      MirConnection *connection)
 {
+#if MIR_CLIENT_VERSION >= MIR_VERSION_NUMBER(3, 4, 0)
+    Q_UNUSED(pixelFormat);
+#endif
     const auto geometry = window->geometry();
     const int width = geometry.width() > 0 ? geometry.width() : 1;
     const int height = geometry.height() > 0 ? geometry.height() : 1;
-    auto type = qtWindowTypeToMirSurfaceType(window->type());
+    auto type = qtWindowTypeToMirWindowType(window->type());
 
     if (U_ON_SCREEN_KEYBOARD_ROLE == roleFor(window)) {
-        type = mir_surface_type_inputmethod;
+        type = mir_window_type_inputmethod;
     }
 
     MirRectangle location{geometry.x(), geometry.y(), 0, 0};
-    MirSurface *parent = nullptr;
+    MirWindow *parent = nullptr;
     if (parentWindowHandle) {
-        parent = parentWindowHandle->mirSurface();
+        parent = parentWindowHandle->mirWindow();
         // Qt uses absolute positioning, but Mir positions surfaces relative to parent.
         location.top  -= parentWindowHandle->geometry().top();
         location.left -= parentWindowHandle->geometry().left();
@@ -269,85 +272,85 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWind
     Spec spec;
 
     switch (type) {
-    case mir_surface_type_menu:
-        spec = Spec{mir_connection_create_spec_for_menu(connection, width, height, pixelFormat, parent,
+    case mir_window_type_menu:
+        spec = Spec{mir_create_menu_window_spec(connection, width, height, parent,
                     &location, mir_edge_attachment_any)};
         break;
-    case mir_surface_type_dialog:
-        spec = Spec{mir_connection_create_spec_for_modal_dialog(connection, width, height, pixelFormat, parent)};
+    case mir_window_type_dialog:
+        spec = Spec{mir_create_modal_dialog_window_spec(connection, width, height, parent)};
         break;
-    case mir_surface_type_utility:
-        spec = Spec{mir_connection_create_spec_for_dialog(connection, width, height, pixelFormat)};
+    case mir_window_type_utility:
+        spec = Spec{mir_create_dialog_window_spec(connection, width, height)};
         break;
-    case mir_surface_type_tip:
+    case mir_window_type_tip:
 #if MIR_CLIENT_VERSION < MIR_VERSION_NUMBER(3, 4, 0)
         spec = Spec{mir_connection_create_spec_for_tooltip(connection, width, height, pixelFormat, parent,
                     &location)};
 #else
-        spec = Spec{mir_connection_create_spec_for_tip(connection, width, height, pixelFormat, parent,
+        spec = Spec{mir_create_tip_window_spec(connection, width, height, parent,
                     &location, mir_edge_attachment_any)};
 #endif
         break;
-    case mir_surface_type_inputmethod:
-        spec = Spec{mir_connection_create_spec_for_input_method(connection, width, height, pixelFormat)};
+    case mir_window_type_inputmethod:
+        spec = Spec{mir_create_input_method_window_spec(connection, width, height)};
         break;
     default:
-        spec = Spec{mir_connection_create_spec_for_normal_surface(connection, width, height, pixelFormat)};
+        spec = Spec{mir_create_normal_window_spec(connection, width, height)};
         break;
     }
 
     qCDebug(mirclient, "makeSurfaceSpec(window=%p): %s spec (type=0x%x, position=(%d, %d)px, size=(%dx%d)px)",
-            window, mirSurfaceTypeToStr(type), window->type(), location.left, location.top, width, height);
+            window, mirWindowTypeToStr(type), window->type(), location.left, location.top, width, height);
 
     return std::move(spec);
 }
 
-void setSizingConstraints(MirSurfaceSpec *spec, const QSize& minSize, const QSize& maxSize, const QSize& increment)
+void setSizingConstraints(MirWindowSpec *spec, const QSize& minSize, const QSize& maxSize, const QSize& increment)
 {
-    mir_surface_spec_set_min_width(spec, minSize.width());
-    mir_surface_spec_set_min_height(spec, minSize.height());
+    mir_window_spec_set_min_width(spec, minSize.width());
+    mir_window_spec_set_min_height(spec, minSize.height());
     if (maxSize.width() >= minSize.width()) {
-        mir_surface_spec_set_max_width(spec, maxSize.width());
+        mir_window_spec_set_max_width(spec, maxSize.width());
     }
     if (maxSize.height() >= minSize.height()) {
-        mir_surface_spec_set_max_height(spec, maxSize.height());
+        mir_window_spec_set_max_height(spec, maxSize.height());
     }
     if (increment.width() > 0) {
-        mir_surface_spec_set_width_increment(spec, increment.width());
+        mir_window_spec_set_width_increment(spec, increment.width());
     }
     if (increment.height() > 0) {
-        mir_surface_spec_set_height_increment(spec, increment.height());
+        mir_window_spec_set_height_increment(spec, increment.height());
     }
 }
 
-MirSurface *createMirSurface(QWindow *window, int mirOutputId, QMirClientWindow *parentWindowHandle,
+MirWindow *createMirWindow(QWindow *window, int mirOutputId, QMirClientWindow *parentWindowHandle,
                              MirPixelFormat pixelFormat, MirConnection *connection,
-                             mir_surface_event_callback inputCallback, void *inputContext)
+                             MirWindowEventCallback inputCallback, void *inputContext)
 {
     auto spec = makeSurfaceSpec(window, pixelFormat, parentWindowHandle, connection);
 
     // Install event handler as early as possible
-    mir_surface_spec_set_event_handler(spec.get(), inputCallback, inputContext);
+    mir_window_spec_set_event_handler(spec.get(), inputCallback, inputContext);
 
     const auto title = window->title().toUtf8();
-    mir_surface_spec_set_name(spec.get(), title.constData());
+    mir_window_spec_set_name(spec.get(), title.constData());
 
     setSizingConstraints(spec.get(), window->minimumSize(), window->maximumSize(), window->sizeIncrement());
 
     if (window->windowState() == Qt::WindowFullScreen) {
-        mir_surface_spec_set_fullscreen_on_output(spec.get(), mirOutputId);
+        mir_window_spec_set_fullscreen_on_output(spec.get(), mirOutputId);
     }
 
     if (window->flags() & LowChromeWindowHint) {
-        mir_surface_spec_set_shell_chrome(spec.get(), mir_shell_chrome_low);
+        mir_window_spec_set_shell_chrome(spec.get(), mir_shell_chrome_low);
     }
 
     if (!window->isVisible()) {
-        mir_surface_spec_set_state(spec.get(), mir_surface_state_hidden);
+        mir_window_spec_set_state(spec.get(), mir_window_state_hidden);
     }
 
-    auto surface = mir_surface_create_sync(spec.get());
-    Q_ASSERT(mir_surface_is_valid(surface));
+    auto surface = mir_create_window_sync(spec.get());
+    Q_ASSERT(mir_window_is_valid(surface));
     return surface;
 }
 
@@ -415,17 +418,17 @@ public:
     void handleSurfaceResized(int width, int height);
     int needsRepaint() const;
 
-    MirSurfaceState state() const { return mir_surface_get_state(mMirSurface); }
-    void setState(MirSurfaceState state);
+    MirWindowState state() const { return mir_window_get_state(mMirWindow); }
+    void setState(MirWindowState state);
 
-    MirSurfaceType type() const { return mir_surface_get_type(mMirSurface); }
+    MirWindowType type() const { return mir_window_get_type(mMirWindow); }
 
     void setShellChrome(MirShellChrome shellChrome);
 
     EGLSurface eglSurface() const { return mEglSurface; }
-    MirSurface *mirSurface() const { return mMirSurface; }
+    MirWindow *mirWindow() const { return mMirWindow; }
 
-    void setSurfaceParent(MirSurface*);
+    void setSurfaceParent(MirWindow*);
     bool hasParent() const { return mParented; }
 
     QSurfaceFormat format() const { return mFormat; }
@@ -435,7 +438,7 @@ public:
     QString persistentSurfaceId();
 
 private:
-    static void surfaceEventCallback(MirSurface* surface, const MirEvent *event, void* context);
+    static void surfaceEventCallback(MirWindow* surface, const MirEvent *event, void* context);
     void postEvent(const MirEvent *event);
 
     QWindow * const mWindow;
@@ -444,7 +447,7 @@ private:
     MirConnection * const mConnection;
     QMirClientWindow * mParentWindowHandle{nullptr};
 
-    MirSurface* mMirSurface;
+    MirWindow* mMirWindow;
     const EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
 
@@ -507,15 +510,15 @@ UbuntuSurface::UbuntuSurface(QMirClientWindow *platformWindow, EGLDisplay displa
 
     mParentWindowHandle = getParentIfNecessary(mWindow, input);
 
-    mMirSurface = createMirSurface(mWindow, outputId, mParentWindowHandle, mPixelFormat, connection, surfaceEventCallback, this);
-    mEglSurface = eglCreateWindowSurface(mEglDisplay, config, nativeWindowFor(mMirSurface), nullptr);
+    mMirWindow = createMirWindow(mWindow, outputId, mParentWindowHandle, mPixelFormat, connection, surfaceEventCallback, this);
+    mEglSurface = eglCreateWindowSurface(mEglDisplay, config, nativeWindowFor(mMirWindow), nullptr);
 
-    mNeedsExposeCatchup = mir_surface_get_visibility(mMirSurface) == mir_surface_visibility_occluded;
+    mNeedsExposeCatchup = mir_window_get_visibility(mMirWindow) == mir_window_visibility_occluded;
 
     // Window manager can give us a final size different from what we asked for
     // so let's check what we ended up getting
-    MirSurfaceParameters parameters;
-    mir_surface_get_parameters(mMirSurface, &parameters);
+    MirWindowParameters parameters;
+    mir_window_get_parameters(mMirWindow, &parameters);
 
     auto geom = mWindow->geometry();
     geom.setWidth(parameters.width);
@@ -538,18 +541,18 @@ UbuntuSurface::~UbuntuSurface()
 {
     if (mEglSurface != EGL_NO_SURFACE)
         eglDestroySurface(mEglDisplay, mEglSurface);
-    if (mMirSurface) {
-        mir_surface_release_sync(mMirSurface);
+    if (mMirWindow) {
+        mir_window_release_sync(mMirWindow);
     }
 }
 
 void UbuntuSurface::updateGeometry(const QRect &newGeometry)
 {
 
-    auto spec = Spec{mir_connection_create_spec_for_changes(mConnection)};
+    auto spec = Spec{mir_create_window_spec(mConnection)};
 
-    mir_surface_spec_set_width(spec.get(), newGeometry.width());
-    mir_surface_spec_set_height(spec.get(), newGeometry.height());
+    mir_window_spec_set_width(spec.get(), newGeometry.width());
+    mir_window_spec_set_height(spec.get(), newGeometry.height());
 
     MirRectangle mirRect {0,0,0,0};
 
@@ -568,26 +571,26 @@ void UbuntuSurface::updateGeometry(const QRect &newGeometry)
         mirRect.top = newGeometry.y();
     }
 
-    mir_surface_spec_set_placement(spec.get(), &mirRect,
+    mir_window_spec_set_placement(spec.get(), &mirRect,
             mir_placement_gravity_northwest /* rect_gravity */, mir_placement_gravity_northwest /* surface_gravity */,
             (MirPlacementHints)0, 0 /* offset_dx */, 0 /* offset_dy */);
 
-    mir_surface_apply_spec(mMirSurface, spec.get());
+    mir_window_apply_spec(mMirWindow, spec.get());
 }
 
 void UbuntuSurface::updateTitle(const QString& newTitle)
 {
     const auto title = newTitle.toUtf8();
-    Spec spec{mir_connection_create_spec_for_changes(mConnection)};
-    mir_surface_spec_set_name(spec.get(), title.constData());
-    mir_surface_apply_spec(mMirSurface, spec.get());
+    Spec spec{mir_create_window_spec(mConnection)};
+    mir_window_spec_set_name(spec.get(), title.constData());
+    mir_window_apply_spec(mMirWindow, spec.get());
 }
 
 void UbuntuSurface::setSizingConstraints(const QSize& minSize, const QSize& maxSize, const QSize& increment)
 {
-    Spec spec{mir_connection_create_spec_for_changes(mConnection)};
+    Spec spec{mir_create_window_spec(mConnection)};
     ::setSizingConstraints(spec.get(), minSize, maxSize, increment);
-    mir_surface_apply_spec(mMirSurface, spec.get());
+    mir_window_apply_spec(mMirWindow, spec.get());
 }
 
 void UbuntuSurface::handleSurfaceResized(int width, int height)
@@ -620,17 +623,17 @@ int UbuntuSurface::needsRepaint() const
     return 0;
 }
 
-void UbuntuSurface::setState(MirSurfaceState state)
+void UbuntuSurface::setState(MirWindowState state)
 {
-    mir_wait_for(mir_surface_set_state(mMirSurface, state));
+    mir_window_set_state(mMirWindow, state);
 }
 
 void UbuntuSurface::setShellChrome(MirShellChrome chrome)
 {
     if (chrome != mShellChrome) {
-        auto spec = Spec{mir_connection_create_spec_for_changes(mConnection)};
-        mir_surface_spec_set_shell_chrome(spec.get(), chrome);
-        mir_surface_apply_spec(mMirSurface, spec.get());
+        auto spec = Spec{mir_create_window_spec(mConnection)};
+        mir_window_spec_set_shell_chrome(spec.get(), chrome);
+        mir_window_apply_spec(mMirWindow, spec.get());
 
         mShellChrome = chrome;
     }
@@ -667,7 +670,7 @@ void UbuntuSurface::onSwapBuffersDone()
     }
 }
 
-void UbuntuSurface::surfaceEventCallback(MirSurface *surface, const MirEvent *event, void* context)
+void UbuntuSurface::surfaceEventCallback(MirWindow *surface, const MirEvent *event, void* context)
 {
     Q_UNUSED(surface);
     Q_ASSERT(context != nullptr);
@@ -697,20 +700,20 @@ void UbuntuSurface::postEvent(const MirEvent *event)
     mInput->postEvent(mPlatformWindow, event);
 }
 
-void UbuntuSurface::setSurfaceParent(MirSurface* parent)
+void UbuntuSurface::setSurfaceParent(MirWindow* parent)
 {
     qCDebug(mirclient, "setSurfaceParent(window=%p)", mWindow);
 
     mParented = true;
-    Spec spec{mir_connection_create_spec_for_changes(mConnection)};
-    mir_surface_spec_set_parent(spec.get(), parent);
-    mir_surface_apply_spec(mMirSurface, spec.get());
+    Spec spec{mir_create_window_spec(mConnection)};
+    mir_window_spec_set_parent(spec.get(), parent);
+    mir_window_apply_spec(mMirWindow, spec.get());
 }
 
 QString UbuntuSurface::persistentSurfaceId()
 {
     if (mPersistentIdStr.isEmpty()) {
-        MirPersistentId* mirPermaId = mir_surface_request_persistent_id_sync(mMirSurface);
+        MirPersistentId* mirPermaId = mir_window_request_persistent_id_sync(mMirWindow);
         mPersistentIdStr = mir_persistent_id_as_string(mirPermaId);
         mir_persistent_id_release(mirPermaId);
     }
@@ -738,7 +741,7 @@ QMirClientWindow::QMirClientWindow(QWindow *w, QMirClientInput *input, QMirClien
     qCDebug(mirclient, "QMirClientWindow(window=%p, screen=%p, input=%p, surf=%p) with title '%s', role: '%d'",
             w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()), roleFor(window()));
 
-    updatePanelHeightHack(mSurface->state() != mir_surface_state_fullscreen);
+    updatePanelHeightHack(mSurface->state() != mir_window_state_fullscreen);
 
     // queue the windowPropertyChanged signal. If it's emitted directly, the platformWindow will not yet be set for the window.
     QMetaObject::invokeMethod(mNativeInterface, "windowPropertyChanged", Qt::QueuedConnection,
@@ -878,7 +881,7 @@ QRect QMirClientWindow::geometry() const
 {
     if (mDebugExtention) {
         auto geom = QPlatformWindow::geometry();
-        geom.moveTopLeft(mDebugExtention->mapSurfacePointToScreen(mSurface->mirSurface(), QPoint(0,0)));
+        geom.moveTopLeft(mDebugExtention->mapWindowPointToScreen(mSurface->mirWindow(), QPoint(0,0)));
         return geom;
     } else {
         return QPlatformWindow::geometry();
@@ -919,7 +922,7 @@ void QMirClientWindow::setVisible(bool visible)
             // so morph it into a modal dialog
             auto parent = transientParentFor(window());
             if (parent) {
-                mSurface->setSurfaceParent(parent->mirSurface());
+                mSurface->setSurfaceParent(parent->mirWindow());
             }
         }
     }
@@ -961,7 +964,7 @@ QSurfaceFormat QMirClientWindow::format() const
 QPoint QMirClientWindow::mapToGlobal(const QPoint &pos) const
 {
     if (mDebugExtention) {
-        return mDebugExtention->mapSurfacePointToScreen(mSurface->mirSurface(), pos);
+        return mDebugExtention->mapWindowPointToScreen(mSurface->mirWindow(), pos);
     } else {
         return pos;
     }
@@ -972,9 +975,9 @@ void* QMirClientWindow::eglSurface() const
     return mSurface->eglSurface();
 }
 
-MirSurface *QMirClientWindow::mirSurface() const
+MirWindow *QMirClientWindow::mirWindow() const
 {
-    return mSurface->mirSurface();
+    return mSurface->mirWindow();
 }
 
 WId QMirClientWindow::winId() const
@@ -1008,7 +1011,7 @@ void QMirClientWindow::handleScreenPropertiesChange(MirFormFactor formFactor, fl
     if (!qFuzzyCompare(scale, mScale)) {
         mScale = scale;
         // update the panelHeight hack since it depends on GU
-        updatePanelHeightHack(mSurface->state() != mir_surface_state_fullscreen);
+        updatePanelHeightHack(mSurface->state() != mir_window_state_fullscreen);
 
         Q_EMIT mNativeInterface->windowPropertyChanged(this, QStringLiteral("scale"));
     }
@@ -1017,14 +1020,14 @@ void QMirClientWindow::handleScreenPropertiesChange(MirFormFactor formFactor, fl
 void QMirClientWindow::updateSurfaceState()
 {
     QMutexLocker lock(&mMutex);
-    MirSurfaceState newState = mWindowVisible ? qtWindowStateToMirSurfaceState(mWindowState) :
-                                                mir_surface_state_hidden;
-    qCDebug(mirclient, "updateSurfaceState (window=%p, surfaceState=%s)", window(), mirSurfaceStateToStr(newState));
+    MirWindowState newState = mWindowVisible ? qtWindowStateToMirWindowState(mWindowState) :
+                                                mir_window_state_hidden;
+    qCDebug(mirclient, "updateSurfaceState (window=%p, surfaceState=%s)", window(), mirWindowStateToStr(newState));
     if (newState != mSurface->state()) {
         mSurface->setState(newState);
 
         lock.unlock();
-        updatePanelHeightHack(newState != mir_surface_state_fullscreen);
+        updatePanelHeightHack(newState != mir_window_state_fullscreen);
     }
 }
 

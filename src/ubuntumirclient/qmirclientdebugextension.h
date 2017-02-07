@@ -43,9 +43,10 @@
 
 #include <QPoint>
 #include <QLibrary>
-struct MirSurface;
 
-typedef bool (*MapperPrototype)(MirSurface* surface, int x, int y, int* screenX, int* screenY);
+#include <mir_toolkit/mir_window.h>
+
+typedef bool (*MapperPrototype)(MirWindow* window, int x, int y, int* screenX, int* screenY);
 
 
 class QMirClientDebugExtension
@@ -55,7 +56,7 @@ public:
 
     bool isEnabled() const;
 
-    QPoint mapSurfacePointToScreen(MirSurface *, const QPoint &point);
+    QPoint mapWindowPointToScreen(MirWindow *, const QPoint &point);
 
 private:
     QLibrary m_mirclientDebug;
