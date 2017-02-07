@@ -46,6 +46,7 @@
 #include <QMutex>
 
 #include <mir_toolkit/common.h> // needed only for MirFormFactor enum
+#include <mir_toolkit/mir_window.h>
 
 #include <memory>
 
@@ -57,7 +58,6 @@ class QMirClientNativeInterface;
 class QMirClientInput;
 class QMirClientScreen;
 class UbuntuSurface;
-struct MirSurface;
 class MirConnection;
 
 class QMirClientWindow : public QObject, public QPlatformWindow
@@ -89,7 +89,7 @@ public:
 
     // New methods.
     void *eglSurface() const;
-    MirSurface *mirSurface() const;
+    MirWindow *mirWindow() const;
     void handleSurfaceResized(int width, int height);
     void handleSurfaceExposeChange(bool exposed);
     void handleSurfaceFocusChanged(bool focused);

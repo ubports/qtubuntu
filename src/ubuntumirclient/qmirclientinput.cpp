@@ -167,22 +167,22 @@ static const uint32_t KeyTable[] = {
     0,                          0
 };
 
-Qt::WindowState mirSurfaceStateToWindowState(MirSurfaceState state)
+Qt::WindowState mirWindowStateToWindowState(MirWindowState state)
 {
     switch (state) {
-    case mir_surface_state_fullscreen:
+    case mir_window_state_fullscreen:
         return Qt::WindowFullScreen;
-    case mir_surface_state_maximized:
-    case mir_surface_state_vertmaximized:
-    case mir_surface_state_horizmaximized:
+    case mir_window_state_maximized:
+    case mir_window_state_vertmaximized:
+    case mir_window_state_horizmaximized:
         return Qt::WindowMaximized;
-    case mir_surface_state_minimized:
+    case mir_window_state_minimized:
         return Qt::WindowMinimized;
-    case mir_surface_state_hidden:
+    case mir_window_state_hidden:
         // We should be handling this state separately.
         Q_ASSERT(false);
-    case mir_surface_state_restored:
-    case mir_surface_state_unknown:
+    case mir_window_state_restored:
+    case mir_window_state_unknown:
     default:
         return Qt::WindowNoState;
     }
@@ -311,10 +311,10 @@ void QMirClientInput::customEvent(QEvent* event)
         break;
     }
     case mir_event_type_surface:
-        handleSurfaceEvent(ubuntuEvent->window, mir_event_get_surface_event(nativeEvent));
+        handleWindowEvent(ubuntuEvent->window, mir_event_get_window_event(nativeEvent));
         break;
     case mir_event_type_surface_output:
-        handleSurfaceOutputEvent(ubuntuEvent->window, mir_event_get_surface_output_event(nativeEvent));
+        handleWindowOutputEvent(ubuntuEvent->window, mir_event_get_window_output_event(nativeEvent));
         break;
     case mir_event_type_orientation:
         dispatchOrientationEvent(ubuntuEvent->window->window(), mir_event_get_orientation_event(nativeEvent));
@@ -618,49 +618,49 @@ void QMirClientInput::dispatchOrientationEvent(QWindow *window, const MirOrienta
                                 new OrientationChangeEvent(OrientationChangeEvent::mType, orientation));
 }
 
-void QMirClientInput::handleSurfaceEvent(const QPointer<QMirClientWindow> &window, const MirSurfaceEvent *event)
+void QMirClientInput::handleWindowEvent(const QPointer<QMirClientWindow> &window, const MirWindowEvent *event)
 {
-    auto surfaceEventAttribute = mir_surface_event_get_attribute(event);
+    auto windowEventAttribute = mir_window_event_get_attribute(event);
 
-    switch (surfaceEventAttribute) {
-    case mir_surface_attrib_focus: {
+    switch (windowEventAttribute) {
+    case mir_window_attrib_focus: {
         window->handleSurfaceFocusChanged(
-                    mir_surface_event_get_attribute_value(event) == mir_surface_focused);
+                    mir_window_event_get_attribute_value(event) == mir_window_focus_state_focused);
         break;
     }
-    case mir_surface_attrib_visibility: {
+    case mir_window_attrib_visibility: {
         window->handleSurfaceExposeChange(
-                    mir_surface_event_get_attribute_value(event) == mir_surface_visibility_exposed);
+                    mir_window_event_get_attribute_value(event) == mir_window_visibility_exposed);
         break;
     }
     // Remaining attributes are ones client sets for server, and server should not override them
-    case mir_surface_attrib_state: {
-        MirSurfaceState state = static_cast<MirSurfaceState>(mir_surface_event_get_attribute_value(event));
+    case mir_window_attrib_state: {
+        MirWindowState state = static_cast<MirWindowState>(mir_window_event_get_attribute_value(event));
 
-        if (state == mir_surface_state_hidden) {
+        if (state == mir_window_state_hidden) {
             window->handleSurfaceVisibilityChanged(false);
         } else {
             // it's visible!
             window->handleSurfaceVisibilityChanged(true);
-            window->handleSurfaceStateChanged(mirSurfaceStateToWindowState(state));
+            window->handleSurfaceStateChanged(mirWindowStateToWindowState(state));
         }
         break;
     }
-    case mir_surface_attrib_type:
-    case mir_surface_attrib_swapinterval:
-    case mir_surface_attrib_dpi:
-    case mir_surface_attrib_preferred_orientation:
-    case mir_surface_attribs:
+    case mir_window_attrib_type:
+    case mir_window_attrib_swapinterval:
+    case mir_window_attrib_dpi:
+    case mir_window_attrib_preferred_orientation:
+    case mir_window_attribs:
         break;
     }
 }
 
-void QMirClientInput::handleSurfaceOutputEvent(const QPointer<QMirClientWindow> &window, const MirSurfaceOutputEvent *event)
+void QMirClientInput::handleWindowOutputEvent(const QPointer<QMirClientWindow> &window, const MirWindowOutputEvent *event)
 {
-    const uint32_t outputId = mir_surface_output_event_get_output_id(event);
-    const int dpi = mir_surface_output_event_get_dpi(event);
-    const MirFormFactor formFactor = mir_surface_output_event_get_form_factor(event);
-    const float scale = mir_surface_output_event_get_scale(event);
+    const uint32_t outputId = mir_window_output_event_get_output_id(event);
+    const int dpi = mir_window_output_event_get_dpi(event);
+    const MirFormFactor formFactor = mir_window_output_event_get_form_factor(event);
+    const float scale = mir_window_output_event_get_scale(event);
 
     const auto screenObserver = mIntegration->screenObserver();
     QMirClientScreen *screen = screenObserver->findScreenWithId(outputId);
