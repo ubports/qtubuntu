@@ -310,16 +310,16 @@ void QMirClientInput::customEvent(QEvent* event)
         }
         break;
     }
-    case mir_event_type_surface:
+    case mir_event_type_window:
         handleWindowEvent(ubuntuEvent->window, mir_event_get_window_event(nativeEvent));
         break;
-    case mir_event_type_surface_output:
+    case mir_event_type_window_output:
         handleWindowOutputEvent(ubuntuEvent->window, mir_event_get_window_output_event(nativeEvent));
         break;
     case mir_event_type_orientation:
         dispatchOrientationEvent(ubuntuEvent->window->window(), mir_event_get_orientation_event(nativeEvent));
         break;
-    case mir_event_type_close_surface:
+    case mir_event_type_close_window:
         QWindowSystemInterface::handleCloseEvent(ubuntuEvent->window->window());
         break;
     default:
