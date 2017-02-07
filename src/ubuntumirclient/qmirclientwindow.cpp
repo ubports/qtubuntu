@@ -248,9 +248,6 @@ bool requiresParent(const Qt::WindowType type)
 Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWindow *parentWindowHandle,
                      MirConnection *connection)
 {
-#if MIR_CLIENT_VERSION >= MIR_VERSION_NUMBER(3, 4, 0)
-    Q_UNUSED(pixelFormat);
-#endif
     const auto geometry = window->geometry();
     const int width = geometry.width() > 0 ? geometry.width() : 1;
     const int height = geometry.height() > 0 ? geometry.height() : 1;
@@ -298,6 +295,8 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWind
         spec = Spec{mir_create_normal_window_spec(connection, width, height)};
         break;
     }
+
+    mir_window_spec_set_pixel_format(spec.get(), pixelFormat);
 
     qCDebug(mirclient, "makeSurfaceSpec(window=%p): %s spec (type=0x%x, position=(%d, %d)px, size=(%dx%d)px)",
             window, mirWindowTypeToStr(type), window->type(), location.left, location.top, width, height);
