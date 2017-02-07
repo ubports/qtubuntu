@@ -236,8 +236,8 @@ static const char* nativeEventTypeToStr(MirEventType t)
         return "key";
     case mir_event_type_motion:
         return "motion";
-    case mir_event_type_surface:
-        return "surface";
+    case mir_event_type_window:
+        return "window";
     case mir_event_type_resize:
         return "resize";
     case mir_event_type_prompt_session_state_change:
