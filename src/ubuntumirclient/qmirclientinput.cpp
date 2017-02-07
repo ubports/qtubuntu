@@ -167,7 +167,7 @@ static const uint32_t KeyTable[] = {
     0,                          0
 };
 
-Qt::WindowState mirWindowStateToWindowState(MirWindowState state)
+Qt::WindowState mirWindowStateToQt(MirWindowState state)
 {
     switch (state) {
     case mir_window_state_fullscreen:
@@ -642,7 +642,7 @@ void QMirClientInput::handleWindowEvent(const QPointer<QMirClientWindow> &window
         } else {
             // it's visible!
             window->handleSurfaceVisibilityChanged(true);
-            window->handleSurfaceStateChanged(mirWindowStateToWindowState(state));
+            window->handleSurfaceStateChanged(mirWindowStateToQt(state));
         }
         break;
     }
