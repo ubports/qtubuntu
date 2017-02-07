@@ -250,14 +250,14 @@ static const char* nativeEventTypeToStr(MirEventType t)
         return "input";
     case mir_event_type_keymap:
         return "keymap";
-    case mir_event_type_input_configuration:
-        return "input_configuration";
     case mir_event_type_window_output:
         return "window_output";
     case mir_event_type_input_device_state:
         return "input_device_state";
     case mir_event_type_window_placement:
         return "window_placement";
+    default:
+        Q_UNREACHABLE();
     }
     Q_UNREACHABLE();
 }
