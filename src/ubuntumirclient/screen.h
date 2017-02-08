@@ -20,7 +20,7 @@
 #include <qpa/qplatformscreen.h>
 #include <QSurfaceFormat>
 
-#include <mircommon/mir_toolkit/common.h> // just for MirFormFactor enum
+#include <mir_toolkit/common.h> // just for MirFormFactor enum
 
 #include "cursor.h"
 
