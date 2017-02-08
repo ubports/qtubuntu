@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Canonical, Ltd.
+ * Copyright (C) 2014-2017 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -220,18 +220,6 @@ bool requiresParent(const MirSurfaceType type)
 bool requiresParent(const Qt::WindowType type)
 {
     return requiresParent(qtWindowTypeToMirSurfaceType(type));
-}
-
-bool isMovable(const Qt::WindowType type)
-{
-    auto mirType = qtWindowTypeToMirSurfaceType(type);
-    switch (mirType) {
-    case mir_surface_type_menu:
-    case mir_surface_type_tip:
-        return true;
-    default:
-        return false;
-    }
 }
 
 Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, UbuntuWindow *parentWindowHandle,
@@ -534,17 +522,33 @@ UbuntuSurface::~UbuntuSurface()
 
 void UbuntuSurface::updateGeometry(const QRect &newGeometry)
 {
-    qCDebug(ubuntumirclient,"updateGeometry(window=%p, width=%d, height=%d)", mWindow,
-            newGeometry.width(), newGeometry.height());
 
-    Spec spec;
-    if (isMovable(mWindow->type())) {
-        spec = Spec{makeSurfaceSpec(mWindow, mPixelFormat, mParentWindowHandle, mConnection)};
+    auto spec = Spec{mir_connection_create_spec_for_changes(mConnection)};
+
+    mir_surface_spec_set_width(spec.get(), newGeometry.width());
+    mir_surface_spec_set_height(spec.get(), newGeometry.height());
+
+    MirRectangle mirRect {0,0,0,0};
+
+    if (mParentWindowHandle) {
+        qCDebug(ubuntumirclient,"updateGeometry(window=%p, x=%d, y=%d, width=%d, height=%d, child)", mWindow,
+                newGeometry.x(), newGeometry.y(), newGeometry.width(), newGeometry.height());
+
+        mirRect.left = newGeometry.x() - mParentWindowHandle->window()->x();
+        mirRect.top = newGeometry.y() - mParentWindowHandle->window()->y();
+
     } else {
-        spec = Spec{mir_connection_create_spec_for_changes(mConnection)};
-        mir_surface_spec_set_width(spec.get(), newGeometry.width());
-        mir_surface_spec_set_height(spec.get(), newGeometry.height());
+        qCDebug(ubuntumirclient,"updateGeometry(window=%p, x=%d, y=%d, width=%d, height=%d, top-level)", mWindow,
+                newGeometry.x(), newGeometry.y(), newGeometry.width(), newGeometry.height());
+
+        mirRect.left = newGeometry.x();
+        mirRect.top = newGeometry.y();
     }
+
+    mir_surface_spec_set_placement(spec.get(), &mirRect,
+            mir_placement_gravity_northwest /* rect_gravity */, mir_placement_gravity_northwest /* surface_gravity */,
+            (MirPlacementHints)0, 0 /* offset_dx */, 0 /* offset_dy */);
+
     mir_surface_apply_spec(mMirSurface, spec.get());
 }
 
@@ -712,6 +716,11 @@ UbuntuWindow::UbuntuWindow(QWindow *w, UbuntuInput *input, UbuntuNativeInterface
             w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()), roleFor(window()));
 
     updatePanelHeightHack(mSurface->state() != mir_surface_state_fullscreen);
+
+    // queue the windowPropertyChanged signal. If it's emitted directly, the platformWindow will not yet be set for the window.
+    QMetaObject::invokeMethod(mNativeInterface, "windowPropertyChanged", Qt::QueuedConnection,
+                              Q_ARG(QPlatformWindow*, this),
+                              Q_ARG(QString, "persistentSurfaceId"));
 }
 
 UbuntuWindow::~UbuntuWindow()

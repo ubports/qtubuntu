@@ -28,7 +28,6 @@ SOURCES = \
     plugin.cpp \
     screen.cpp \
     screenobserver.cpp \
-    theme.cpp \
     window.cpp \
     appstatecontroller.cpp
 
@@ -41,16 +40,18 @@ HEADERS = \
     glcontext.h \
     input.h \
     integration.h \
-    logging.h \
     nativeinterface.h \
     orientationchangeevent_p.h \
     platformservices.h \
     plugin.h \
     screenobserver.h \
     screen.h \
-    theme.h \
     window.h \
+    logging.h \
     appstatecontroller.h
+
+OTHER_FILES += \
+    ubuntumirclient.json
 
 # Installation path
 target.path +=  $$[QT_INSTALL_PLUGINS]/platforms

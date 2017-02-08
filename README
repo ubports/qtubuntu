@@ -48,7 +48,9 @@
   * ubuntumirclient.input       - Messages related to input and other Mir events.
   * ubuntumirclient.graphics    - Messages related to graphics, GL and EGL.
   * ubuntumirclient.swapBuffers - Messages related to surface buffer swapping.
-  * ubuntumirclient             - For all other messages.
+  * ubuntumirclient             - For all other messages form the ubuntumirclient QPA.
+  * ubuntuappmenu.registrar     - Messages related to application menu registration.
+  * ubuntuappmenu               - For all other messages form the ubuntuappmenu QPA theme.
 
   The QT_QPA_EGLFS_DEBUG environment variable prints a little more information
   from Qt's internals.
@@ -99,4 +101,3 @@
 
   [1] http://doc-snapshot.qt-project.org/5.0/qabstractnativeeventfilter.html
   [2] http://doc-snapshot.qt-project.org/5.0/qcoreapplication.html#installNativeEventFilter
-

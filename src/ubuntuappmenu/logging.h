@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Canonical, Ltd.
+ * Copyright (C) 2016 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -14,30 +14,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "theme.h"
+#ifndef QUBUNTUTHEMELOGGING_H
+#define QUBUNTUTHEMELOGGING_H
 
-#include <QtCore/QVariant>
+#include <QLoggingCategory>
 
-const char *UbuntuTheme::name = "ubuntu";
+#define ASSERT(cond) ((!(cond)) ? qt_assert(#cond,__FILE__,__LINE__) : qt_noop())
 
-UbuntuTheme::UbuntuTheme()
-{
-}
+Q_DECLARE_LOGGING_CATEGORY(ubuntuappmenu)
+Q_DECLARE_LOGGING_CATEGORY(ubuntuappmenuRegistrar)
 
-UbuntuTheme::~UbuntuTheme()
-{
-}
-
-QVariant UbuntuTheme::themeHint(ThemeHint hint) const
-{
-    if (hint == QPlatformTheme::SystemIconThemeName) {
-        QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
-        if (iconTheme.isEmpty()) {
-            return QVariant(QStringLiteral("ubuntu-mobile"));
-        } else {
-            return QVariant(QString(iconTheme));
-        }
-    } else {
-        return QGenericUnixTheme::themeHint(hint);
-    }
-}
+#endif  // QUBUNTUTHEMELOGGING_H
