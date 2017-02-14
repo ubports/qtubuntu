@@ -712,9 +712,9 @@ void UbuntuSurface::setSurfaceParent(MirWindow* parent)
 QString UbuntuSurface::persistentSurfaceId()
 {
     if (mPersistentIdStr.isEmpty()) {
-        MirPersistentId* mirPermaId = mir_window_request_persistent_id_sync(mMirWindow);
-        mPersistentIdStr = mir_persistent_id_as_string(mirPermaId);
-        mir_persistent_id_release(mirPermaId);
+        auto id = mir_window_request_window_id_sync(mMirWindow);
+        mPersistentIdStr = mir_window_id_as_string(id);
+        mir_window_id_release(id);
     }
     return mPersistentIdStr;
 }
