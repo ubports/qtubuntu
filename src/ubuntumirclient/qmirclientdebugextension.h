@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Canonical, Ltd.
+** Copyright (C) 2016-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -43,9 +43,10 @@
 
 #include <QPoint>
 #include <QLibrary>
-struct MirSurface;
 
-typedef bool (*MapperPrototype)(MirSurface* surface, int x, int y, int* screenX, int* screenY);
+#include <mir_toolkit/mir_window.h>
+
+typedef bool (*MapperPrototype)(MirWindow* window, int x, int y, int* screenX, int* screenY);
 
 
 class QMirClientDebugExtension
@@ -55,7 +56,7 @@ public:
 
     bool isEnabled() const;
 
-    QPoint mapSurfacePointToScreen(MirSurface *, const QPoint &point);
+    QPoint mapWindowPointToScreen(MirWindow *, const QPoint &point);
 
 private:
     QLibrary m_mirclientDebug;

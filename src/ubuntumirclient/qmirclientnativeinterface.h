@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Canonical, Ltd.
+** Copyright (C) 2016-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -50,7 +50,7 @@ class QPlatformScreen;
 class QMirClientNativeInterface : public QPlatformNativeInterface {
     Q_OBJECT
 public:
-    enum ResourceType { EglDisplay, EglContext, NativeOrientation, Display, MirConnection, MirSurface, Scale, FormFactor };
+    enum ResourceType { EglDisplay, EglContext, NativeOrientation, Display, MirConnection, MirWindow, Scale, FormFactor };
 
     QMirClientNativeInterface(const QMirClientClientIntegration *integration);
     ~QMirClientNativeInterface();

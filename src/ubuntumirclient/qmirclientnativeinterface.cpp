@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Canonical, Ltd.
+** Copyright (C) 2016-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -60,7 +60,7 @@ public:
         insert("nativeorientation", QMirClientNativeInterface::NativeOrientation);
         insert("display", QMirClientNativeInterface::Display);
         insert("mirconnection", QMirClientNativeInterface::MirConnection);
-        insert("mirsurface", QMirClientNativeInterface::MirSurface);
+        insert("mirwindow", QMirClientNativeInterface::MirWindow);
         insert("scale", QMirClientNativeInterface::Scale);
         insert("formfactor", QMirClientNativeInterface::FormFactor);
     }
@@ -137,11 +137,11 @@ void* QMirClientNativeInterface::nativeResourceForWindow(const QByteArray& resou
             mNativeOrientation = new Qt::ScreenOrientation(platformScreen->nativeOrientation());
         }
         return mNativeOrientation;
-    case MirSurface:
+    case MirWindow:
         if (window) {
             auto ubuntuWindow = static_cast<QMirClientWindow*>(window->handle());
             if (ubuntuWindow) {
-                return ubuntuWindow->mirSurface();
+                return ubuntuWindow->mirWindow();
             } else {
                 return nullptr;
             }

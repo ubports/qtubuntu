@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015-2016 Canonical, Ltd.
+** Copyright (C) 2015-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -46,8 +46,9 @@
 #include <QMap>
 #include <QByteArray>
 
+#include <mir_toolkit/mir_window.h>
+
 struct MirConnection;
-struct MirSurface;
 
 class QMirClientCursor : public QPlatformCursor
 {
@@ -55,8 +56,8 @@ public:
     QMirClientCursor(MirConnection *connection);
     void changeCursor(QCursor *windowCursor, QWindow *window) override;
 private:
-    void configureMirCursorWithPixmapQCursor(MirSurface *surface, QCursor &cursor);
-    void applyDefaultCursorConfiguration(MirSurface *surface);
+    void configureMirCursorWithPixmapQCursor(MirWindow *window, QCursor &cursor);
+    void applyDefaultCursorConfiguration(MirWindow *window);
     QMap<int, QByteArray> mShapeToCursorName;
     MirConnection *mConnection;
 };

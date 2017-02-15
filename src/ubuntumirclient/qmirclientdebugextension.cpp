@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Canonical, Ltd.
+** Copyright (C) 2016-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -52,7 +52,7 @@ QMirClientDebugExtension::QMirClientDebugExtension()
     , m_mapper(nullptr)
 {
     qCDebug(mirclientDebug) << "NOTICE: Loading mirclient-debug-extension";
-    m_mapper = (MapperPrototype) m_mirclientDebug.resolve("mir_debug_surface_coords_to_screen");
+    m_mapper = (MapperPrototype) m_mirclientDebug.resolve("mir_extension_window_coordinate_translation");
 
     if (!m_mirclientDebug.isLoaded()) {
         qCWarning(mirclientDebug) << "ERROR: mirclient-debug-extension failed to load:"
@@ -68,14 +68,14 @@ bool QMirClientDebugExtension::isEnabled() const
     return m_mirclientDebug.isLoaded() && m_mapper;
 }
 
-QPoint QMirClientDebugExtension::mapSurfacePointToScreen(MirSurface *surface, const QPoint &point)
+QPoint QMirClientDebugExtension::mapWindowPointToScreen(MirWindow *window, const QPoint &point)
 {
     if (!m_mapper) {
         return point;
     }
 
     QPoint mappedPoint;
-    bool status = m_mapper(surface, point.x(), point.y(), &mappedPoint.rx(), &mappedPoint.ry());
+    bool status = m_mapper(window, point.x(), point.y(), &mappedPoint.rx(), &mappedPoint.ry());
     if (status) {
         return mappedPoint;
     } else {
