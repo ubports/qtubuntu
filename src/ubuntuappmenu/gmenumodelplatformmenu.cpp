@@ -499,6 +499,11 @@ void UbuntuPlatformMenuItem::setMenu(QPlatformMenu *menu)
     if (m_menu != menu) {
         m_menu = menu;
         Q_EMIT propertyChanged();
+
+        if (menu) {
+            connect(menu, &QObject::destroyed,
+                    this, [this] { setMenu(nullptr); });
+        }
     }
 }
 
