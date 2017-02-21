@@ -224,6 +224,7 @@ void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirWindow *window, QC
 
 void QMirClientCursor::applyDefaultCursorConfiguration(MirWindow *window)
 {
+
     CursorWindowSpec spec(mConnection, "left_ptr");
     spec.apply(window);
 }
