@@ -64,7 +64,7 @@ Q_LOGGING_CATEGORY(mirclientBufferSwap, "qt.qpa.mirclient.bufferSwap", QtWarning
 
 namespace
 {
-const Qt::WindowType InputMethodWindow = (Qt::WindowType)0x00000080; // Qt has no such thing
+const Qt::WindowType InputMethodWindowType = (Qt::WindowType)(0x00000080 | Qt::WindowType::Window); // Qt has no such thing
 const Qt::WindowType LowChromeWindowHint = (Qt::WindowType)0x00800000;
 
 
@@ -180,7 +180,7 @@ MirWindowType qtWindowTypeToMirWindowType(Qt::WindowType type)
         return mir_window_type_tip;
     case Qt::SplashScreen:
         return mir_window_type_freestyle;
-    case InputMethodWindow:
+    case InputMethodWindowType:
         return mir_window_type_inputmethod;
     case Qt::Window:
     default:
