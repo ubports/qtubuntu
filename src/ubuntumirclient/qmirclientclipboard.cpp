@@ -149,6 +149,8 @@ void QMirClientClipboard::updateMimeData()
         mMimeData = mContentHub->latestPaste(surfaceId);
         mClipboardState = SyncedClipboard;
         emitChanged(QClipboard::Clipboard);
+    } else {
+        mMimeData = nullptr;
     }
 }
 
