@@ -112,6 +112,7 @@ UbuntuGMenuModelExporter::UbuntuGMenuModelExporter(QObject *parent)
     , m_gactionGroup(g_simple_action_group_new())
     , m_exportedModel(0)
     , m_exportedActions(0)
+    , m_qtubuntuExtraHandler(nullptr)
     , m_menuPath(QStringLiteral(MENU_OBJECT_PATH).arg(s_menuId++))
 {
     m_structureTimer.setSingleShot(true);
