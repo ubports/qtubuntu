@@ -180,7 +180,7 @@ void UbuntuGMenuModelExporter::exportModels()
 
     if (!m_qtubuntuExtraHandler) {
         m_qtubuntuExtraHandler = new QtUbuntuExtraActionHandler();
-        if (!m_qtubuntuExtraHandler->connect(m_connection, menuPath)) {
+        if (!m_qtubuntuExtraHandler->connect(m_connection, menuPath, this)) {
             delete m_qtubuntuExtraHandler;
         }
     }

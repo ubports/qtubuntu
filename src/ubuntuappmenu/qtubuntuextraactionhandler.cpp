@@ -68,14 +68,14 @@ QtUbuntuExtraActionHandler::~QtUbuntuExtraActionHandler()
     g_dbus_node_info_unref(m_introspection_data);
 }
 
-bool QtUbuntuExtraActionHandler::connect(GDBusConnection *connection, const QByteArray &menuPath)
+bool QtUbuntuExtraActionHandler::connect(GDBusConnection *connection, const QByteArray &menuPath, UbuntuGMenuModelExporter *gmenuexporter)
 {
 
     GError *error = nullptr;
     guint res = g_dbus_connection_register_object (connection, menuPath.constData(),
                             m_introspection_data->interfaces[0],
                             &interface_vtable,
-                            this,
+                            gmenuexporter,
                             nullptr,
                             &error);
 

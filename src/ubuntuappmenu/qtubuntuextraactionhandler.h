@@ -21,13 +21,15 @@
 
 class QByteArray;
 
+class UbuntuGMenuModelExporter;
+
 class QtUbuntuExtraActionHandler
 {
 public:
     QtUbuntuExtraActionHandler();
     ~QtUbuntuExtraActionHandler();
 
-    bool connect(GDBusConnection *connection, const QByteArray &menuPath);
+    bool connect(GDBusConnection *connection, const QByteArray &menuPath, UbuntuGMenuModelExporter *gmenuexporter);
 
 private:
     GDBusNodeInfo *m_introspection_data;
