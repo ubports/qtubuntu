@@ -59,6 +59,7 @@ static const GDBusInterfaceVTable interface_vtable =
 };
 
 QtUbuntuExtraActionHandler::QtUbuntuExtraActionHandler()
+ : m_registration_id(0)
 {
     m_introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
 }
@@ -72,17 +73,23 @@ bool QtUbuntuExtraActionHandler::connect(GDBusConnection *connection, const QByt
 {
 
     GError *error = nullptr;
-    guint res = g_dbus_connection_register_object (connection, menuPath.constData(),
+    m_registration_id = g_dbus_connection_register_object (connection, menuPath.constData(),
                             m_introspection_data->interfaces[0],
                             &interface_vtable,
                             gmenuexporter,
                             nullptr,
                             &error);
 
-    if (!res) {
+    if (!m_registration_id) {
         qCWarning(ubuntuappmenu, "Failed to extra actions - %s", error ? error->message : "unknown error");
         g_error_free (error);
     }
 
-    return res != 0;
+    return m_registration_id != 0;
+}
+
+void QtUbuntuExtraActionHandler::disconnect(GDBusConnection *connection) {
+    if (m_registration_id) {
+        g_dbus_connection_unregister_object (connection, m_registration_id);
+    }
 }

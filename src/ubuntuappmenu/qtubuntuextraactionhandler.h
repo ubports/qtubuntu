@@ -30,9 +30,11 @@ public:
     ~QtUbuntuExtraActionHandler();
 
     bool connect(GDBusConnection *connection, const QByteArray &menuPath, UbuntuGMenuModelExporter *gmenuexporter);
+    void disconnect(GDBusConnection *connection);
 
 private:
     GDBusNodeInfo *m_introspection_data;
+    guint m_registration_id;
 };
 
 #endif

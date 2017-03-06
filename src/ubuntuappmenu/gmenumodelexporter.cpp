@@ -214,6 +214,11 @@ void UbuntuGMenuModelExporter::unexportModels()
         g_dbus_connection_unexport_action_group(m_connection, m_exportedActions);
         m_exportedActions = 0;
     }
+    if (m_qtubuntuExtraHandler) {
+        m_qtubuntuExtraHandler->disconnect(m_connection);
+        delete m_qtubuntuExtraHandler;
+    }
+    m_qtubuntuExtraHandler = nullptr;
     g_object_unref(m_connection);
     m_connection = nullptr;
 }
