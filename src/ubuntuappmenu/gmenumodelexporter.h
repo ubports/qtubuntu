@@ -26,6 +26,8 @@
 #include <QSet>
 #include <QMetaObject>
 
+class QtUbuntuExtraActionHandler;
+
 // Base class for a gmenumodel exporter
 class UbuntuGMenuModelExporter : public QObject
 {
@@ -61,6 +63,7 @@ protected:
     QSet<QByteArray> m_actions;
     guint m_exportedModel;
     guint m_exportedActions;
+    QtUbuntuExtraActionHandler *m_qtubuntuExtraHandler;
     QTimer m_structureTimer;
     QString m_menuPath;
 

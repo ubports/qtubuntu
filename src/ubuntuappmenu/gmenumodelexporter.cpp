@@ -18,6 +18,7 @@
 #include "gmenumodelexporter.h"
 #include "registry.h"
 #include "logging.h"
+#include "qtubuntuextraactionhandler.h"
 
 #include <QDebug>
 
@@ -141,46 +142,6 @@ void UbuntuGMenuModelExporter::clear()
     m_actions.clear();
 }
 
-static const gchar introspection_xml[] =
-  "<node>"
-  "  <interface name='qtubuntu.actions.extra'>"
-  "    <method name='aboutToShow'>"
-  "      <arg type='t' name='tag' direction='in'/>"
-  "    </method>"
-  "  </interface>"
-  "</node>";
-
-static void handle_method_call (GDBusConnection       *,
-                    const gchar           *,
-                    const gchar           *,
-                    const gchar           *,
-                    const gchar           *method_name,
-                    GVariant              *parameters,
-                    GDBusMethodInvocation *invocation,
-                    gpointer               user_data)
-{
-
-    if (g_strcmp0 (method_name, "aboutToShow") == 0)
-    {
-        UbuntuGMenuModelExporter *obj = (UbuntuGMenuModelExporter *)user_data;
-        guint64 tag;
-        g_variant_get (parameters, "(t)", &tag);
-        obj->aboutToShow(tag);
-
-        g_dbus_method_invocation_return_value (invocation, NULL);
-    }
-}
-
-
-static const GDBusInterfaceVTable interface_vtable =
-{
-  handle_method_call,
-  NULL,
-  NULL,
-  NULL
-};
-
-
 // Export the model on dbus
 void UbuntuGMenuModelExporter::exportModels()
 {
@@ -216,16 +177,12 @@ void UbuntuGMenuModelExporter::exportModels()
         }
     }
 
-    GDBusNodeInfo *introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
-    auto res = g_dbus_connection_register_object (m_connection, menuPath.constData(),
-                            introspection_data->interfaces[0],
-                            &interface_vtable,
-                            this,
-                            nullptr,
-                            &error
-    );
-    qDebug() << "res" << res;
-    // TODO do something with result value
+    if (!m_qtubuntuExtraHandler) {
+        m_qtubuntuExtraHandler = new QtUbuntuExtraActionHandler();
+        if (!m_qtubuntuExtraHandler->connect(m_connection, menuPath)) {
+            delete m_qtubuntuExtraHandler;
+        }
+    }
 }
 
 void UbuntuGMenuModelExporter::aboutToShow(quint64 tag)

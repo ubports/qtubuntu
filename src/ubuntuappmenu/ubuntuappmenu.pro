@@ -22,7 +22,8 @@ HEADERS += \
     logging.h \
     menuregistrar.h \
     registry.h \
-    themeplugin.h
+    themeplugin.h \
+    qtubuntuextraactionhandler.h
 
 SOURCES += \
     theme.cpp \
@@ -30,7 +31,8 @@ SOURCES += \
     gmenumodelplatformmenu.cpp \
     menuregistrar.cpp \
     registry.cpp \
-    themeplugin.cpp
+    themeplugin.cpp \
+    qtubuntuextraactionhandler.cpp
 
 OTHER_FILES += \
     ubuntuappmenu.json
