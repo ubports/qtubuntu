@@ -141,6 +141,46 @@ void UbuntuGMenuModelExporter::clear()
     m_actions.clear();
 }
 
+static const gchar introspection_xml[] =
+  "<node>"
+  "  <interface name='qtubuntu.actions.extra'>"
+  "    <method name='aboutToShow'>"
+  "      <arg type='t' name='tag' direction='in'/>"
+  "    </method>"
+  "  </interface>"
+  "</node>";
+
+static void handle_method_call (GDBusConnection       *,
+                    const gchar           *,
+                    const gchar           *,
+                    const gchar           *,
+                    const gchar           *method_name,
+                    GVariant              *parameters,
+                    GDBusMethodInvocation *invocation,
+                    gpointer               user_data)
+{
+
+    if (g_strcmp0 (method_name, "aboutToShow") == 0)
+    {
+        UbuntuGMenuModelExporter *obj = (UbuntuGMenuModelExporter *)user_data;
+        guint64 tag;
+        g_variant_get (parameters, "(t)", &tag);
+        obj->aboutToShow(tag);
+
+        g_dbus_method_invocation_return_value (invocation, NULL);
+    }
+}
+
+
+static const GDBusInterfaceVTable interface_vtable =
+{
+  handle_method_call,
+  NULL,
+  NULL,
+  NULL
+};
+
+
 // Export the model on dbus
 void UbuntuGMenuModelExporter::exportModels()
 {
@@ -175,6 +215,28 @@ void UbuntuGMenuModelExporter::exportModels()
             qCDebug(ubuntuappmenu, "Exported actions on %s", g_dbus_connection_get_unique_name(m_connection));
         }
     }
+
+    GDBusNodeInfo *introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
+    auto res = g_dbus_connection_register_object (m_connection, menuPath.constData(),
+                            introspection_data->interfaces[0],
+                            &interface_vtable,
+                            this,
+                            nullptr,
+                            &error
+    );
+    qDebug() << "res" << res;
+    // TODO do something with result value
+}
+
+void UbuntuGMenuModelExporter::aboutToShow(quint64 tag)
+{
+    UbuntuPlatformMenu* gplatformMenu = m_submenusWithTag.value(tag);
+    if (!gplatformMenu) {
+        qWarning() << "Got an aboutToShow call with an unknown tag";
+        return;
+    }
+
+    gplatformMenu->aboutToShow();
 }
 
 // Unexport the model
@@ -205,6 +267,7 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
 {
     UbuntuPlatformMenu* gplatformMenu = static_cast<UbuntuPlatformMenu*>(platformMenu);
     if (!gplatformMenu) return nullptr;
+
     GMenu* menu = g_menu_new();
 
     QByteArray label;
@@ -217,7 +280,25 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
     addSubmenuItems(gplatformMenu, menu);
 
     GMenuItem* gmenuItem = g_menu_item_new_submenu(label.constData(), G_MENU_MODEL(menu));
+    const quint64 tag = gplatformMenu->tag();
+    if (tag != 0) {
+        g_menu_item_set_attribute_value(gmenuItem, "qtubuntu-tag", g_variant_new_uint64 (tag));
+        m_submenusWithTag.insert(gplatformMenu->tag(), gplatformMenu);
+        connect(gplatformMenu, &UbuntuPlatformMenu::destroyed,
+                this, [this, tag] { m_submenusWithTag.remove(tag); });
+    }
     g_object_unref(menu);
+
+    connect(gplatformMenu, &UbuntuPlatformMenu::structureChanged, this, [this, gplatformMenu, menu]
+        {
+            // TODO clean stuff?
+            // TODO hide behind a timer so that it doesn't get called a bazillion times
+            g_menu_remove_all(menu);
+
+            addSubmenuItems(gplatformMenu, menu);
+        });
+
+
     return gmenuItem;
 }
 
@@ -270,6 +351,7 @@ GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformM
     g_menu_item_set_detailed_action(gmenuItem, ("unity." + actionLabel).constData());
 
     addAction(actionLabel, gplatformMenuItem);
+
     return gmenuItem;
 }
 

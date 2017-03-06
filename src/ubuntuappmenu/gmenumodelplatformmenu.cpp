@@ -81,8 +81,6 @@ void UbuntuPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *befor
             }
         }
     }
-    connect(static_cast<UbuntuPlatformMenu*>(menu), &UbuntuPlatformMenu::structureChanged,
-            this, &UbuntuPlatformMenuBar::structureChanged);
     Q_EMIT menuInserted(menu);
 }
 
@@ -97,8 +95,6 @@ void UbuntuPlatformMenuBar::removeMenu(QPlatformMenu *menu)
             break;
         }
     }
-    disconnect(static_cast<UbuntuPlatformMenu*>(menu), &UbuntuPlatformMenu::structureChanged,
-            this, &UbuntuPlatformMenuBar::structureChanged);
     Q_EMIT menuRemoved(menu);
 }
 
@@ -166,7 +162,8 @@ void UbuntuPlatformMenuBar::setReady(bool isReady)
 //////////////////////////////////////////////////////////////
 
 UbuntuPlatformMenu::UbuntuPlatformMenu()
-    : m_parentWindow(nullptr)
+    : m_tag(reinterpret_cast<quintptr>(this))
+    , m_parentWindow(nullptr)
     , m_exporter(nullptr)
     , m_registrar(nullptr)
 {
@@ -380,6 +377,7 @@ QDebug UbuntuPlatformMenu::operator<<(QDebug stream)
 
 UbuntuPlatformMenuItem::UbuntuPlatformMenuItem()
     : m_menu(nullptr)
+    , m_tag(reinterpret_cast<quintptr>(this))
 {
     ITEM_DEBUG_MSG << "()";
 }

@@ -22,6 +22,7 @@
 #include <gio/gio.h>
 
 #include <QTimer>
+#include <QMap>
 #include <QSet>
 #include <QMetaObject>
 
@@ -36,6 +37,8 @@ public:
     void unexportModels();
 
     QString menuPath() const { return m_menuPath;}
+
+    void aboutToShow(quint64 tag);
 
 protected:
     UbuntuGMenuModelExporter(QObject *parent);
@@ -54,6 +57,7 @@ protected:
     GDBusConnection *m_connection;
     GMenu *m_gmainMenu;
     GSimpleActionGroup *m_gactionGroup;
+    QMap<quint64, UbuntuPlatformMenu*> m_submenusWithTag;
     QSet<QByteArray> m_actions;
     guint m_exportedModel;
     guint m_exportedActions;
