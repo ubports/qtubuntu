@@ -224,7 +224,6 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
 {
     UbuntuPlatformMenu* gplatformMenu = static_cast<UbuntuPlatformMenu*>(platformMenu);
     if (!gplatformMenu) return nullptr;
-
     GMenu* menu = g_menu_new();
 
     QByteArray label;
@@ -308,7 +307,6 @@ GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformM
     g_menu_item_set_detailed_action(gmenuItem, ("unity." + actionLabel).constData());
 
     addAction(actionLabel, gplatformMenuItem);
-
     return gmenuItem;
 }
 
