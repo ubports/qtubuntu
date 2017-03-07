@@ -290,8 +290,6 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
     if (tag != 0) {
         g_menu_item_set_attribute_value(gmenuItem, "qtubuntu-tag", g_variant_new_uint64 (tag));
         m_submenusWithTag.insert(gplatformMenu->tag(), gplatformMenu);
-        connect(gplatformMenu, &UbuntuPlatformMenu::destroyed,
-                this, [this, tag] { m_submenusWithTag.remove(tag); });
     }
     g_object_unref(menu);
 
@@ -303,9 +301,15 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
             }
         });
 
-    connect(gplatformMenu, &UbuntuPlatformMenu::destroyed, this, [this, gplatformMenu]
+    connect(gplatformMenu, &UbuntuPlatformMenu::destroyed, this, [this, tag, gplatformMenu]
         {
+            m_submenusWithTag.remove(tag);
             m_gmenusForMenus.remove(gplatformMenu);
+            auto timerIdIt = m_reloadMenuTimers.find(gplatformMenu);
+            if (timerIdIt != m_reloadMenuTimers.end()) {
+                killTimer(*timerIdIt);
+                m_reloadMenuTimers.erase(timerIdIt);
+            }
         });
 
     return gmenuItem;
