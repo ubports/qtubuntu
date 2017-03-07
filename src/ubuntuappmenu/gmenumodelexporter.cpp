@@ -21,6 +21,7 @@
 #include "qtubuntuextraactionhandler.h"
 
 #include <QDebug>
+#include <QTimerEvent>
 
 #include <functional>
 
@@ -141,6 +142,35 @@ void UbuntuGMenuModelExporter::clear()
         g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
     }
     m_actions.clear();
+
+    m_gmenusForMenus.clear();
+}
+
+void UbuntuGMenuModelExporter::timerEvent(QTimerEvent *e)
+{
+    // Find the menu, it's a very short list
+    auto it = m_reloadMenuTimers.begin();
+    for (; it != m_reloadMenuTimers.end(); ++it) {
+        if (e->timerId() == it.value())
+            break;
+    }
+
+    if (it != m_reloadMenuTimers.end()) {
+        // TODO clean stuff?
+        UbuntuPlatformMenu* gplatformMenu = it.key();
+        GMenu *menu = m_gmenusForMenus.value(gplatformMenu);
+        if (menu) {
+            g_menu_remove_all(menu);
+            addSubmenuItems(gplatformMenu, menu);
+        } else {
+            qWarning() << "Got an update timer for a menu that has no GMenu" << gplatformMenu;
+        }
+
+        m_reloadMenuTimers.erase(it);
+    } else {
+        qWarning() << "Got an update timer for a timer that was not running";
+    }
+    killTimer(e->timerId());
 }
 
 // Export the model on dbus
@@ -253,13 +283,13 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
 
     connect(gplatformMenu, &UbuntuPlatformMenu::structureChanged, this, [this, gplatformMenu, menu]
         {
-            // TODO clean stuff?
-            // TODO hide behind a timer so that it doesn't get called a bazillion times
-            g_menu_remove_all(menu);
-
-            addSubmenuItems(gplatformMenu, menu);
+            if (!m_reloadMenuTimers.contains(gplatformMenu)) {
+                const int timerId = startTimer(0);
+                m_reloadMenuTimers.insert(gplatformMenu, timerId);
+            }
         });
 
+    m_gmenusForMenus.insert(gplatformMenu, menu);
 
     return gmenuItem;
 }

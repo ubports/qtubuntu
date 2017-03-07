@@ -55,6 +55,8 @@ protected:
 
     void clear();
 
+    void timerEvent(QTimerEvent *e);
+
 protected:
     GDBusConnection *m_connection;
     GMenu *m_gmainMenu;
@@ -68,6 +70,9 @@ protected:
     QString m_menuPath;
 
     QVector<QMetaObject::Connection> m_propertyConnections;
+
+    QHash<UbuntuPlatformMenu*, int> m_reloadMenuTimers;
+    QHash<UbuntuPlatformMenu*, GMenu*> m_gmenusForMenus;
 };
 
 // Class which exports a qt platform menu bar.
