@@ -46,9 +46,9 @@ protected:
     UbuntuGMenuModelExporter(QObject *parent);
 
     GMenuItem *createSubmenu(QPlatformMenu* platformMenu, UbuntuPlatformMenuItem* forItem);
-    GMenuItem *createMenuItem(QPlatformMenuItem* platformMenuItem);
+    GMenuItem *createMenuItem(QPlatformMenuItem* platformMenuItem, GMenu *parentMenu);
     GMenuItem *createSection(QList<QPlatformMenuItem*>::const_iterator iter, QList<QPlatformMenuItem*>::const_iterator end);
-    void addAction(const QByteArray& name, UbuntuPlatformMenuItem* gplatformItem);
+    void addAction(const QByteArray& name, UbuntuPlatformMenuItem* gplatformItem, GMenu *parentMenu);
 
     void addSubmenuItems(UbuntuPlatformMenu* gplatformMenu, GMenu* menu);
     void processItemForGMenu(QPlatformMenuItem* item, GMenu* gmenu);
@@ -61,18 +61,23 @@ protected:
     GDBusConnection *m_connection;
     GMenu *m_gmainMenu;
     GSimpleActionGroup *m_gactionGroup;
-    QMap<quint64, UbuntuPlatformMenu*> m_submenusWithTag;
-    QSet<QByteArray> m_actions;
     guint m_exportedModel;
     guint m_exportedActions;
     QtUbuntuExtraActionHandler *m_qtubuntuExtraHandler;
     QTimer m_structureTimer;
     QString m_menuPath;
 
-    QVector<QMetaObject::Connection> m_propertyConnections;
+    // UbuntuPlatformMenu::tag -> UbuntuPlatformMenu
+    QMap<quint64, UbuntuPlatformMenu*> m_submenusWithTag;
 
+    // UbuntuPlatformMenu -> reload TimerId (startTimer)
     QHash<UbuntuPlatformMenu*, int> m_reloadMenuTimers;
+
     QHash<UbuntuPlatformMenu*, GMenu*> m_gmenusForMenus;
+
+    QHash<GMenu*, QSet<QByteArray>> m_actions;
+    QHash<GMenu*, QVector<QMetaObject::Connection>> m_propertyConnections;
+
 };
 
 // Class which exports a qt platform menu bar.

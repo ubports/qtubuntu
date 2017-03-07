@@ -132,14 +132,19 @@ UbuntuGMenuModelExporter::~UbuntuGMenuModelExporter()
 // Clear the menu and actions that have been created.
 void UbuntuGMenuModelExporter::clear()
 {
-    Q_FOREACH(const QMetaObject::Connection& connection, m_propertyConnections) {
-        QObject::disconnect(connection);
+    Q_FOREACH(const QVector<QMetaObject::Connection>& menuPropertyConnections, m_propertyConnections) {
+        Q_FOREACH(const QMetaObject::Connection& connection, menuPropertyConnections) {
+            QObject::disconnect(connection);
+        }
     }
+    m_propertyConnections.clear();
 
     g_menu_remove_all(m_gmainMenu);
 
-    Q_FOREACH(const QByteArray& action, m_actions) {
-        g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
+    Q_FOREACH(const QSet<QByteArray>& menuActions, m_actions) {
+        Q_FOREACH(const QByteArray& action, menuActions) {
+            g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
+        }
     }
     m_actions.clear();
 
@@ -156,10 +161,17 @@ void UbuntuGMenuModelExporter::timerEvent(QTimerEvent *e)
     }
 
     if (it != m_reloadMenuTimers.end()) {
-        // TODO clean stuff?
         UbuntuPlatformMenu* gplatformMenu = it.key();
         GMenu *menu = m_gmenusForMenus.value(gplatformMenu);
         if (menu) {
+            Q_FOREACH(const QMetaObject::Connection& connection, m_propertyConnections[menu]) {
+                QObject::disconnect(connection);
+            }
+            m_propertyConnections.remove(menu);
+            Q_FOREACH(const QByteArray& action, m_actions[menu]) {
+                g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
+            }
+            m_actions.remove(menu);
             g_menu_remove_all(menu);
             addSubmenuItems(gplatformMenu, menu);
         } else {
@@ -262,6 +274,8 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
     if (!gplatformMenu) return nullptr;
     GMenu* menu = g_menu_new();
 
+    m_gmenusForMenus.insert(gplatformMenu, menu);
+
     QByteArray label;
     if (forItem) {
         label = UbuntuPlatformMenuItem::get_text(forItem).toUtf8();
@@ -289,7 +303,10 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
             }
         });
 
-    m_gmenusForMenus.insert(gplatformMenu, menu);
+    connect(gplatformMenu, &UbuntuPlatformMenu::destroyed, this, [this, gplatformMenu]
+        {
+            m_gmenusForMenus.remove(gplatformMenu);
+        });
 
     return gmenuItem;
 }
@@ -329,7 +346,7 @@ void UbuntuGMenuModelExporter::addSubmenuItems(UbuntuPlatformMenu* gplatformMenu
 
 // Create and return a gmenu item for the given platform menu item.
 // Returned GMenuItem must be cleaned up using g_object_unref
-GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuItem)
+GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuItem, GMenu *parentMenu)
 {
     UbuntuPlatformMenuItem* gplatformMenuItem = static_cast<UbuntuPlatformMenuItem*>(platformMenuItem);
     if (!gplatformMenuItem) return nullptr;
@@ -342,7 +359,7 @@ GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformM
     g_menu_item_set_attribute(gmenuItem, "accel", "s", shortcut.constData());
     g_menu_item_set_detailed_action(gmenuItem, ("unity." + actionLabel).constData());
 
-    addAction(actionLabel, gplatformMenuItem);
+    addAction(actionLabel, gplatformMenuItem, parentMenu);
     return gmenuItem;
 }
 
@@ -367,7 +384,7 @@ void UbuntuGMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMe
     if (!gplatformMenuItem) return;
 
     GMenuItem* gmenuItem = gplatformMenuItem->menu() ? createSubmenu(gplatformMenuItem->menu(), gplatformMenuItem) :
-                                                       createMenuItem(gplatformMenuItem);
+                                                       createMenuItem(gplatformMenuItem, gmenu);
     if (gmenuItem) {
         g_menu_append_item(gmenu, gmenuItem);
         g_object_unref(gmenuItem);
@@ -375,14 +392,17 @@ void UbuntuGMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMe
 }
 
 // Create and add an action for a menu item.
-void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformMenuItem *gplatformMenuItem)
+void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformMenuItem *gplatformMenuItem, GMenu *parentMenu)
 {
     disconnect(gplatformMenuItem, &UbuntuPlatformMenuItem::checkedChanged, this, 0);
     disconnect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, this, 0);
 
-    if (m_actions.contains(name)) {
+    QSet<QByteArray> &actions = m_actions[parentMenu];
+    QVector<QMetaObject::Connection> &propertyConnections = m_propertyConnections[parentMenu];
+
+    if (actions.contains(name)) {
         g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), name.constData());
-        m_actions.remove(name);
+        actions.remove(name);
     }
 
     bool checkable = UbuntuPlatformMenuItem::get_checkable(gplatformMenuItem);
@@ -399,7 +419,7 @@ void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformM
             }
         };
         // save the connection to disconnect in UbuntuGMenuModelExporter::clear()
-        m_propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::checkedChanged, this, updateChecked);
+        propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::checkedChanged, this, updateChecked);
     } else {
         action = g_simple_action_new(name.constData(), nullptr);
     }
@@ -413,11 +433,11 @@ void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformM
     };
     updateEnabled(UbuntuPlatformMenuItem::get_enabled(gplatformMenuItem));
     // save the connection to disconnect in UbuntuGMenuModelExporter::clear()
-    m_propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, this, updateEnabled);
+    propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, this, updateEnabled);
 
     g_signal_connect(action, "activate", G_CALLBACK(activate_cb), gplatformMenuItem);
 
-    m_actions.insert(name);
+    actions.insert(name);
     g_action_map_add_action(G_ACTION_MAP(m_gactionGroup), G_ACTION(action));
     g_object_unref(action);
 }
