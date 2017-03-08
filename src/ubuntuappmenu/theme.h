@@ -30,9 +30,10 @@ public:
     QVariant themeHint(ThemeHint hint) const override;
 
     // For the menus
-    virtual QPlatformMenuItem* createPlatformMenuItem() const override;
-    virtual QPlatformMenu* createPlatformMenu() const override;
-    virtual QPlatformMenuBar* createPlatformMenuBar() const override;
+    QPlatformMenuItem* createPlatformMenuItem() const override;
+    QPlatformMenu* createPlatformMenu() const override;
+    QPlatformMenuBar* createPlatformMenuBar() const override;
+    QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const override;
 };
 
 #endif // UBUNTU_THEME_H
