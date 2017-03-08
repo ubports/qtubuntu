@@ -141,10 +141,9 @@ void QMirClientClipboard::updateMimeData()
         return;
     }
 
-    delete mMimeData;
-
     QWindow *focusWindow = QGuiApplication::focusWindow();
     if (focusWindow) {
+        delete mMimeData;
         QString surfaceId = static_cast<QMirClientWindow*>(focusWindow->handle())->persistentSurfaceId();
         mMimeData = mContentHub->latestPaste(surfaceId);
         mClipboardState = SyncedClipboard;
