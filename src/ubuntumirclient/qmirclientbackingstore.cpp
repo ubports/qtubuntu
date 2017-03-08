@@ -61,7 +61,12 @@ QMirClientBackingStore::QMirClientBackingStore(QWindow* window)
 
 QMirClientBackingStore::~QMirClientBackingStore()
 {
-    mContext->makeCurrent(window()); // needed as QOpenGLTexture destructor assumes current context
+    // Paraphrasing QOpenGLCompositorBackingStore: "With render-to-texture-widgets QWidget makes
+    // sure the context is made current before destroying backingstores. That is however not the
+    // case for windows with regular widgets only.
+    if (!QOpenGLContext::currentContext()) {
+        mContext->makeCurrent(window());
+    }
 }
 
 void QMirClientBackingStore::flush(QWindow* window, const QRegion& region, const QPoint& offset)
