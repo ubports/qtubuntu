@@ -719,6 +719,8 @@ QString UbuntuSurface::persistentSurfaceId()
     return mPersistentIdStr;
 }
 
+Q_DECLARE_METATYPE(QPlatformWindow*)
+
 QMirClientWindow::QMirClientWindow(QWindow *w, QMirClientInput *input, QMirClientNativeInterface *native,
                                    QMirClientAppStateController *appState, EGLDisplay eglDisplay,
                                    MirConnection *mirConnection, QMirClientDebugExtension *debugExt)
@@ -735,6 +737,12 @@ QMirClientWindow::QMirClientWindow(QWindow *w, QMirClientInput *input, QMirClien
     , mScale(1.0)
     , mFormFactor(mir_form_factor_unknown)
 {
+    static bool metaTypeRegistered = false;
+    if (Q_UNLIKELY(!metaTypeRegistered)) {
+        qRegisterMetaType<QPlatformWindow*>();
+        metaTypeRegistered = true;
+    }
+
     mWindowExposed = mSurface->mNeedsExposeCatchup == false;
 
     qCDebug(mirclient, "QMirClientWindow(window=%p, screen=%p, input=%p, surf=%p) with title '%s', role: '%d'",
