@@ -79,6 +79,7 @@ public:
     void setWindowTitle(const QString &title) override;
     void propagateSizeHints() override;
     bool isExposed() const override;
+    void setMask(const QRegion &region) override;
 
     QPoint mapToGlobal(const QPoint &pos) const override;
     QSurfaceFormat format() const override;
