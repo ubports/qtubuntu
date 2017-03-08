@@ -166,7 +166,8 @@ void UbuntuPlatformMenuBar::setReady(bool isReady)
 //////////////////////////////////////////////////////////////
 
 UbuntuPlatformMenu::UbuntuPlatformMenu()
-    : m_parentWindow(nullptr)
+    : m_tag(reinterpret_cast<quintptr>(this))
+    , m_parentWindow(nullptr)
     , m_exporter(nullptr)
     , m_registrar(nullptr)
 {
@@ -380,6 +381,7 @@ QDebug UbuntuPlatformMenu::operator<<(QDebug stream)
 
 UbuntuPlatformMenuItem::UbuntuPlatformMenuItem()
     : m_menu(nullptr)
+    , m_tag(reinterpret_cast<quintptr>(this))
 {
     ITEM_DEBUG_MSG << "()";
 }
