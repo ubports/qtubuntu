@@ -111,6 +111,7 @@ Q_SIGNALS:
     void menuItemInserted(QPlatformMenuItem *menuItem);
     void menuItemRemoved(QPlatformMenuItem *menuItem);
     void structureChanged();
+    void enabledChanged(bool);
     void propertyChanged();
 
 private:
