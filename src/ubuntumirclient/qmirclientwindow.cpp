@@ -245,10 +245,15 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWind
                     &location, mir_edge_attachment_any)};
         break;
     case mir_window_type_dialog:
-        spec = Spec{mir_create_modal_dialog_window_spec(connection, width, height, parent)};
+        if (parent) {
+            spec = Spec{mir_create_modal_dialog_window_spec(connection, width, height, parent)};
+        } else {
+            spec = Spec{mir_create_dialog_window_spec(connection, width, height)};
+        }
         break;
-    case mir_window_type_utility:
-        spec = Spec{mir_create_dialog_window_spec(connection, width, height)};
+    case mir_window_type_utility: // mir missing mir_create_utility_window_spec
+        spec = Spec{mir_create_normal_window_spec(connection, width, height)};
+        mir_window_spec_set_type(spec.get(), mir_window_type_utility);
         break;
     case mir_window_type_tip:
 #if MIR_CLIENT_VERSION < MIR_VERSION_NUMBER(3, 4, 0)
