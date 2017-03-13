@@ -74,3 +74,11 @@ QPlatformMenuBar *UbuntuAppMenuTheme::createPlatformMenuBar() const
     if (useLocalMenu()) return QGenericUnixTheme::createPlatformMenuBar();
     return new UbuntuPlatformMenuBar();
 }
+
+QPlatformSystemTrayIcon *UbuntuAppMenuTheme::createPlatformSystemTrayIcon() const
+{
+    // We can't use QGenericUnixTheme implementation since it needs the platformMenu to
+    // be a subclass of QDBusPlatformMenu and ours isn't
+    // TODO Investigate if we're fine with not supporting system trays or we should fix it
+    return nullptr;
+}

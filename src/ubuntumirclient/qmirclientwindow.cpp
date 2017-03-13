@@ -58,29 +58,15 @@
 #include <QtGui/private/qguiapplication_p.h>
 #include <QtPlatformSupport/private/qeglconvenience_p.h>
 
-// Platform API
-#include <ubuntu/application/instance.h>
-
 #include <EGL/egl.h>
 
 Q_LOGGING_CATEGORY(mirclientBufferSwap, "qt.qpa.mirclient.bufferSwap", QtWarningMsg)
 
 namespace
 {
+const Qt::WindowType InputMethodWindowType = (Qt::WindowType)(0x00000080 | Qt::WindowType::Window); // Qt has no such thing
 const Qt::WindowType LowChromeWindowHint = (Qt::WindowType)0x00800000;
 
-// FIXME: this used to be defined by platform-api, but it's been removed in v3. Change ubuntu-keyboard to use
-// a different enum for window roles.
-enum UAUiWindowRole {
-    U_MAIN_ROLE = 1,
-    U_DASH_ROLE,
-    U_INDICATOR_ROLE,
-    U_NOTIFICATIONS_ROLE,
-    U_GREETER_ROLE,
-    U_LAUNCHER_ROLE,
-    U_ON_SCREEN_KEYBOARD_ROLE,
-    U_SHUTDOWN_DIALOG_ROLE,
-};
 
 struct MirSpecDeleter
 {
@@ -194,6 +180,8 @@ MirWindowType qtWindowTypeToMirWindowType(Qt::WindowType type)
         return mir_window_type_tip;
     case Qt::SplashScreen:
         return mir_window_type_freestyle;
+    case InputMethodWindowType:
+        return mir_window_type_inputmethod;
     case Qt::Window:
     default:
         return mir_window_type_normal;
@@ -204,19 +192,6 @@ WId makeId()
 {
     static int id = 1;
     return id++;
-}
-
-UAUiWindowRole roleFor(QWindow *window)
-{
-    QVariant roleVariant = window->property("role");
-    if (!roleVariant.isValid())
-        return U_MAIN_ROLE;
-
-    uint role = roleVariant.toUInt();
-    if (role < U_MAIN_ROLE || role > U_SHUTDOWN_DIALOG_ROLE)
-        return U_MAIN_ROLE;
-
-    return static_cast<UAUiWindowRole>(role);
 }
 
 QMirClientWindow *transientParentFor(QWindow *window)
@@ -252,10 +227,6 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWind
     const int width = geometry.width() > 0 ? geometry.width() : 1;
     const int height = geometry.height() > 0 ? geometry.height() : 1;
     auto type = qtWindowTypeToMirWindowType(window->type());
-
-    if (U_ON_SCREEN_KEYBOARD_ROLE == roleFor(window)) {
-        type = mir_window_type_inputmethod;
-    }
 
     MirRectangle location{geometry.x(), geometry.y(), 0, 0};
     MirWindow *parent = nullptr;
@@ -322,6 +293,29 @@ void setSizingConstraints(MirWindowSpec *spec, const QSize& minSize, const QSize
     }
 }
 
+void setMask(MirWindowSpec *spec, const QRegion& mask)
+{
+    const int count = mask.rectCount();
+    if (count == 0) {
+        mir_window_spec_set_input_shape(spec, nullptr, 0);
+        return;
+    }
+
+    // Convert the QRegion into a list of MirRectangles
+    auto rects = new MirRectangle[count];
+
+    int i=0;
+    for (const auto &rect : mask.rects()) {
+        rects[i].left   = rect.x();
+        rects[i].top    = rect.y();
+        rects[i].width  = (unsigned int) rect.width();
+        rects[i].height = (unsigned int) rect.height();
+        i++;
+    }
+
+    mir_window_spec_set_input_shape(spec, rects, count);
+}
+
 MirWindow *createMirWindow(QWindow *window, int mirOutputId, QMirClientWindow *parentWindowHandle,
                              MirPixelFormat pixelFormat, MirConnection *connection,
                              MirWindowEventCallback inputCallback, void *inputContext)
@@ -335,6 +329,7 @@ MirWindow *createMirWindow(QWindow *window, int mirOutputId, QMirClientWindow *p
     mir_window_spec_set_name(spec.get(), title.constData());
 
     setSizingConstraints(spec.get(), window->minimumSize(), window->maximumSize(), window->sizeIncrement());
+    setMask(spec.get(), window->mask());
 
     if (window->windowState() == Qt::WindowFullScreen) {
         mir_window_spec_set_fullscreen_on_output(spec.get(), mirOutputId);
@@ -412,6 +407,7 @@ public:
     void updateGeometry(const QRect &newGeometry);
     void updateTitle(const QString& title);
     void setSizingConstraints(const QSize& minSize, const QSize& maxSize, const QSize& increment);
+    void setMask(const QRegion &mask);
 
     void onSwapBuffersDone();
     void handleSurfaceResized(int width, int height);
@@ -528,8 +524,7 @@ UbuntuSurface::UbuntuSurface(QMirClientWindow *platformWindow, EGLDisplay displa
     platformWindow->QPlatformWindow::setGeometry(geom);
     QWindowSystemInterface::handleGeometryChange(mWindow, geom);
 
-    qCDebug(mirclient) << "Created surface with geometry:" << geom << "title:" << mWindow->title()
-                       << "role:" << roleFor(mWindow);
+    qCDebug(mirclient) << "Created surface with geometry:" << geom << "title:" << mWindow->title();
     qCDebug(mirclientGraphics)
                        << "Requested format:" << mWindow->requestedFormat()
                        << "\nActual format:" << mFormat
@@ -709,6 +704,15 @@ void UbuntuSurface::setSurfaceParent(MirWindow* parent)
     mir_window_apply_spec(mMirWindow, spec.get());
 }
 
+void UbuntuSurface::setMask(const QRegion &region)
+{
+    qCDebug(mirclient, "setMask(window=%p, region=%s)", mWindow, region);
+
+    Spec spec{mir_create_window_spec(mConnection)};
+    ::setMask(spec.get(), region);
+    mir_window_apply_spec(mMirWindow, spec.get());
+}
+
 QString UbuntuSurface::persistentSurfaceId()
 {
     if (mPersistentIdStr.isEmpty()) {
@@ -718,6 +722,8 @@ QString UbuntuSurface::persistentSurfaceId()
     }
     return mPersistentIdStr;
 }
+
+Q_DECLARE_METATYPE(QPlatformWindow*)
 
 QMirClientWindow::QMirClientWindow(QWindow *w, QMirClientInput *input, QMirClientNativeInterface *native,
                                    QMirClientAppStateController *appState, EGLDisplay eglDisplay,
@@ -735,10 +741,16 @@ QMirClientWindow::QMirClientWindow(QWindow *w, QMirClientInput *input, QMirClien
     , mScale(1.0)
     , mFormFactor(mir_form_factor_unknown)
 {
+    static bool metaTypeRegistered = false;
+    if (Q_UNLIKELY(!metaTypeRegistered)) {
+        qRegisterMetaType<QPlatformWindow*>();
+        metaTypeRegistered = true;
+    }
+
     mWindowExposed = mSurface->mNeedsExposeCatchup == false;
 
-    qCDebug(mirclient, "QMirClientWindow(window=%p, screen=%p, input=%p, surf=%p) with title '%s', role: '%d'",
-            w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()), roleFor(window()));
+    qCDebug(mirclient, "QMirClientWindow(window=%p, screen=%p, input=%p, surf=%p) with title '%s'",
+            w, w->screen()->handle(), input, mSurface.get(), qPrintable(window()->title()));
 
     updatePanelHeightHack(mSurface->state() != mir_window_state_fullscreen);
 
@@ -953,6 +965,11 @@ bool QMirClientWindow::isExposed() const
 {
     // mNeedsExposeCatchup because we need to render a frame to get the expose surface event from mir.
     return mWindowVisible && (mWindowExposed || (mSurface && mSurface->mNeedsExposeCatchup));
+}
+
+void QMirClientWindow::setMask(const QRegion &region)
+{
+    mSurface->setMask(region);
 }
 
 QSurfaceFormat QMirClientWindow::format() const

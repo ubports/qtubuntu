@@ -1,3 +1,19 @@
+qtubuntu (0.64+17.04.20170308-0ubuntu1) zesty; urgency=medium
+
+  [ Gerry Boland ]
+  * Implement QPlatformWindow::setMask and add support for special InputMethod 
+    window type
+  * BackingStore: make current only if no existing context current (LP:
+    #1665705)
+
+  [ Albert Astals Cid ]
+  * Implement UbuntuAppMenuTheme::createPlatformSystemTrayIcon
+  * Register metatype used in queued invokeMethod
+  * Make sure mMimeData doesn't point to already deleted memory
+  * Initialize m_tag
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Wed, 08 Mar 2017 11:59:55 +0000
+
 qtubuntu (0.63+17.04.20170215-0ubuntu1) zesty; urgency=medium
 
   [ Albert Astals Cid ]
