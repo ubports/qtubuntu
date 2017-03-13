@@ -76,7 +76,7 @@ QMirClientBackingStore::~QMirClientBackingStore()
         mContext->makeCurrent(tempSurface.data());
     }
     // QOpenGLTexture will go out of scope, is then deleted. Then QOpenGLContext falls out of
-    // scope, calls done_current and is then deleted.
+    // scope, calls doneCurrent and is then deleted.
 }
 
 void QMirClientBackingStore::flush(QWindow* window, const QRegion& region, const QPoint& offset)
