@@ -67,7 +67,7 @@ QMirClientBackingStore::~QMirClientBackingStore()
 
     // Paraphrasing QOpenGLCompositorBackingStore: "With render-to-texture-widgets QWidget makes
     // sure the context is made current before destroying backingstores. That is however not the
-    // case for windows with regular widgets only.
+    // case for windows with regular widgets only."
     auto context = QOpenGLContext::currentContext();
     QScopedPointer<QOffscreenSurface> tempSurface;
     if (!context) { // QWindow's backing QPlatformSurface probably gone, use temp one for cleanup
