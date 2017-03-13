@@ -65,7 +65,7 @@ QMirClientBackingStore::~QMirClientBackingStore()
     if (!mTexture->isCreated())
         return;
 
-    // According to QOpenGLCompositorBackingStore: "With render-to-texture-widgets QWidget makes
+    // Paraphrasing QOpenGLCompositorBackingStore: "With render-to-texture-widgets QWidget makes
     // sure the context is made current before destroying backingstores. That is however not the
     // case for windows with regular widgets only.
     auto context = QOpenGLContext::currentContext();
