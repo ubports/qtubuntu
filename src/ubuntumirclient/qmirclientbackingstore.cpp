@@ -61,12 +61,22 @@ QMirClientBackingStore::QMirClientBackingStore(QWindow* window)
 
 QMirClientBackingStore::~QMirClientBackingStore()
 {
-    // Paraphrasing QOpenGLCompositorBackingStore: "With render-to-texture-widgets QWidget makes
+    if (!mTexture->isCreated())
+        return;
+
+    // According to QOpenGLCompositorBackingStore: "With render-to-texture-widgets QWidget makes
     // sure the context is made current before destroying backingstores. That is however not the
     // case for windows with regular widgets only.
-    if (!QOpenGLContext::currentContext()) {
-        mContext->makeCurrent(window());
+    auto context = QOpenGLContext::currentContext();
+    QScopedPointer<QOffscreenSurface> tempSurface;
+    if (!context) { // QWindow's backing QPlatformSurface probably gone, use temp one for cleanup
+        tempSurface.reset(new QOffscreenSurface);
+        tempSurface->setFormat(mContext->format());
+        tempSurface->create();
+        mContext->makeCurrent(tempSurface.data());
     }
+    // QOpenGLTexture will go out of scope, is then deleted. Then QOpenGLContext falls out of
+    // scope, calls done_current and is then deleted.
 }
 
 void QMirClientBackingStore::flush(QWindow* window, const QRegion& region, const QPoint& offset)
