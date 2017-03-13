@@ -40,6 +40,7 @@
 
 #include "qmirclientbackingstore.h"
 #include "qmirclientlogging.h"
+#include <QtGui/QOffscreenSurface>
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QMatrix4x4>
