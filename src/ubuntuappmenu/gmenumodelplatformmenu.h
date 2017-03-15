@@ -89,9 +89,9 @@ public:
     virtual void setMinimumWidth(int width) override;
     virtual void setFont(const QFont &font) override;
 
-    virtual void showPopup(const QWindow *parentWindow, const QRect &targetRect, const QPlatformMenuItem *item);
+    virtual void showPopup(const QWindow *parentWindow, const QRect &targetRect, const QPlatformMenuItem *item) override;
 
-    virtual void dismiss(); // Closes this and all its related menu popups
+    virtual void dismiss() override; // Closes this and all its related menu popups
 
     virtual QPlatformMenuItem *menuItemAt(int position) const override;
     virtual QPlatformMenuItem *menuItemForTag(quintptr tag) const override;
