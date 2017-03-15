@@ -706,7 +706,7 @@ void UbuntuSurface::setSurfaceParent(MirWindow* parent)
 
 void UbuntuSurface::setMask(const QRegion &region)
 {
-    qCDebug(mirclient).nospace() << "setMask(window=" << nullptr << ", region=" << region << ")";
+    qCDebug(mirclient).nospace() << "setMask(window=" << mWindow << ", region=" << region << ")";
 
     Spec spec{mir_create_window_spec(mConnection)};
     ::setMask(spec.get(), region);
