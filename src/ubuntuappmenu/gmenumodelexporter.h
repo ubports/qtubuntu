@@ -55,7 +55,7 @@ protected:
 
     void clear();
 
-    void timerEvent(QTimerEvent *e);
+    void timerEvent(QTimerEvent *e) override;
 
 protected:
     GDBusConnection *m_connection;
