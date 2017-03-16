@@ -40,12 +40,20 @@ static void handle_method_call (GDBusConnection       *,
 
     if (g_strcmp0 (method_name, "aboutToShow") == 0)
     {
-        UbuntuGMenuModelExporter *obj = (UbuntuGMenuModelExporter *)user_data;
-        guint64 tag;
-        g_variant_get (parameters, "(t)", &tag);
-        obj->aboutToShow(tag);
+        if (g_variant_check_format_string(parameters, "(t)", false)) {
+            auto obj = static_cast<UbuntuGMenuModelExporter*>(user_data);
+            guint64 tag;
+
+            g_variant_get (parameters, "(t)", &tag);
+            obj->aboutToShow(tag);
+        }
 
         g_dbus_method_invocation_return_value (invocation, NULL);
+    } else {
+        g_dbus_method_invocation_return_error(invocation,
+                                              G_DBUS_ERROR,
+                                              G_DBUS_ERROR_UNKNOWN_METHOD,
+                                              "Unknown method");
     }
 }
 
@@ -66,11 +74,15 @@ QtUbuntuExtraActionHandler::QtUbuntuExtraActionHandler()
 
 QtUbuntuExtraActionHandler::~QtUbuntuExtraActionHandler()
 {
-    g_dbus_node_info_unref(m_introspection_data);
+    g_clear_pointer(&m_introspection_data, g_dbus_node_info_unref);
 }
 
 bool QtUbuntuExtraActionHandler::connect(GDBusConnection *connection, const QByteArray &menuPath, UbuntuGMenuModelExporter *gmenuexporter)
 {
+    if (m_registration_id != 0) {
+        qCWarning(ubuntuappmenu, "Called connect in an already connected QtUbuntuExtraActionHandler");
+        return false;
+    }
 
     GError *error = nullptr;
     m_registration_id = g_dbus_connection_register_object (connection, menuPath.constData(),
@@ -82,7 +94,7 @@ bool QtUbuntuExtraActionHandler::connect(GDBusConnection *connection, const QByt
 
     if (!m_registration_id) {
         qCWarning(ubuntuappmenu, "Failed to extra actions - %s", error ? error->message : "unknown error");
-        g_error_free (error);
+        g_clear_error(&error);
     }
 
     return m_registration_id != 0;
