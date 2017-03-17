@@ -174,8 +174,9 @@ MirWindowType qtWindowTypeToMirWindowType(Qt::WindowType type)
     case Qt::Drawer:
         return mir_window_type_utility;
     case Qt::Popup:
-    case Qt::Tool:
         return mir_window_type_menu;
+    case Qt::Tool:
+        return mir_window_type_satellite;
     case Qt::ToolTip:
         return mir_window_type_tip;
     case Qt::SplashScreen:
@@ -261,6 +262,15 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWind
         break;
     case mir_window_type_inputmethod:
         spec = Spec{mir_create_input_method_window_spec(connection, width, height)};
+        break;
+    case mir_window_type_satellite:
+        // There's no helper function for satellite windows. Guess they're not very popular
+        spec = Spec{mir_create_window_spec(connection)};
+        mir_window_spec_set_type(spec.get(), mir_window_type_satellite);
+        mir_window_spec_set_buffer_usage(spec.get(), mir_buffer_usage_hardware);
+        mir_window_spec_set_parent(spec.get(), parent);
+        mir_window_spec_set_width(spec.get(), width);
+        mir_window_spec_set_height(spec.get(), height);
         break;
     default:
         spec = Spec{mir_create_normal_window_spec(connection, width, height)};
