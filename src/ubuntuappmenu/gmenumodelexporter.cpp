@@ -73,6 +73,13 @@ UbuntuMenuBarExporter::UbuntuMenuBarExporter(UbuntuPlatformMenuBar * bar)
                 g_menu_append_item(m_gmainMenu, item);
                 g_object_unref(item);
             }
+
+            UbuntuPlatformMenu* gplatformMenu = static_cast<UbuntuPlatformMenu*>(platformMenu);
+            if (gplatformMenu) {
+                // Sadly we don't have a better way to propagate a enabled change in a top level menu
+                // than reseting the whole menubar
+                connect(gplatformMenu, &UbuntuPlatformMenu::enabledChanged, bar, &UbuntuPlatformMenuBar::structureChanged);
+            }
         }
     });
 
@@ -278,13 +285,27 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
     m_gmenusForMenus.insert(gplatformMenu, menu);
 
     QByteArray label;
+    bool enabled;
     if (forItem) {
         label = UbuntuPlatformMenuItem::get_text(forItem).toUtf8();
+        enabled = UbuntuPlatformMenuItem::get_enabled(forItem);
     } else {
         label = UbuntuPlatformMenu::get_text(gplatformMenu).toUtf8();
+        enabled = UbuntuPlatformMenu::get_enabled(gplatformMenu);
     }
 
     addSubmenuItems(gplatformMenu, menu);
+
+    Q_FOREACH(QPlatformMenuItem *childItem, gplatformMenu->menuItems()) {
+        UbuntuPlatformMenuItem* gplatformMenuItem = static_cast<UbuntuPlatformMenuItem*>(childItem);
+        if (!gplatformMenuItem) continue;
+
+        // Sadly we don't have a better way to propagate a enabled change in a item-that-is-submenu
+        // than reseting the whole parent menu
+        if (gplatformMenuItem->menu()) {
+            connect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, gplatformMenu, &UbuntuPlatformMenu::structureChanged);
+        }
+    }
 
     GMenuItem* gmenuItem = g_menu_item_new_submenu(label.constData(), G_MENU_MODEL(menu));
     const quint64 tag = gplatformMenu->tag();
@@ -294,7 +315,9 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
     }
     g_object_unref(menu);
 
-    connect(gplatformMenu, &UbuntuPlatformMenu::structureChanged, this, [this, gplatformMenu, menu]
+    g_menu_item_set_attribute_value(gmenuItem, "submenu-enabled", g_variant_new_boolean(enabled));
+
+    connect(gplatformMenu, &UbuntuPlatformMenu::structureChanged, this, [this, gplatformMenu]
         {
             if (!m_reloadMenuTimers.contains(gplatformMenu)) {
                 const int timerId = startTimer(0);

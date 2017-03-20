@@ -261,6 +261,7 @@ void UbuntuPlatformMenu::setEnabled(bool enabled)
 
     if (m_enabled != enabled) {
         m_enabled = enabled;
+        Q_EMIT enabledChanged(enabled);
         Q_EMIT propertyChanged();
     }
 }
