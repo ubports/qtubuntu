@@ -58,7 +58,7 @@ class QMirClientDebugExtension;
 class QMirClientInput;
 class QMirClientNativeInterface;
 class QMirClientScreen;
-class MirConnection;
+struct MirConnection;
 
 class QMirClientClientIntegration : public QObject, public QPlatformIntegration
 {

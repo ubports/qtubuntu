@@ -277,7 +277,7 @@ Spec makeSurfaceSpec(QWindow *window, MirPixelFormat pixelFormat, QMirClientWind
     qCDebug(mirclient, "makeSurfaceSpec(window=%p): %s spec (type=0x%x, position=(%d, %d)px, size=(%dx%d)px)",
             window, mirWindowTypeToStr(type), window->type(), location.left, location.top, width, height);
 
-    return std::move(spec);
+    return spec;
 }
 
 void setSizingConstraints(MirWindowSpec *spec, const QSize& minSize, const QSize& maxSize, const QSize& increment)
@@ -711,7 +711,7 @@ void UbuntuSurface::setSurfaceParent(MirWindow* parent)
 
 void UbuntuSurface::setMask(const QRegion &region)
 {
-    qCDebug(mirclient, "setMask(window=%p, region=%s)", mWindow, region);
+    qCDebug(mirclient).nospace() << "setMask(window=" << mWindow << ", region=" << region << ")";
 
     Spec spec{mir_create_window_spec(mConnection)};
     ::setMask(spec.get(), region);

@@ -58,7 +58,7 @@ class QMirClientNativeInterface;
 class QMirClientInput;
 class QMirClientScreen;
 class UbuntuSurface;
-class MirConnection;
+struct MirConnection;
 
 class QMirClientWindow : public QObject, public QPlatformWindow
 {
