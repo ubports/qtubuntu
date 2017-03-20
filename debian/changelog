@@ -1,3 +1,18 @@
+qtubuntu (0.64+17.04.20170320-0ubuntu1) zesty; urgency=medium
+
+  [ Albert Astals Cid ]
+  * Set qtubuntu-tag and handle aboutToShow calls (LP: #1664578)
+  * Set enabled state for menus in the submenu-enabled property since
+    GMenuModel doesn't support that concept (LP: #1670694)
+  * fix image conversion to Format_ARGB32
+  * Build with clang
+
+  [ Gerry Boland ]
+  * Use correct parented/parentless dialog and utility window types from
+    Mir
+
+ -- Lukáš Tinkl <lukas.tinkl@canonical.com>  Mon, 20 Mar 2017 17:31:42 +0000
+
 qtubuntu (0.64+17.04.20170308-0ubuntu1) zesty; urgency=medium
 
   [ Gerry Boland ]
