@@ -22,8 +22,11 @@
 #include <gio/gio.h>
 
 #include <QTimer>
+#include <QMap>
 #include <QSet>
 #include <QMetaObject>
+
+class QtUbuntuExtraActionHandler;
 
 // Base class for a gmenumodel exporter
 class UbuntuGMenuModelExporter : public QObject
@@ -37,30 +40,44 @@ public:
 
     QString menuPath() const { return m_menuPath;}
 
+    void aboutToShow(quint64 tag);
+
 protected:
     UbuntuGMenuModelExporter(QObject *parent);
 
     GMenuItem *createSubmenu(QPlatformMenu* platformMenu, UbuntuPlatformMenuItem* forItem);
-    GMenuItem *createMenuItem(QPlatformMenuItem* platformMenuItem);
+    GMenuItem *createMenuItem(QPlatformMenuItem* platformMenuItem, GMenu *parentMenu);
     GMenuItem *createSection(QList<QPlatformMenuItem*>::const_iterator iter, QList<QPlatformMenuItem*>::const_iterator end);
-    void addAction(const QByteArray& name, UbuntuPlatformMenuItem* gplatformItem);
+    void addAction(const QByteArray& name, UbuntuPlatformMenuItem* gplatformItem, GMenu *parentMenu);
 
     void addSubmenuItems(UbuntuPlatformMenu* gplatformMenu, GMenu* menu);
     void processItemForGMenu(QPlatformMenuItem* item, GMenu* gmenu);
 
     void clear();
 
+    void timerEvent(QTimerEvent *e) override;
+
 protected:
     GDBusConnection *m_connection;
     GMenu *m_gmainMenu;
     GSimpleActionGroup *m_gactionGroup;
-    QSet<QByteArray> m_actions;
     guint m_exportedModel;
     guint m_exportedActions;
+    QtUbuntuExtraActionHandler *m_qtubuntuExtraHandler;
     QTimer m_structureTimer;
     QString m_menuPath;
 
-    QVector<QMetaObject::Connection> m_propertyConnections;
+    // UbuntuPlatformMenu::tag -> UbuntuPlatformMenu
+    QMap<quint64, UbuntuPlatformMenu*> m_submenusWithTag;
+
+    // UbuntuPlatformMenu -> reload TimerId (startTimer)
+    QHash<UbuntuPlatformMenu*, int> m_reloadMenuTimers;
+
+    QHash<UbuntuPlatformMenu*, GMenu*> m_gmenusForMenus;
+
+    QHash<GMenu*, QSet<QByteArray>> m_actions;
+    QHash<GMenu*, QVector<QMetaObject::Connection>> m_propertyConnections;
+
 };
 
 // Class which exports a qt platform menu bar.

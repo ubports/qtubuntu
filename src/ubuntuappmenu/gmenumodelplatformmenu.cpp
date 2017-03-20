@@ -81,8 +81,6 @@ void UbuntuPlatformMenuBar::insertMenu(QPlatformMenu *menu, QPlatformMenu *befor
             }
         }
     }
-    connect(static_cast<UbuntuPlatformMenu*>(menu), &UbuntuPlatformMenu::structureChanged,
-            this, &UbuntuPlatformMenuBar::structureChanged);
     Q_EMIT menuInserted(menu);
 }
 
@@ -97,8 +95,6 @@ void UbuntuPlatformMenuBar::removeMenu(QPlatformMenu *menu)
             break;
         }
     }
-    disconnect(static_cast<UbuntuPlatformMenu*>(menu), &UbuntuPlatformMenu::structureChanged,
-            this, &UbuntuPlatformMenuBar::structureChanged);
     Q_EMIT menuRemoved(menu);
 }
 

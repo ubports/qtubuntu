@@ -18,8 +18,10 @@
 #include "gmenumodelexporter.h"
 #include "registry.h"
 #include "logging.h"
+#include "qtubuntuextraactionhandler.h"
 
 #include <QDebug>
+#include <QTimerEvent>
 
 #include <functional>
 
@@ -111,6 +113,7 @@ UbuntuGMenuModelExporter::UbuntuGMenuModelExporter(QObject *parent)
     , m_gactionGroup(g_simple_action_group_new())
     , m_exportedModel(0)
     , m_exportedActions(0)
+    , m_qtubuntuExtraHandler(nullptr)
     , m_menuPath(QStringLiteral(MENU_OBJECT_PATH).arg(s_menuId++))
 {
     m_structureTimer.setSingleShot(true);
@@ -129,16 +132,57 @@ UbuntuGMenuModelExporter::~UbuntuGMenuModelExporter()
 // Clear the menu and actions that have been created.
 void UbuntuGMenuModelExporter::clear()
 {
-    Q_FOREACH(const QMetaObject::Connection& connection, m_propertyConnections) {
-        QObject::disconnect(connection);
+    Q_FOREACH(const QVector<QMetaObject::Connection>& menuPropertyConnections, m_propertyConnections) {
+        Q_FOREACH(const QMetaObject::Connection& connection, menuPropertyConnections) {
+            QObject::disconnect(connection);
+        }
     }
+    m_propertyConnections.clear();
 
     g_menu_remove_all(m_gmainMenu);
 
-    Q_FOREACH(const QByteArray& action, m_actions) {
-        g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
+    Q_FOREACH(const QSet<QByteArray>& menuActions, m_actions) {
+        Q_FOREACH(const QByteArray& action, menuActions) {
+            g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
+        }
     }
     m_actions.clear();
+
+    m_gmenusForMenus.clear();
+}
+
+void UbuntuGMenuModelExporter::timerEvent(QTimerEvent *e)
+{
+    // Find the menu, it's a very short list
+    auto it = m_reloadMenuTimers.begin();
+    for (; it != m_reloadMenuTimers.end(); ++it) {
+        if (e->timerId() == it.value())
+            break;
+    }
+
+    if (it != m_reloadMenuTimers.end()) {
+        UbuntuPlatformMenu* gplatformMenu = it.key();
+        GMenu *menu = m_gmenusForMenus.value(gplatformMenu);
+        if (menu) {
+            Q_FOREACH(const QMetaObject::Connection& connection, m_propertyConnections[menu]) {
+                QObject::disconnect(connection);
+            }
+            m_propertyConnections.remove(menu);
+            Q_FOREACH(const QByteArray& action, m_actions[menu]) {
+                g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), action.constData());
+            }
+            m_actions.remove(menu);
+            g_menu_remove_all(menu);
+            addSubmenuItems(gplatformMenu, menu);
+        } else {
+            qWarning() << "Got an update timer for a menu that has no GMenu" << gplatformMenu;
+        }
+
+        m_reloadMenuTimers.erase(it);
+    } else {
+        qWarning() << "Got an update timer for a timer that was not running";
+    }
+    killTimer(e->timerId());
 }
 
 // Export the model on dbus
@@ -175,6 +219,25 @@ void UbuntuGMenuModelExporter::exportModels()
             qCDebug(ubuntuappmenu, "Exported actions on %s", g_dbus_connection_get_unique_name(m_connection));
         }
     }
+
+    if (!m_qtubuntuExtraHandler) {
+        m_qtubuntuExtraHandler = new QtUbuntuExtraActionHandler();
+        if (!m_qtubuntuExtraHandler->connect(m_connection, menuPath, this)) {
+            delete m_qtubuntuExtraHandler;
+            m_qtubuntuExtraHandler = nullptr;
+        }
+    }
+}
+
+void UbuntuGMenuModelExporter::aboutToShow(quint64 tag)
+{
+    UbuntuPlatformMenu* gplatformMenu = m_submenusWithTag.value(tag);
+    if (!gplatformMenu) {
+        qWarning() << "Got an aboutToShow call with an unknown tag";
+        return;
+    }
+
+    gplatformMenu->aboutToShow();
 }
 
 // Unexport the model
@@ -194,6 +257,11 @@ void UbuntuGMenuModelExporter::unexportModels()
         g_dbus_connection_unexport_action_group(m_connection, m_exportedActions);
         m_exportedActions = 0;
     }
+    if (m_qtubuntuExtraHandler) {
+        m_qtubuntuExtraHandler->disconnect(m_connection);
+        delete m_qtubuntuExtraHandler;
+        m_qtubuntuExtraHandler = nullptr;
+    }
     g_object_unref(m_connection);
     m_connection = nullptr;
 }
@@ -207,6 +275,8 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
     if (!gplatformMenu) return nullptr;
     GMenu* menu = g_menu_new();
 
+    m_gmenusForMenus.insert(gplatformMenu, menu);
+
     QByteArray label;
     if (forItem) {
         label = UbuntuPlatformMenuItem::get_text(forItem).toUtf8();
@@ -217,7 +287,32 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
     addSubmenuItems(gplatformMenu, menu);
 
     GMenuItem* gmenuItem = g_menu_item_new_submenu(label.constData(), G_MENU_MODEL(menu));
+    const quint64 tag = gplatformMenu->tag();
+    if (tag != 0) {
+        g_menu_item_set_attribute_value(gmenuItem, "qtubuntu-tag", g_variant_new_uint64 (tag));
+        m_submenusWithTag.insert(gplatformMenu->tag(), gplatformMenu);
+    }
     g_object_unref(menu);
+
+    connect(gplatformMenu, &UbuntuPlatformMenu::structureChanged, this, [this, gplatformMenu, menu]
+        {
+            if (!m_reloadMenuTimers.contains(gplatformMenu)) {
+                const int timerId = startTimer(0);
+                m_reloadMenuTimers.insert(gplatformMenu, timerId);
+            }
+        });
+
+    connect(gplatformMenu, &UbuntuPlatformMenu::destroyed, this, [this, tag, gplatformMenu]
+        {
+            m_submenusWithTag.remove(tag);
+            m_gmenusForMenus.remove(gplatformMenu);
+            auto timerIdIt = m_reloadMenuTimers.find(gplatformMenu);
+            if (timerIdIt != m_reloadMenuTimers.end()) {
+                killTimer(*timerIdIt);
+                m_reloadMenuTimers.erase(timerIdIt);
+            }
+        });
+
     return gmenuItem;
 }
 
@@ -256,7 +351,7 @@ void UbuntuGMenuModelExporter::addSubmenuItems(UbuntuPlatformMenu* gplatformMenu
 
 // Create and return a gmenu item for the given platform menu item.
 // Returned GMenuItem must be cleaned up using g_object_unref
-GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuItem)
+GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformMenuItem, GMenu *parentMenu)
 {
     UbuntuPlatformMenuItem* gplatformMenuItem = static_cast<UbuntuPlatformMenuItem*>(platformMenuItem);
     if (!gplatformMenuItem) return nullptr;
@@ -269,7 +364,7 @@ GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformM
     g_menu_item_set_attribute(gmenuItem, "accel", "s", shortcut.constData());
     g_menu_item_set_detailed_action(gmenuItem, ("unity." + actionLabel).constData());
 
-    addAction(actionLabel, gplatformMenuItem);
+    addAction(actionLabel, gplatformMenuItem, parentMenu);
     return gmenuItem;
 }
 
@@ -294,7 +389,7 @@ void UbuntuGMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMe
     if (!gplatformMenuItem) return;
 
     GMenuItem* gmenuItem = gplatformMenuItem->menu() ? createSubmenu(gplatformMenuItem->menu(), gplatformMenuItem) :
-                                                       createMenuItem(gplatformMenuItem);
+                                                       createMenuItem(gplatformMenuItem, gmenu);
     if (gmenuItem) {
         g_menu_append_item(gmenu, gmenuItem);
         g_object_unref(gmenuItem);
@@ -302,14 +397,17 @@ void UbuntuGMenuModelExporter::processItemForGMenu(QPlatformMenuItem *platformMe
 }
 
 // Create and add an action for a menu item.
-void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformMenuItem *gplatformMenuItem)
+void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformMenuItem *gplatformMenuItem, GMenu *parentMenu)
 {
     disconnect(gplatformMenuItem, &UbuntuPlatformMenuItem::checkedChanged, this, 0);
     disconnect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, this, 0);
 
-    if (m_actions.contains(name)) {
+    QSet<QByteArray> &actions = m_actions[parentMenu];
+    QVector<QMetaObject::Connection> &propertyConnections = m_propertyConnections[parentMenu];
+
+    if (actions.contains(name)) {
         g_action_map_remove_action(G_ACTION_MAP(m_gactionGroup), name.constData());
-        m_actions.remove(name);
+        actions.remove(name);
     }
 
     bool checkable = UbuntuPlatformMenuItem::get_checkable(gplatformMenuItem);
@@ -326,7 +424,7 @@ void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformM
             }
         };
         // save the connection to disconnect in UbuntuGMenuModelExporter::clear()
-        m_propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::checkedChanged, this, updateChecked);
+        propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::checkedChanged, this, updateChecked);
     } else {
         action = g_simple_action_new(name.constData(), nullptr);
     }
@@ -340,11 +438,11 @@ void UbuntuGMenuModelExporter::addAction(const QByteArray &name, UbuntuPlatformM
     };
     updateEnabled(UbuntuPlatformMenuItem::get_enabled(gplatformMenuItem));
     // save the connection to disconnect in UbuntuGMenuModelExporter::clear()
-    m_propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, this, updateEnabled);
+    propertyConnections << connect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, this, updateEnabled);
 
     g_signal_connect(action, "activate", G_CALLBACK(activate_cb), gplatformMenuItem);
 
-    m_actions.insert(name);
+    actions.insert(name);
     g_action_map_add_action(G_ACTION_MAP(m_gactionGroup), G_ACTION(action));
     g_object_unref(action);
 }
