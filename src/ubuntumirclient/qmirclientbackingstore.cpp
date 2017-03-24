@@ -69,12 +69,11 @@ QMirClientBackingStore::~QMirClientBackingStore()
     // sure the context is made current before destroying backingstores. That is however not the
     // case for windows with regular widgets only."
     auto context = QOpenGLContext::currentContext();
-    QScopedPointer<QOffscreenSurface> tempSurface;
     if (!context) { // QWindow's backing QPlatformSurface probably gone, use temp one for cleanup
-        tempSurface.reset(new QOffscreenSurface);
-        tempSurface->setFormat(mContext->format());
-        tempSurface->create();
-        mContext->makeCurrent(tempSurface.data());
+        QOffscreenSurface tempSurface;
+        tempSurface.setFormat(mContext->format());
+        tempSurface.create();
+        mContext->makeCurrent(&tempSurface);
     }
     // QOpenGLTexture will go out of scope, is then deleted. Then QOpenGLContext falls out of
     // scope, calls doneCurrent and is then deleted.
