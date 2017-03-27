@@ -305,6 +305,7 @@ GMenuItem *UbuntuGMenuModelExporter::createSubmenu(QPlatformMenu *platformMenu, 
         if (gplatformMenuItem->menu()) {
             connect(gplatformMenuItem, &UbuntuPlatformMenuItem::enabledChanged, gplatformMenu, &UbuntuPlatformMenu::structureChanged);
         }
+        connect(gplatformMenuItem, &UbuntuPlatformMenuItem::visibleChanged, gplatformMenu, &UbuntuPlatformMenu::structureChanged);
     }
 
     GMenuItem* gmenuItem = g_menu_item_new_submenu(label.constData(), G_MENU_MODEL(menu));
@@ -378,6 +379,9 @@ GMenuItem *UbuntuGMenuModelExporter::createMenuItem(QPlatformMenuItem *platformM
 {
     UbuntuPlatformMenuItem* gplatformMenuItem = static_cast<UbuntuPlatformMenuItem*>(platformMenuItem);
     if (!gplatformMenuItem) return nullptr;
+
+    if (!UbuntuPlatformMenuItem::get_visible(gplatformMenuItem))
+        return nullptr;
 
     QByteArray label(UbuntuPlatformMenuItem::get_text(gplatformMenuItem).toUtf8());
     QByteArray actionLabel(getActionString(UbuntuPlatformMenuItem::get_text(gplatformMenuItem)).toUtf8());

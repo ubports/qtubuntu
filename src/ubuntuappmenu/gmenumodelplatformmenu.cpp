@@ -417,6 +417,7 @@ void UbuntuPlatformMenuItem::setVisible(bool isVisible)
     ITEM_DEBUG_MSG << "(visible=" << isVisible << ")";
     if (m_visible != isVisible) {
         m_visible = isVisible;
+        Q_EMIT visibleChanged(m_visible);
     }
 }
 

@@ -159,6 +159,7 @@ public:
 Q_SIGNALS:
     void checkedChanged(bool);
     void enabledChanged(bool);
+    void visibleChanged(bool);
 
 private:
     MENU_PROPERTY(UbuntuPlatformMenuItem, separator, bool, false)
