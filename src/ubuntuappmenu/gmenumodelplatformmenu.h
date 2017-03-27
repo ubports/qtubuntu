@@ -112,7 +112,6 @@ Q_SIGNALS:
     void menuItemRemoved(QPlatformMenuItem *menuItem);
     void structureChanged();
     void enabledChanged(bool);
-    void propertyChanged();
 
 private:
     MENU_PROPERTY(UbuntuPlatformMenu, visible, bool, true)
@@ -160,7 +159,6 @@ public:
 Q_SIGNALS:
     void checkedChanged(bool);
     void enabledChanged(bool);
-    void propertyChanged();
 
 private:
     MENU_PROPERTY(UbuntuPlatformMenuItem, separator, bool, false)
