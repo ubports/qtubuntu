@@ -42,25 +42,22 @@
 #define QMIRCLIENTDEBUGEXTENSION_H
 
 #include <QPoint>
-#include <QLibrary>
 
 #include <mir_toolkit/mir_window.h>
 
-typedef bool (*MapperPrototype)(MirWindow* window, int x, int y, int* screenX, int* screenY);
-
+struct MirExtensionWindowCoordinateTranslationV1;
 
 class QMirClientDebugExtension
 {
 public:
-    QMirClientDebugExtension();
+    QMirClientDebugExtension(MirConnection *connection);
 
     bool isEnabled() const;
 
     QPoint mapWindowPointToScreen(MirWindow *, const QPoint &point);
 
 private:
-    QLibrary m_mirclientDebug;
-    MapperPrototype m_mapper;
+    MirExtensionWindowCoordinateTranslationV1 const *mExtension;
 };
 
 #endif // QMIRCLIENTDEBUGEXTENSION_H

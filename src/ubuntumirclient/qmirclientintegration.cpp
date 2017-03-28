@@ -163,7 +163,7 @@ QMirClientClientIntegration::QMirClientClientIntegration(int argc, char **argv)
         }
     }
     if (testability) {
-        mDebugExtension.reset(new QMirClientDebugExtension);
+        mDebugExtension.reset(new QMirClientDebugExtension(mMirConnection));
         if (!mDebugExtension->isEnabled()) {
             mDebugExtension.reset();
         }
