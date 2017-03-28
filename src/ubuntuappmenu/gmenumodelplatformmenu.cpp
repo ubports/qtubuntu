@@ -241,7 +241,6 @@ void UbuntuPlatformMenu::setText(const QString &text)
     MENU_DEBUG_MSG << "(text=" << text << ")";
     if (m_text != text) {
         m_text = text;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -251,7 +250,6 @@ void UbuntuPlatformMenu::setIcon(const QIcon &icon)
 
     if (!icon.isNull() || (!m_icon.isNull() && icon.isNull())) {
         m_icon = icon;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -262,7 +260,6 @@ void UbuntuPlatformMenu::setEnabled(bool enabled)
     if (m_enabled != enabled) {
         m_enabled = enabled;
         Q_EMIT enabledChanged(enabled);
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -272,7 +269,6 @@ void UbuntuPlatformMenu::setVisible(bool isVisible)
 
     if (m_visible != isVisible) {
         m_visible = isVisible;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -404,7 +400,6 @@ void UbuntuPlatformMenuItem::setText(const QString &text)
     ITEM_DEBUG_MSG << "(text=" << text << ")";
     if (m_text != text) {
         m_text = text;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -414,7 +409,6 @@ void UbuntuPlatformMenuItem::setIcon(const QIcon &icon)
 
     if (!icon.isNull() || (!m_icon.isNull() && icon.isNull())) {
         m_icon = icon;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -423,7 +417,6 @@ void UbuntuPlatformMenuItem::setVisible(bool isVisible)
     ITEM_DEBUG_MSG << "(visible=" << isVisible << ")";
     if (m_visible != isVisible) {
         m_visible = isVisible;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -432,7 +425,6 @@ void UbuntuPlatformMenuItem::setIsSeparator(bool isSeparator)
     ITEM_DEBUG_MSG << "(separator=" << isSeparator << ")";
     if (m_separator != isSeparator) {
         m_separator = isSeparator;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -453,7 +445,6 @@ void UbuntuPlatformMenuItem::setCheckable(bool checkable)
     ITEM_DEBUG_MSG << "(checkable=" << checkable << ")";
     if (m_checkable != checkable) {
         m_checkable = checkable;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -463,7 +454,6 @@ void UbuntuPlatformMenuItem::setChecked(bool isChecked)
     if (m_checked != isChecked) {
         m_checked = isChecked;
         Q_EMIT checkedChanged(isChecked);
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -472,7 +462,6 @@ void UbuntuPlatformMenuItem::setShortcut(const QKeySequence &shortcut)
     ITEM_DEBUG_MSG << "(shortcut=" << shortcut << ")";
     if (m_shortcut != shortcut) {
         m_shortcut = shortcut;
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -482,7 +471,6 @@ void UbuntuPlatformMenuItem::setEnabled(bool enabled)
     if (m_enabled != enabled) {
         m_enabled = enabled;
         Q_EMIT enabledChanged(enabled);
-        Q_EMIT propertyChanged();
     }
 }
 
@@ -497,7 +485,6 @@ void UbuntuPlatformMenuItem::setMenu(QPlatformMenu *menu)
     ITEM_DEBUG_MSG << "(menu=" << menu << ")";
     if (m_menu != menu) {
         m_menu = menu;
-        Q_EMIT propertyChanged();
 
         if (menu) {
             connect(menu, &QObject::destroyed,
