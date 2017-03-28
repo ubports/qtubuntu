@@ -1,3 +1,22 @@
+qtubuntu (0.64+17.04.20170328.1-0ubuntu1) zesty; urgency=medium
+
+  [ Albert Astals Cid ]
+  * Remove signal noone uses
+  * Honor the menu item visibility (LP: #1675802)
+
+  [ Alberto Aguirre, Arthur Mello ]
+  * Remove more uses of deprecated mir apis.
+
+  [ Daniel d'Andrada ]
+  * Qt::Tool == mir_window_type_satellite (LP: #1673415)
+  * Proper implementation of QPlatformScreen::logicalDpi (LP: #1675572)
+
+  [ Gerry Boland ]
+  * BackingStore: is possible for context's QPlatformSurface to be
+    deleted before backing store is.
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Tue, 28 Mar 2017 17:13:20 +0000
+
 qtubuntu (0.64+17.04.20170320-0ubuntu1) zesty; urgency=medium
 
   [ Albert Astals Cid ]
