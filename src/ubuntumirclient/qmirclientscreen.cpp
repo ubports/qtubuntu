@@ -56,12 +56,11 @@
 
 #include <memory>
 
-#define ENV_GRID_UNIT_PX "GRID_UNIT_PX"
+#define ENV_LOGICAL_DPI "QT_LOGICAL_DPI"
 
 static const int overrideDevicePixelRatio = qgetenv("QT_DEVICE_PIXEL_RATIO").toInt();
 
-const float QMirClientScreen::mGridUnitToLogicalDpiMultiplier = 14.0; // by experimentation
-const float QMirClientScreen::mMirScaleToGridUnitMultiplier = 8.0; // by definition in qtmir
+const float QMirClientScreen::mMirScaleToLogicalDpiMultiplier = 96.0; // by definition in qtmir
 
 static const char *orientationToStr(Qt::ScreenOrientation orientation) {
     switch (orientation) {
@@ -93,17 +92,15 @@ QMirClientScreen::QMirClientScreen(const MirOutput *output, MirConnection *conne
     , mCursor(connection)
 {
 
-    if (qEnvironmentVariableIsSet(ENV_GRID_UNIT_PX)) {
-        QByteArray stringValue = qgetenv(ENV_GRID_UNIT_PX);
+    if (qEnvironmentVariableIsSet(ENV_LOGICAL_DPI)) {
+        QByteArray stringValue = qgetenv(ENV_LOGICAL_DPI);
         bool ok;
         float value = stringValue.toFloat(&ok);
         if (ok && value > 0) {
-            mGridUnitPxEnv = value;
+            mLogicalDpiEnv = value;
         }
     }
 
-    mLogicalDpi.first = 0;
-    mLogicalDpi.second = 0;
     updateLogicalDpi();
 
     setMirOutput(output);
@@ -276,12 +273,10 @@ void QMirClientScreen::updateLogicalDpi()
 {
     auto oldDpi = mLogicalDpi;
 
-    if (mGridUnitPxEnv != 0) {
-        mLogicalDpi.first = mGridUnitPxEnv * mGridUnitToLogicalDpiMultiplier;
-        mLogicalDpi.second = mGridUnitPxEnv * mGridUnitToLogicalDpiMultiplier;
+    if (mLogicalDpiEnv != 0) {
+        mLogicalDpi.first = mLogicalDpi.second = mLogicalDpiEnv;
     } else {
-        mLogicalDpi.first = mScale * mMirScaleToGridUnitMultiplier * mGridUnitToLogicalDpiMultiplier;
-        mLogicalDpi.second = mScale * mMirScaleToGridUnitMultiplier * mGridUnitToLogicalDpiMultiplier;
+        mLogicalDpi.first = mLogicalDpi.second = mScale * mMirScaleToLogicalDpiMultiplier;
     }
 
     if (oldDpi.first != 0 && oldDpi.second != 0 && oldDpi != mLogicalDpi) {

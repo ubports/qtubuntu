@@ -99,11 +99,10 @@ private:
     float mScale;
     int mOutputId;
     QMirClientCursor mCursor;
-    float mGridUnitPxEnv{0};
+    float mLogicalDpiEnv{0};
     QDpi mLogicalDpi;
 
-    static const float mGridUnitToLogicalDpiMultiplier;
-    static const float mMirScaleToGridUnitMultiplier;
+    static const float mMirScaleToLogicalDpiMultiplier;
 
     friend class QMirClientNativeInterface;
 };
