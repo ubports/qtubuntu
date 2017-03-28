@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Canonical, Ltd.
+** Copyright (C) 2014-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -56,7 +56,11 @@
 
 #include <memory>
 
+#define ENV_LOGICAL_DPI "QT_LOGICAL_DPI"
+
 static const int overrideDevicePixelRatio = qgetenv("QT_DEVICE_PIXEL_RATIO").toInt();
+
+const float QMirClientScreen::mMirScaleToLogicalDpiMultiplier = 96.0; // by definition in qtmir
 
 static const char *orientationToStr(Qt::ScreenOrientation orientation) {
     switch (orientation) {
@@ -82,12 +86,23 @@ QMirClientScreen::QMirClientScreen(const MirOutput *output, MirConnection *conne
     : mDevicePixelRatio(1.0)
     , mFormat(QImage::Format_RGB32)
     , mDepth(32)
-    , mDpi{0}
     , mFormFactor{mir_form_factor_unknown}
     , mScale{1.0}
     , mOutputId(0)
     , mCursor(connection)
 {
+
+    if (qEnvironmentVariableIsSet(ENV_LOGICAL_DPI)) {
+        QByteArray stringValue = qgetenv(ENV_LOGICAL_DPI);
+        bool ok;
+        float value = stringValue.toFloat(&ok);
+        if (ok && value > 0) {
+            mLogicalDpiEnv = value;
+        }
+    }
+
+    updateLogicalDpi();
+
     setMirOutput(output);
 }
 
@@ -183,6 +198,7 @@ void QMirClientScreen::setMirOutput(const MirOutput *output)
 
     // UI scale & DPR
     mScale = mir_output_get_scale_factor(output);
+    updateLogicalDpi();
     if (overrideDevicePixelRatio > 0) {
         mDevicePixelRatio = overrideDevicePixelRatio;
     } else {
@@ -234,16 +250,12 @@ void QMirClientScreen::updateMirOutput(const MirOutput *output)
     }
 }
 
-void QMirClientScreen::setAdditionalMirDisplayProperties(float scale, MirFormFactor formFactor, int dpi)
+void QMirClientScreen::setAdditionalMirDisplayProperties(float scale, MirFormFactor formFactor, int /*dpi*/)
 {
-    if (mDpi != dpi) {
-        mDpi = dpi;
-        QWindowSystemInterface::handleScreenLogicalDotsPerInchChange(screen(), dpi, dpi);
-    }
-
     auto nativeInterface = static_cast<QMirClientNativeInterface *>(qGuiApp->platformNativeInterface());
     if (!qFuzzyCompare(mScale, scale)) {
         mScale = scale;
+        updateLogicalDpi();
         nativeInterface->screenPropertyChanged(this, QStringLiteral("scale"));
     }
     if (mFormFactor != formFactor) {
@@ -254,9 +266,20 @@ void QMirClientScreen::setAdditionalMirDisplayProperties(float scale, MirFormFac
 
 QDpi QMirClientScreen::logicalDpi() const
 {
-    if (mDpi > 0) {
-        return QDpi(mDpi, mDpi);
+    return mLogicalDpi;
+}
+
+void QMirClientScreen::updateLogicalDpi()
+{
+    auto oldDpi = mLogicalDpi;
+
+    if (mLogicalDpiEnv != 0) {
+        mLogicalDpi.first = mLogicalDpi.second = mLogicalDpiEnv;
     } else {
-        return QPlatformScreen::logicalDpi();
+        mLogicalDpi.first = mLogicalDpi.second = mScale * mMirScaleToLogicalDpiMultiplier;
+    }
+
+    if (oldDpi.first != 0 && oldDpi.second != 0 && oldDpi != mLogicalDpi) {
+        QWindowSystemInterface::handleScreenLogicalDotsPerInchChange(screen(), mLogicalDpi.first, mLogicalDpi.second);
     }
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Canonical, Ltd.
+** Copyright (C) 2014-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -85,6 +85,7 @@ public:
 
 private:
     void setMirOutput(const MirOutput *output);
+    void updateLogicalDpi();
 
     QRect mGeometry, mNativeGeometry;
     QSizeF mPhysicalSize;
@@ -93,12 +94,15 @@ private:
     Qt::ScreenOrientation mCurrentOrientation;
     QImage::Format mFormat;
     int mDepth;
-    int mDpi;
     qreal mRefreshRate;
     MirFormFactor mFormFactor;
     float mScale;
     int mOutputId;
     QMirClientCursor mCursor;
+    float mLogicalDpiEnv{0};
+    QDpi mLogicalDpi;
+
+    static const float mMirScaleToLogicalDpiMultiplier;
 
     friend class QMirClientNativeInterface;
 };
