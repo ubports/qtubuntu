@@ -24,16 +24,20 @@ class UbuntuAppMenuTheme : public QGenericUnixTheme
 public:
     static const char* name;
     UbuntuAppMenuTheme();
-    virtual ~UbuntuAppMenuTheme();
+    ~UbuntuAppMenuTheme() = default;
 
     // From QPlatformTheme
     QVariant themeHint(ThemeHint hint) const override;
+    const QFont *font(Font type) const override;
 
     // For the menus
     QPlatformMenuItem* createPlatformMenuItem() const override;
     QPlatformMenu* createPlatformMenu() const override;
     QPlatformMenuBar* createPlatformMenuBar() const override;
     QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const override;
+
+private:
+    QFont systemFont, fixedFont;
 };
 
 #endif // UBUNTU_THEME_H

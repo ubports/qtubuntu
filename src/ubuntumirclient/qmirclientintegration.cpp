@@ -75,21 +75,46 @@
 class UbuntuIconTheme : public QGenericUnixTheme
 {
 public:
-    UbuntuIconTheme() {}
+    UbuntuIconTheme()
+      : systemFont(QStringLiteral("Ubuntu Regular"), 10),
+        fixedFont(QStringLiteral("Ubuntu Mono Regular"), 13)
+    {
+        systemFont.setStyleHint(QFont::System);
+        fixedFont.setStyleHint(QFont::TypeWriter);
+    }
 
     // From QPlatformTheme
-    QVariant themeHint(ThemeHint hint) const override {
-        if (hint == QPlatformTheme::SystemIconThemeName) {
+    QVariant themeHint(ThemeHint hint) const override
+    {
+        switch (hint) {
+        case QPlatformTheme::SystemIconThemeName: {
             QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
             if (iconTheme.isEmpty()) {
-                return QVariant(QStringLiteral("ubuntu-mobile"));
+                return QStringLiteral("suru");
             } else {
-                return QVariant(QString(iconTheme));
+                return iconTheme;
             }
-        } else {
-            return QGenericUnixTheme::themeHint(hint);
+        }
+        default:
+            break;
+        }
+        return QGenericUnixTheme::themeHint(hint);
+    }
+
+    const QFont *font(Font type) const override
+    {
+        switch (type) {
+        case QPlatformTheme::SystemFont:
+            return &systemFont;
+        case QPlatformTheme::FixedFont:
+            return &fixedFont;
+        default:
+            return nullptr;
         }
     }
+
+private:
+    QFont systemFont, fixedFont;
 };
 
 static void resumedCallback(const UApplicationOptions */*options*/, void *context)

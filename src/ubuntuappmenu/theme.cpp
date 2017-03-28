@@ -34,26 +34,41 @@ bool useLocalMenu() {
 
 }
 
-UbuntuAppMenuTheme::UbuntuAppMenuTheme()
+UbuntuAppMenuTheme::UbuntuAppMenuTheme():
+    systemFont(QStringLiteral("Ubuntu Regular"), 10),
+    fixedFont(QStringLiteral("Ubuntu Mono Regular"), 13)
 {
     qCDebug(ubuntuappmenu, "UbuntuAppMenuTheme::UbuntuAppMenuTheme() - useLocalMenu=%s", useLocalMenu() ? "true" : "false");
-}
-
-UbuntuAppMenuTheme::~UbuntuAppMenuTheme()
-{
+    systemFont.setStyleHint(QFont::System);
+    fixedFont.setStyleHint(QFont::TypeWriter);
 }
 
 QVariant UbuntuAppMenuTheme::themeHint(ThemeHint hint) const
 {
-    if (hint == QPlatformTheme::SystemIconThemeName) {
+    switch (hint) {
+    case QPlatformTheme::SystemIconThemeName: {
         QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
         if (iconTheme.isEmpty()) {
-            return QVariant(QStringLiteral("ubuntu-mobile"));
+            return QStringLiteral("suru");
         } else {
-            return QVariant(QString(iconTheme));
+            return iconTheme;
         }
-    } else {
-        return QGenericUnixTheme::themeHint(hint);
+    }
+    default:
+        break;
+    }
+    return QGenericUnixTheme::themeHint(hint);
+}
+
+const QFont *UbuntuAppMenuTheme::font(QPlatformTheme::Font type) const
+{
+    switch (type) {
+    case QPlatformTheme::SystemFont:
+        return &systemFont;
+    case QPlatformTheme::FixedFont:
+        return &fixedFont;
+    default:
+        return nullptr;
     }
 }
 
