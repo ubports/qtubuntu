@@ -17,27 +17,20 @@
 #ifndef UBUNTU_THEME_H
 #define UBUNTU_THEME_H
 
-#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
+#include "../shared/ubuntutheme.h"
 
-class UbuntuAppMenuTheme : public QGenericUnixTheme
+class UbuntuAppMenuTheme : public UbuntuIconTheme
 {
 public:
     static const char* name;
     UbuntuAppMenuTheme();
     ~UbuntuAppMenuTheme() = default;
 
-    // From QPlatformTheme
-    QVariant themeHint(ThemeHint hint) const override;
-    const QFont *font(Font type) const override;
-
     // For the menus
     QPlatformMenuItem* createPlatformMenuItem() const override;
     QPlatformMenu* createPlatformMenu() const override;
     QPlatformMenuBar* createPlatformMenuBar() const override;
     QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const override;
-
-private:
-    QFont mSystemFont, mFixedFont;
 };
 
 #endif // UBUNTU_THEME_H
