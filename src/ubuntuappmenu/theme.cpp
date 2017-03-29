@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Canonical, Ltd.
+ * Copyright (C) 2016-2017 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -35,12 +35,12 @@ bool useLocalMenu() {
 }
 
 UbuntuAppMenuTheme::UbuntuAppMenuTheme():
-    systemFont(QStringLiteral("Ubuntu Regular"), 10),
-    fixedFont(QStringLiteral("Ubuntu Mono Regular"), 13)
+    mSystemFont(QStringLiteral("Ubuntu Regular"), 10),
+    mFixedFont(QStringLiteral("Ubuntu Mono Regular"), 13)
 {
     qCDebug(ubuntuappmenu, "UbuntuAppMenuTheme::UbuntuAppMenuTheme() - useLocalMenu=%s", useLocalMenu() ? "true" : "false");
-    systemFont.setStyleHint(QFont::System);
-    fixedFont.setStyleHint(QFont::TypeWriter);
+    mSystemFont.setStyleHint(QFont::System);
+    mFixedFont.setStyleHint(QFont::TypeWriter);
 }
 
 QVariant UbuntuAppMenuTheme::themeHint(ThemeHint hint) const
@@ -64,9 +64,9 @@ const QFont *UbuntuAppMenuTheme::font(QPlatformTheme::Font type) const
 {
     switch (type) {
     case QPlatformTheme::SystemFont:
-        return &systemFont;
+        return &mSystemFont;
     case QPlatformTheme::FixedFont:
-        return &fixedFont;
+        return &mFixedFont;
     default:
         return nullptr;
     }

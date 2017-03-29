@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Canonical, Ltd.
+** Copyright (C) 2014-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -76,11 +76,11 @@ class UbuntuIconTheme : public QGenericUnixTheme
 {
 public:
     UbuntuIconTheme()
-      : systemFont(QStringLiteral("Ubuntu Regular"), 10),
-        fixedFont(QStringLiteral("Ubuntu Mono Regular"), 13)
+      : mSystemFont(QStringLiteral("Ubuntu Regular"), 10),
+        mFixedFont(QStringLiteral("Ubuntu Mono Regular"), 13)
     {
-        systemFont.setStyleHint(QFont::System);
-        fixedFont.setStyleHint(QFont::TypeWriter);
+        mSystemFont.setStyleHint(QFont::System);
+        mFixedFont.setStyleHint(QFont::TypeWriter);
     }
 
     // From QPlatformTheme
@@ -105,16 +105,16 @@ public:
     {
         switch (type) {
         case QPlatformTheme::SystemFont:
-            return &systemFont;
+            return &mSystemFont;
         case QPlatformTheme::FixedFont:
-            return &fixedFont;
+            return &mFixedFont;
         default:
             return nullptr;
         }
     }
 
 private:
-    QFont systemFont, fixedFont;
+    QFont mSystemFont, mFixedFont;
 };
 
 static void resumedCallback(const UApplicationOptions */*options*/, void *context)
