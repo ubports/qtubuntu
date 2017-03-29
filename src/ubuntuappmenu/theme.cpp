@@ -35,7 +35,7 @@ bool useLocalMenu() {
 }
 
 UbuntuAppMenuTheme::UbuntuAppMenuTheme():
-    UbuntuIconTheme()
+    UbuntuTheme()
 {
     qCDebug(ubuntuappmenu, "UbuntuAppMenuTheme::UbuntuAppMenuTheme() - useLocalMenu=%s", useLocalMenu() ? "true" : "false");
 }

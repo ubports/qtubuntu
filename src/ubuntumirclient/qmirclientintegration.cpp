@@ -330,7 +330,7 @@ QStringList QMirClientClientIntegration::themeNames() const
 QPlatformTheme* QMirClientClientIntegration::createPlatformTheme(const QString& name) const
 {
     Q_UNUSED(name);
-    return new UbuntuIconTheme;
+    return new UbuntuTheme;
 }
 
 QVariant QMirClientClientIntegration::styleHint(StyleHint hint) const

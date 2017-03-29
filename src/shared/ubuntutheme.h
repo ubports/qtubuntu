@@ -17,17 +17,17 @@
 #include <QVariant>
 #include <QtPlatformSupport/private/qgenericunixthemes_p.h>
 
-class UbuntuIconTheme : public QGenericUnixTheme
+class UbuntuTheme : public QGenericUnixTheme
 {
 public:
-    UbuntuIconTheme()
+    UbuntuTheme()
       : mSystemFont(QStringLiteral("Ubuntu Regular"), 10),
         mFixedFont(QStringLiteral("Ubuntu Mono Regular"), 13)
     {
         mSystemFont.setStyleHint(QFont::System);
         mFixedFont.setStyleHint(QFont::TypeWriter);
     }
-    ~UbuntuIconTheme() = default;
+    ~UbuntuTheme() = default;
 
     QVariant themeHint(ThemeHint hint) const override
     {

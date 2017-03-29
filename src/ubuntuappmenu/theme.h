@@ -19,7 +19,7 @@
 
 #include "../shared/ubuntutheme.h"
 
-class UbuntuAppMenuTheme : public UbuntuIconTheme
+class UbuntuAppMenuTheme : public UbuntuTheme
 {
 public:
     static const char* name;
