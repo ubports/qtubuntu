@@ -23,7 +23,8 @@ HEADERS += \
     menuregistrar.h \
     registry.h \
     themeplugin.h \
-    qtubuntuextraactionhandler.h
+    qtubuntuextraactionhandler.h \
+    ../shared/ubuntutheme.h
 
 SOURCES += \
     theme.cpp \

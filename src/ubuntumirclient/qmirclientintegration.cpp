@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2016 Canonical, Ltd.
+** Copyright (C) 2014-2017 Canonical, Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -50,6 +50,7 @@
 #include "qmirclientnativeinterface.h"
 #include "qmirclientscreen.h"
 #include "qmirclientwindow.h"
+#include "../shared/ubuntutheme.h"
 
 // Qt
 #include <QFileInfo>
@@ -61,7 +62,6 @@
 #include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
 #include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
 #include <QtPlatformSupport/private/qeglpbuffer_p.h>
-#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
 #include <QtPlatformSupport/private/bridge_p.h>
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
@@ -70,27 +70,6 @@
 #include <ubuntu/application/lifecycle_delegate.h>
 #include <ubuntu/application/id.h>
 #include <ubuntu/application/options.h>
-
-
-class UbuntuIconTheme : public QGenericUnixTheme
-{
-public:
-    UbuntuIconTheme() {}
-
-    // From QPlatformTheme
-    QVariant themeHint(ThemeHint hint) const override {
-        if (hint == QPlatformTheme::SystemIconThemeName) {
-            QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
-            if (iconTheme.isEmpty()) {
-                return QVariant(QStringLiteral("ubuntu-mobile"));
-            } else {
-                return QVariant(QString(iconTheme));
-            }
-        } else {
-            return QGenericUnixTheme::themeHint(hint);
-        }
-    }
-};
 
 static void resumedCallback(const UApplicationOptions */*options*/, void *context)
 {
@@ -351,7 +330,7 @@ QStringList QMirClientClientIntegration::themeNames() const
 QPlatformTheme* QMirClientClientIntegration::createPlatformTheme(const QString& name) const
 {
     Q_UNUSED(name);
-    return new UbuntuIconTheme;
+    return new UbuntuTheme;
 }
 
 QVariant QMirClientClientIntegration::styleHint(StyleHint hint) const

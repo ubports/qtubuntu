@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Canonical, Ltd.
+ * Copyright (C) 2016-2017 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -34,27 +34,10 @@ bool useLocalMenu() {
 
 }
 
-UbuntuAppMenuTheme::UbuntuAppMenuTheme()
+UbuntuAppMenuTheme::UbuntuAppMenuTheme():
+    UbuntuTheme()
 {
     qCDebug(ubuntuappmenu, "UbuntuAppMenuTheme::UbuntuAppMenuTheme() - useLocalMenu=%s", useLocalMenu() ? "true" : "false");
-}
-
-UbuntuAppMenuTheme::~UbuntuAppMenuTheme()
-{
-}
-
-QVariant UbuntuAppMenuTheme::themeHint(ThemeHint hint) const
-{
-    if (hint == QPlatformTheme::SystemIconThemeName) {
-        QByteArray iconTheme = qgetenv("QTUBUNTU_ICON_THEME");
-        if (iconTheme.isEmpty()) {
-            return QVariant(QStringLiteral("ubuntu-mobile"));
-        } else {
-            return QVariant(QString(iconTheme));
-        }
-    } else {
-        return QGenericUnixTheme::themeHint(hint);
-    }
 }
 
 QPlatformMenuItem *UbuntuAppMenuTheme::createPlatformMenuItem() const

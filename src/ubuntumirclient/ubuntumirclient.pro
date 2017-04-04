@@ -48,7 +48,8 @@ HEADERS = \
     qmirclientscreen.h \
     qmirclientwindow.h \
     qmirclientlogging.h \
-    qmirclientappstatecontroller.h
+    qmirclientappstatecontroller.h \
+    ../shared/ubuntutheme.h
 
 OTHER_FILES += \
     ubuntumirclient.json
