@@ -1,3 +1,10 @@
+qtubuntu (0.64+17.04.20170404-0ubuntu1) zesty; urgency=medium
+
+  * Use the correct font (Ubuntu family) and icon theme (suru) (LP:
+    #1676878)
+
+ -- Lukáš Tinkl <lukas.tinkl@canonical.com>  Tue, 04 Apr 2017 00:47:22 +0000
+
 qtubuntu (0.64+17.04.20170328.1-0ubuntu1) zesty; urgency=medium
 
   [ Albert Astals Cid ]
