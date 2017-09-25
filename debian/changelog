@@ -1,3 +1,9 @@
+qtubuntu (0.64+ubports) vivid; urgency=medium
+
+  * Imported to UBports
+
+ -- UBports auto importer <infra@ubports.com>  Mon, 25 Sep 2017 02:07:27 +0200
+
 qtubuntu (0.63+17.04.20161201.1-0ubuntu1) zesty; urgency=medium
 
   * Use debug extension only if mir-debug loaded
