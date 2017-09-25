@@ -72,6 +72,7 @@ void UbuntuAppStateController::setWindowFocused(bool focused)
         QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
     } else {
         m_inactiveTimer.start();
+        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
     }
 
     m_lastActive = focused;
