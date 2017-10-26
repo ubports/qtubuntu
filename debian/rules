@@ -19,7 +19,7 @@ export PKG_CONFIG_PATH=/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig
 gles2_architectures = arm64 armhf
 
 %:
-	dh $@
+	dh $@ --parallel
 
 override_dh_clean:
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
