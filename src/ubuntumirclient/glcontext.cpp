@@ -19,8 +19,8 @@
 #include "window.h"
 
 #include <QOpenGLFramebufferObject>
-#include <QtPlatformSupport/private/qeglconvenience_p.h>
-#include <QtPlatformSupport/private/qeglpbuffer_p.h>
+#include <QtEglSupport/private/qeglconvenience_p.h>
+#include <QtEglSupport/private/qeglpbuffer_p.h>
 #include <QtGui/private/qopenglcontext_p.h>
 
 Q_LOGGING_CATEGORY(ubuntumirclientGraphics, "ubuntumirclient.graphics", QtWarningMsg)

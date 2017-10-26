@@ -17,7 +17,7 @@
 #ifndef UBUNTU_THEME_H
 #define UBUNTU_THEME_H
 
-#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
+#include <QtThemeSupport/private/qgenericunixthemes_p.h>
 
 class UbuntuTheme : public QGenericUnixTheme
 {
