@@ -19,7 +19,7 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QMatrix4x4>
-#include <QtGui/private/qopengltextureblitter_p.h>
+#include <QOpenGLTextureBlitter>
 #include <QtGui/qopenglfunctions.h>
 
 UbuntuBackingStore::UbuntuBackingStore(QWindow* window)
