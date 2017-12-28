@@ -56,7 +56,7 @@
 #include <QSize>
 #include <QtMath>
 #include <QtGui/private/qguiapplication_p.h>
-#include <QtPlatformSupport/private/qeglconvenience_p.h>
+#include <QtEglSupport/private/qeglconvenience_p.h>
 
 #include <EGL/egl.h>
 

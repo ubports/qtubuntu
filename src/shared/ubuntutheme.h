@@ -15,7 +15,7 @@
  */
 
 #include <QVariant>
-#include <QtPlatformSupport/private/qgenericunixthemes_p.h>
+#include <QtThemeSupport/private/qgenericunixthemes_p.h>
 
 class UbuntuTheme : public QGenericUnixTheme
 {

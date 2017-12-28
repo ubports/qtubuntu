@@ -42,7 +42,7 @@
 #define QMIRCLIENTGLCONTEXT_H
 
 #include <qpa/qplatformopenglcontext.h>
-#include <QtPlatformSupport/private/qeglplatformcontext_p.h>
+#include <QtEglSupport/private/qeglplatformcontext_p.h>
 
 #include <EGL/egl.h>
 

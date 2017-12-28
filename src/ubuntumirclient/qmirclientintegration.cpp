@@ -58,11 +58,11 @@
 #include <qpa/qplatformnativeinterface.h>
 #include <qpa/qplatforminputcontextfactory_p.h>
 #include <qpa/qplatforminputcontext.h>
-#include <QtPlatformSupport/private/qeglconvenience_p.h>
-#include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
-#include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
-#include <QtPlatformSupport/private/qeglpbuffer_p.h>
-#include <QtPlatformSupport/private/bridge_p.h>
+#include <QtEglSupport/private/qeglconvenience_p.h>
+#include <QtFontDatabaseSupport/private/qgenericunixfontdatabase_p.h>
+#include <QtEventDispatcherSupport/private/qgenericunixeventdispatcher_p.h>
+#include <QtEglSupport/private/qeglpbuffer_p.h>
+#include <QtLinuxAccessibilitySupport/private/bridge_p.h>
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
 

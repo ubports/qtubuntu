@@ -2,7 +2,7 @@ TARGET = ubuntuappmenu
 TEMPLATE = lib
 
 QT -= gui
-QT += core-private platformsupport-private dbus
+QT += core-private theme_support-private dbus
 
 CONFIG += plugin no_keywords
 

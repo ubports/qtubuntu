@@ -44,7 +44,7 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QMatrix4x4>
-#include <QtGui/private/qopengltextureblitter_p.h>
+#include <QtGui/qopengltextureblitter.h>
 #include <QtGui/qopenglfunctions.h>
 
 QMirClientBackingStore::QMirClientBackingStore(QWindow* window)
