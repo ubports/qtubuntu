@@ -1,8 +1,111 @@
-qtubuntu (0.64+ubports) xenial; urgency=medium
+qtubuntu (0.64.1+ubports) xenial; urgency=medium
 
   * Imported to UBports
 
  -- UBports auto importer <infra@ubports.com>  Mon, 25 Sep 2017 02:07:27 +0200
+ 
+qtubuntu (0.64+17.04.20170404-0ubuntu1) zesty; urgency=medium
+
+  * Use the correct font (Ubuntu family) and icon theme (suru) (LP:
+    #1676878)
+
+ -- Lukáš Tinkl <lukas.tinkl@canonical.com>  Tue, 04 Apr 2017 00:47:22 +0000
+
+qtubuntu (0.64+17.04.20170328.1-0ubuntu1) zesty; urgency=medium
+
+  [ Albert Astals Cid ]
+  * Remove signal noone uses
+  * Honor the menu item visibility (LP: #1675802)
+
+  [ Alberto Aguirre, Arthur Mello ]
+  * Remove more uses of deprecated mir apis.
+
+  [ Daniel d'Andrada ]
+  * Qt::Tool == mir_window_type_satellite (LP: #1673415)
+  * Proper implementation of QPlatformScreen::logicalDpi (LP: #1675572)
+
+  [ Gerry Boland ]
+  * BackingStore: is possible for context's QPlatformSurface to be
+    deleted before backing store is.
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Tue, 28 Mar 2017 17:13:20 +0000
+
+qtubuntu (0.64+17.04.20170320-0ubuntu1) zesty; urgency=medium
+
+  [ Albert Astals Cid ]
+  * Set qtubuntu-tag and handle aboutToShow calls (LP: #1664578)
+  * Set enabled state for menus in the submenu-enabled property since
+    GMenuModel doesn't support that concept (LP: #1670694)
+  * fix image conversion to Format_ARGB32
+  * Build with clang
+
+  [ Gerry Boland ]
+  * Use correct parented/parentless dialog and utility window types from
+    Mir
+
+ -- Lukáš Tinkl <lukas.tinkl@canonical.com>  Mon, 20 Mar 2017 17:31:42 +0000
+
+qtubuntu (0.64+17.04.20170308-0ubuntu1) zesty; urgency=medium
+
+  [ Gerry Boland ]
+  * Implement QPlatformWindow::setMask and add support for special InputMethod 
+    window type
+  * BackingStore: make current only if no existing context current (LP:
+    #1665705)
+
+  [ Albert Astals Cid ]
+  * Implement UbuntuAppMenuTheme::createPlatformSystemTrayIcon
+  * Register metatype used in queued invokeMethod
+  * Make sure mMimeData doesn't point to already deleted memory
+  * Initialize m_tag
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Wed, 08 Mar 2017 11:59:55 +0000
+
+qtubuntu (0.63+17.04.20170215-0ubuntu1) zesty; urgency=medium
+
+  [ Albert Astals Cid ]
+  * Fix crash when starting konsole
+
+  [ Alberto Aguirre ]
+  * Changes for mir 0.26.1: PersitentID has been renamed to WindowID
+
+  [ Arthur Mello ]
+  * Update code to use new Mir Api's.
+
+  [ Gerry Boland, Nick Dedekind ]
+  * Class renaming and syntax changes to shrink delta with upstream
+    mirclient QPA plugin (which is equivalent to rev 360)
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Wed, 15 Feb 2017 08:23:33 +0000
+
+qtubuntu (0.63+17.04.20170119.2-0ubuntu1) zesty; urgency=medium
+
+  [ Daniel d'Andrada ]
+  * Resize menus and toolips when told to do so
+
+  [ Gerry Boland ]
+  * Quit gracefully if Mir connection failed (LP: #1655936)
+
+ -- Michał Sawicz <michal.sawicz@canonical.com>  Thu, 19 Jan 2017 22:55:05 +0000
+
+qtubuntu (0.63+17.04.20170110.1-0ubuntu1) zesty; urgency=medium
+
+  [ Timo Jyrinki ]
+  * Remove mircommon specifier for header, fix other ftbfs with mir 0.25
+    (LP: #1653905)
+
+  [ Nick Dedekind ]
+  * Added a QPlatformTheme for exporting gmenumodel for qt menus.
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Tue, 10 Jan 2017 06:42:48 +0000
+
+qtubuntu (0.63+17.04.20170104-0ubuntu1) zesty; urgency=medium
+
+  [ Gerry Boland ]
+  * Remove mircommon specifier for header, fix other ftbfs with mir 0.25
+    (LP: #1653905)
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Wed, 04 Jan 2017 13:46:42 +0000
 
 qtubuntu (0.63+17.04.20161201.1-0ubuntu1) zesty; urgency=medium
 
