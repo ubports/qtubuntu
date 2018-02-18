@@ -130,7 +130,10 @@ QMirClientClientIntegration::QMirClientClientIntegration(int argc, char **argv)
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 
     // Initialize EGL.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     mEglNativeDisplay = mir_connection_get_egl_native_display(mMirConnection);
+#pragma GCC diagnostic pop
     ASSERT((mEglDisplay = eglGetDisplay(mEglNativeDisplay)) != EGL_NO_DISPLAY);
     ASSERT(eglInitialize(mEglDisplay, nullptr, nullptr) == EGL_TRUE);
 

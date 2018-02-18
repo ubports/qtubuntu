@@ -60,6 +60,9 @@
 
 #include <EGL/egl.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 Q_LOGGING_CATEGORY(mirclientBufferSwap, "qt.qpa.mirclient.bufferSwap", QtWarningMsg)
 
 namespace
@@ -1066,3 +1069,5 @@ QString QMirClientWindow::persistentSurfaceId()
 {
     return mSurface->persistentSurfaceId();
 }
+
+#pragma GCC diagnostic pop

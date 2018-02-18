@@ -195,10 +195,11 @@ void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirWindow *window, QC
     if (image.format() != QImage::Format_ARGB32) {
         image = image.convertToFormat(QImage::Format_ARGB32);
     }
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     MirBufferStream *bufferStream = mir_connection_create_buffer_stream_sync(mConnection,
             image.width(), image.height(), mir_pixel_format_argb_8888, mir_buffer_usage_software);
-
+#pragma GCC diagnostic pop
     {
         MirGraphicsRegion region;
         mir_buffer_stream_get_graphics_region(bufferStream, &region);
@@ -214,12 +215,16 @@ void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirWindow *window, QC
     mir_buffer_stream_swap_buffers_sync(bufferStream);
 
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         auto configuration = mir_cursor_configuration_from_buffer_stream(bufferStream, cursor.hotSpot().x(), cursor.hotSpot().y());
         mir_window_configure_cursor(window, configuration);
         mir_cursor_configuration_destroy(configuration);
+
     }
 
     mir_buffer_stream_release_sync(bufferStream);
+#pragma GCC diagnostic pop
 }
 
 void QMirClientCursor::applyDefaultCursorConfiguration(MirWindow *window)

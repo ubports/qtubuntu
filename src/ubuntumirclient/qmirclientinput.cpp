@@ -227,7 +227,8 @@ QMirClientInput::~QMirClientInput()
 {
   // Qt will take care of deleting mTouchDevice.
 }
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 static const char* nativeEventTypeToStr(MirEventType t)
 {
     switch (t)
@@ -261,6 +262,7 @@ static const char* nativeEventTypeToStr(MirEventType t)
     }
     Q_UNREACHABLE();
 }
+#pragma GCC diagnostic pop
 
 void QMirClientInput::customEvent(QEvent* event)
 {
