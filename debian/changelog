@@ -1,9 +1,9 @@
-qtubuntu (0.64.1+ubports) xenial; urgency=medium
+qtubuntu (0.64.1+ubports) bionic; urgency=medium
 
   * Imported to UBports
 
  -- UBports auto importer <infra@ubports.com>  Mon, 25 Sep 2017 02:07:27 +0200
- 
+
 qtubuntu (0.64+17.04.20170404-0ubuntu1) zesty; urgency=medium
 
   * Use the correct font (Ubuntu family) and icon theme (suru) (LP:
@@ -48,7 +48,7 @@ qtubuntu (0.64+17.04.20170320-0ubuntu1) zesty; urgency=medium
 qtubuntu (0.64+17.04.20170308-0ubuntu1) zesty; urgency=medium
 
   [ Gerry Boland ]
-  * Implement QPlatformWindow::setMask and add support for special InputMethod 
+  * Implement QPlatformWindow::setMask and add support for special InputMethod
     window type
   * BackingStore: make current only if no existing context current (LP:
     #1665705)
@@ -588,7 +588,7 @@ qtubuntu (0.60+14.10.20140808.1-0ubuntu1) utopic; urgency=low
 qtubuntu (0.60+14.10.20140728-0ubuntu1) utopic; urgency=medium
 
   [ Gerry Boland ]
-  * Major refactor: remove SurfaceFlinger & Mir in-server-process-client support, 
+  * Major refactor: remove SurfaceFlinger & Mir in-server-process-client support,
     flatten class hierarchy. Only Mir client QPA remains
 
   [ Ubuntu daily release ]
@@ -1237,7 +1237,7 @@ qthybris (0.36) quantal; urgency=low
 
 qthybris (0.35) quantal; urgency=low
 
-  * fix for hardcoded screen size lp:1097798 
+  * fix for hardcoded screen size lp:1097798
 
  -- Bill Filler <bill.filler@canonical.com>  Thu, 10 Jan 2013 16:23:41 -0500
 
