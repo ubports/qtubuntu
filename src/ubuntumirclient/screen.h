@@ -41,6 +41,7 @@ public:
     QRect availableGeometry() const override { return mGeometry; }
     QSizeF physicalSize() const override { return mPhysicalSize; }
     qreal devicePixelRatio() const override { return mDevicePixelRatio; }
+    qreal pixelDensity() const override;
     QDpi logicalDpi() const override;
     Qt::ScreenOrientation nativeOrientation() const override { return mNativeOrientation; }
     Qt::ScreenOrientation orientation() const override { return mNativeOrientation; }
