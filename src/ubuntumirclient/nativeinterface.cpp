@@ -33,6 +33,7 @@ public:
         : QMap<QByteArray, UbuntuNativeInterface::ResourceType>() {
         insert("egldisplay", UbuntuNativeInterface::EglDisplay);
         insert("eglcontext", UbuntuNativeInterface::EglContext);
+        insert("eglconfig", UbuntuNativeInterface::EglConfig);
         insert("nativeorientation", UbuntuNativeInterface::NativeOrientation);
         insert("display", UbuntuNativeInterface::Display);
         insert("mirconnection", UbuntuNativeInterface::MirConnection);
@@ -90,10 +91,14 @@ void* UbuntuNativeInterface::nativeResourceForContext(
 
     const ResourceType kResourceType = ubuntuResourceMap()->value(kLowerCaseResource);
 
-    if (kResourceType == UbuntuNativeInterface::EglContext)
+    switch (kResourceType) {
+    case EglConfig:
+        return static_cast<UbuntuOpenGLContext*>(context->handle())->eglConfig();
+    case EglContext:
         return static_cast<UbuntuOpenGLContext*>(context->handle())->eglContext();
-    else
+    default:
         return nullptr;
+    }
 }
 
 void* UbuntuNativeInterface::nativeResourceForWindow(const QByteArray& resourceString, QWindow* window)
