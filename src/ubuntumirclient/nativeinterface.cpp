@@ -67,9 +67,12 @@ void* UbuntuNativeInterface::nativeResourceForIntegration(const QByteArray &reso
 
     const ResourceType resourceType = ubuntuResourceMap()->value(lowerCaseResource);
 
-    if (resourceType == UbuntuNativeInterface::MirConnection) {
+    switch (resourceType) {
+    case EglDisplay:
+        return mIntegration->eglDisplay();
+    case MirConnection:
         return mIntegration->mirConnection();
-    } else {
+    default:
         return nullptr;
     }
 }
