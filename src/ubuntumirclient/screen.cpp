@@ -230,6 +230,10 @@ void UbuntuScreen::setAdditionalMirDisplayProperties(float scale, MirFormFactor 
 
 qreal UbuntuScreen::pixelDensity() const
 {
+    // If GRID_UNIT_PX is set, use that. We have to use either 
+    // GRID_UNIT_PX or pixelDensity since these are not guarantee to match
+    if (qEnvironmentVariableIsSet("GRID_UNIT_PX"))
+      return mScale;
     return qMax(1.0, logicalDpi().first / 160.0);
 }
 
