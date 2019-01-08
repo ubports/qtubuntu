@@ -120,6 +120,7 @@ const char *mirWindowTypeToStr(MirWindowType type)
     case mir_window_type_inputmethod:  return "Input Method";  /**< AKA "OSK" or handwriting etc.   */
     case mir_window_type_satellite:    return "Satellite";     /**< AKA "toolbox"/"toolbar"         */
     case mir_window_type_tip:          return "Tip";           /**< AKA "tooltip"                   */
+    case mir_window_type_decoration:   return "Decoration";
     case mir_window_types:             Q_UNREACHABLE();
     }
     return "";
