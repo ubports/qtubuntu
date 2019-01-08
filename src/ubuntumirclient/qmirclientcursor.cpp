@@ -138,9 +138,15 @@ class CursorWindowSpec
 {
 public:
     CursorWindowSpec(MirConnection *connection, const char *name)
-    :  spec(mir_create_window_spec(connection))
+    :  CursorWindowSpec(connection)
     {
         mir_window_spec_set_cursor_name(spec, name);
+    }
+
+    CursorWindowSpec(MirConnection *connection, MirRenderSurface *surface, int hotspotX, int hotspotY)
+    :  CursorWindowSpec(connection)
+    {
+        mir_window_spec_set_cursor_render_surface(spec, surface, hotspotX, hotspotY);
     }
 
     ~CursorWindowSpec()
@@ -153,8 +159,60 @@ public:
         mir_window_apply_spec(window, spec);
     }
 private:
+    CursorWindowSpec(MirConnection *connection) : spec(mir_create_window_spec(connection)) {}
     MirWindowSpec * const spec;
 };
+
+class BufferStream
+{
+public:
+    BufferStream(MirRenderSurface *surface, int width, int height)
+    : stream(mir_render_surface_get_buffer_stream(surface, width, height, mir_pixel_format_argb_8888))
+    {
+    }
+
+    void draw(QImage const& image)
+    {
+        MirGraphicsRegion region;
+        const bool validRegion = mir_buffer_stream_get_graphics_region(stream, &region);
+        if (!validRegion)
+            throw std::runtime_error("Could not get graphics region to draw into");
+
+        auto regionLine = region.vaddr;
+        Q_ASSERT(image.bytesPerLine() <= region.stride);
+
+        for (int i = 0; i < image.height(); ++i) {
+           memcpy(regionLine, image.scanLine(i), image.bytesPerLine());
+           regionLine += region.stride;
+        }
+        mir_buffer_stream_swap_buffers_sync(stream);
+    }
+
+private:
+    MirBufferStream * const stream;
+};
+
+class RenderSurface
+{
+public:
+    RenderSurface(MirConnection *connection, int width, int height)
+    : surface(mir_connection_create_render_surface_sync(connection, width, height)),
+      stream(surface, width, height)
+    {
+        if (!mir_render_surface_is_valid(surface)) {
+            throw std::runtime_error(mir_render_surface_get_error_message(surface));
+        }
+    }
+
+    ~RenderSurface() { mir_render_surface_release(surface); }
+    operator MirRenderSurface *() const { return surface; }
+    void draw(QImage const& image) { stream.draw(image); }
+
+private:
+    MirRenderSurface * const surface;
+    BufferStream stream;
+};
+
 } // anonymous namespace
 
 void QMirClientCursor::changeCursor(QCursor *windowCursor, QWindow *window)
@@ -196,30 +254,15 @@ void QMirClientCursor::configureMirCursorWithPixmapQCursor(MirWindow *window, QC
         image = image.convertToFormat(QImage::Format_ARGB32);
     }
 
-    MirBufferStream *bufferStream = mir_connection_create_buffer_stream_sync(mConnection,
-            image.width(), image.height(), mir_pixel_format_argb_8888, mir_buffer_usage_software);
+    try {
+        RenderSurface surface(mConnection, image.width(), image.height());
+        surface.draw(image);
 
-    {
-        MirGraphicsRegion region;
-        mir_buffer_stream_get_graphics_region(bufferStream, &region);
-
-        char *regionLine = region.vaddr;
-        Q_ASSERT(image.bytesPerLine() <= region.stride);
-        for (int i = 0; i < image.height(); ++i) {
-            memcpy(regionLine, image.scanLine(i), image.bytesPerLine());
-            regionLine += region.stride;
-        }
+        CursorWindowSpec spec(mConnection, surface, cursor.hotSpot().x(), cursor.hotSpot().y());
+        spec.apply(window);
+    } catch(std::exception const& e) {
+        qWarning("Error applying pixmap cursor: %s", e.what());
     }
-
-    mir_buffer_stream_swap_buffers_sync(bufferStream);
-
-    {
-        auto configuration = mir_cursor_configuration_from_buffer_stream(bufferStream, cursor.hotSpot().x(), cursor.hotSpot().y());
-        mir_window_configure_cursor(window, configuration);
-        mir_cursor_configuration_destroy(configuration);
-    }
-
-    mir_buffer_stream_release_sync(bufferStream);
 }
 
 void QMirClientCursor::applyDefaultCursorConfiguration(MirWindow *window)

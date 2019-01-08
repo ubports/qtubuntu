@@ -232,10 +232,6 @@ static const char* nativeEventTypeToStr(MirEventType t)
 {
     switch (t)
     {
-    case mir_event_type_key:
-        return "key";
-    case mir_event_type_motion:
-        return "motion";
     case mir_event_type_window:
         return "window";
     case mir_event_type_resize:

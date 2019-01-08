@@ -6,7 +6,7 @@ QT += core-private egl_support-private fontdatabase_support-private eventdispatc
 
 CONFIG += plugin no_keywords qpa/genericunixfontdatabase
 
-DEFINES += MESA_EGL_NO_X11_HEADERS
+DEFINES += MESA_EGL_NO_X11_HEADERS MIR_DEPRECATE_RENDERSURFACES=0 MIR_ENABLE_DEPRECATIONS=0
 # CONFIG += c++11 # only enables C++0x
 QMAKE_CXXFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -Werror -Wall
 QMAKE_LFLAGS += -std=c++11 -Wl,-no-undefined

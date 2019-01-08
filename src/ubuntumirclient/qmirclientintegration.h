@@ -89,7 +89,7 @@ public:
     // New methods.
     MirConnection *mirConnection() const { return mMirConnection; }
     EGLDisplay eglDisplay() const { return mEglDisplay; }
-    EGLNativeDisplayType eglNativeDisplay() const { return mEglNativeDisplay; }
+    EGLNativeDisplayType eglNativeDisplay() const { return mMirConnection; }
     QMirClientAppStateController *appStateController() const { return mAppStateController.data(); }
     QMirClientScreenObserver *screenObserver() const { return mScreenObserver.data(); }
     QMirClientDebugExtension *debugExtension() const { return mDebugExtension.data(); }
@@ -125,7 +125,6 @@ private:
 
     // EGL related
     EGLDisplay mEglDisplay{EGL_NO_DISPLAY};
-    EGLNativeDisplayType mEglNativeDisplay;
 };
 
 #endif // QMIRCLIENTINTEGRATION_H

@@ -130,8 +130,7 @@ QMirClientClientIntegration::QMirClientClientIntegration(int argc, char **argv)
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 
     // Initialize EGL.
-    mEglNativeDisplay = mir_connection_get_egl_native_display(mMirConnection);
-    ASSERT((mEglDisplay = eglGetDisplay(mEglNativeDisplay)) != EGL_NO_DISPLAY);
+    ASSERT((mEglDisplay = eglGetDisplay(mMirConnection)) != EGL_NO_DISPLAY);
     ASSERT(eglInitialize(mEglDisplay, nullptr, nullptr) == EGL_TRUE);
 
     // Has debug mode been requsted, either with "-testability" switch or QT_LOAD_TESTABILITY env var
