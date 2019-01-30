@@ -1,3 +1,15 @@
+## NOTE
+
+qtubuntu is deprecated, this includes ubuntuappmenu and ubuntumirclient, ubuntumirclient will NOT work without patches
+to mesa, due to this we have deprecated ubuntumirclient in favour of qtwayland for client applications!
+
+ubuntuappmenu has been splitted and renamed, it can be found here [https://gitlab.com/ubports/core/qtunity-appmenutheme](https://gitlab.com/ubports/core/qtunity-appmenutheme)
+
+ubuntumirclient currently only used in xenial! but will be replace with qtwayland. 
+
+## Qtubuntu
+
+
   1. Description
   2. Running
   3. Debug messages and logging
