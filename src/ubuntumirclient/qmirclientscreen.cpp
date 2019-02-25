@@ -91,6 +91,7 @@ QMirClientScreen::QMirClientScreen(const MirOutput *output, MirConnection *conne
     , mOutputId(0)
     , mCursor(connection)
 {
+    qDebug() << "Creating a QMirClientScreen now";
 
     if (qEnvironmentVariableIsSet(ENV_LOGICAL_DPI)) {
         QByteArray stringValue = qgetenv(ENV_LOGICAL_DPI);
