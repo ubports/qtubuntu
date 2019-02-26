@@ -68,6 +68,7 @@ public:
     QDpi logicalDpi() const override;
     Qt::ScreenOrientation nativeOrientation() const override { return mNativeOrientation; }
     Qt::ScreenOrientation orientation() const override { return mNativeOrientation; }
+    qreal pixelDensity() const override { return mDevicePixelRatio; }
     QPlatformCursor *cursor() const override { return const_cast<QMirClientCursor*>(&mCursor); }
 
     // Additional Screen properties from Mir
