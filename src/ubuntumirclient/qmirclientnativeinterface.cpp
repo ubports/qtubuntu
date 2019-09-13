@@ -91,9 +91,12 @@ void* QMirClientNativeInterface::nativeResourceForIntegration(const QByteArray &
 
     const ResourceType resourceType = ubuntuResourceMap()->value(lowerCaseResource);
 
-    if (resourceType == QMirClientNativeInterface::MirConnection) {
+    switch (resourceType) {
+    case EglDisplay:
+        return mIntegration->eglDisplay();
+    case MirConnection:
         return mIntegration->mirConnection();
-    } else {
+    default:
         return nullptr;
     }
 }
