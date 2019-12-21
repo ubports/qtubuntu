@@ -1022,6 +1022,11 @@ void QMirClientWindow::onSwapBuffersDone()
     QMutexLocker lock(&mMutex);
     mSurface->onSwapBuffersDone();
 
+    if (!mReceivedInitialBuffer) {
+        mReceivedInitialBuffer = true;
+        static_cast<QMirClientScreen*>(screen())->onInitialBuffer();
+    }
+
     if (mSurface->mNeedsExposeCatchup) {
         mSurface->mNeedsExposeCatchup = false;
         mWindowExposed = false;
