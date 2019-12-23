@@ -171,9 +171,31 @@ void QMirClientScreen::handleWindowSurfaceResize(int windowWidth, int windowHeig
         } else {
             mCurrentOrientation = Qt::LandscapeOrientation;
         }
-        qCDebug(mirclient, "QMirClientScreen::handleWindowSurfaceResize - new orientation %s",orientationToStr(mCurrentOrientation));
-        QWindowSystemInterface::handleScreenOrientationChange(screen(), mCurrentOrientation);
+        mCurrentOrientationDirty = true;
+
+        // Some clients will segfault if we send orientation events before we have
+        // got the initial buffers. So work around this.
+        if (mReceivedInitialBuffer)
+            handleScreenOrientationChange();
     }
+}
+
+void QMirClientScreen::onInitialBuffer()
+{
+    qCDebug(mirclient, "QMirClientScreen::onInitialBuffer");
+
+    mReceivedInitialBuffer = true;
+    handleScreenOrientationChange();
+}
+
+void QMirClientScreen::handleScreenOrientationChange()
+{
+    if (!mCurrentOrientationDirty)
+        return;
+
+    mCurrentOrientationDirty = false;
+    qCDebug(mirclient, "QMirClientScreen::handleWindowSurfaceResize - new orientation %s",orientationToStr(mCurrentOrientation));
+    QWindowSystemInterface::handleScreenOrientationChange(screen(), mCurrentOrientation);
 }
 
 void QMirClientScreen::setMirOutput(const MirOutput *output)

@@ -79,6 +79,7 @@ public:
     void updateMirOutput(const MirOutput *output);
     void setAdditionalMirDisplayProperties(float scale, MirFormFactor formFactor, int dpi);
     void handleWindowSurfaceResize(int width, int height);
+    void onInitialBuffer();
 
     // QObject methods.
     void customEvent(QEvent* event) override;
@@ -86,6 +87,7 @@ public:
 private:
     void setMirOutput(const MirOutput *output);
     void updateLogicalDpi();
+    void handleScreenOrientationChange();
 
     QRect mGeometry, mNativeGeometry;
     QSizeF mPhysicalSize;
@@ -101,6 +103,8 @@ private:
     QMirClientCursor mCursor;
     float mLogicalDpiEnv{0};
     QDpi mLogicalDpi;
+    bool mCurrentOrientationDirty = false;
+    bool mReceivedInitialBuffer = false;
 
     static const float mMirScaleToLogicalDpiMultiplier;
 

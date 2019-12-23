@@ -115,6 +115,7 @@ private:
     std::unique_ptr<UbuntuSurface> mSurface;
     float mScale;
     MirFormFactor mFormFactor;
+    bool mReceivedInitialBuffer = false;
 };
 
 #endif // QMIRCLIENTWINDOW_H
