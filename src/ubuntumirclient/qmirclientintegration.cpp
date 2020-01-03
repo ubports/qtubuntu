@@ -74,7 +74,11 @@
 static void resumedCallback(const UApplicationOptions */*options*/, void *context)
 {
     auto integration = static_cast<QMirClientClientIntegration*>(context);
-    integration->appStateController()->setResumed();
+
+    // Make sure calls to appStateController happen on the main thread.
+    QMetaObject::invokeMethod(integration->appStateController(),
+                                "setResumed",
+                                Qt::QueuedConnection);
 }
 
 static void aboutToStopCallback(UApplicationArchive */*archive*/, void *context)
@@ -86,7 +90,11 @@ static void aboutToStopCallback(UApplicationArchive */*archive*/, void *context)
     } else {
         qCWarning(mirclient) << "aboutToStopCallback(): no input context";
     }
-    integration->appStateController()->setSuspended();
+
+    // Make sure calls to appStateController happen on the main thread.
+    QMetaObject::invokeMethod(integration->appStateController(),
+                                "setSuspended",
+                                Qt::QueuedConnection);
 }
 
 
