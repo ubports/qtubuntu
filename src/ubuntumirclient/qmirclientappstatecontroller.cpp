@@ -50,7 +50,8 @@
  */
 
 QMirClientAppStateController::QMirClientAppStateController()
-    : m_suspended(false)
+    : QObject()
+    , m_suspended(false)
     , m_lastActive(true)
 {
     m_inactiveTimer.setSingleShot(true);

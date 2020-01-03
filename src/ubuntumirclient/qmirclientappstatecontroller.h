@@ -41,17 +41,21 @@
 #ifndef QMIRCLIENTAPPSTATECONTROLLER_H
 #define QMIRCLIENTAPPSTATECONTROLLER_H
 
+#include <QObject>
 #include <QTimer>
 
-class QMirClientAppStateController
+class QMirClientAppStateController : public QObject
 {
+    Q_OBJECT
+
 public:
     QMirClientAppStateController();
 
+    void setWindowFocused(bool focused);
+
+public Q_SLOTS:
     void setSuspended();
     void setResumed();
-
-    void setWindowFocused(bool focused);
 
 private:
     bool m_suspended;
