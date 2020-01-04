@@ -52,7 +52,7 @@
 QMirClientAppStateController::QMirClientAppStateController()
     : QObject()
     , m_suspended(false)
-    , m_lastActive(true)
+    , m_focused(true)
 {
     m_inactiveTimer.setSingleShot(true);
     m_inactiveTimer.setInterval(10);
@@ -78,7 +78,7 @@ void QMirClientAppStateController::setResumed()
     if (m_suspended) {
         m_suspended = false;
 
-        if (m_lastActive) {
+        if (m_focused) {
             QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
         } else {
             QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationInactive);
@@ -88,6 +88,11 @@ void QMirClientAppStateController::setResumed()
 
 void QMirClientAppStateController::setWindowFocused(bool focused)
 {
+    // A window can be focused before the app is resumed because lifecycle state
+    // in Unity8 is a function of focused state. However, application state
+    // should stay at suspended in that case.
+    m_focused = focused;
+
     if (m_suspended) {
         return;
     }
@@ -98,6 +103,4 @@ void QMirClientAppStateController::setWindowFocused(bool focused)
     } else {
         m_inactiveTimer.start();
     }
-
-    m_lastActive = focused;
 }
