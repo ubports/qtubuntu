@@ -59,7 +59,7 @@ public Q_SLOTS:
 
 private:
     bool m_suspended;
-    bool m_lastActive;
+    bool m_focused;
     QTimer m_inactiveTimer;
 };
 
