@@ -122,6 +122,7 @@ void* QMirClientNativeInterface::nativeResourceForContext(
         return static_cast<QMirClientOpenGLContext*>(context->handle())->eglContext();
     default:
         return nullptr;
+    }
 }
 
 void* QMirClientNativeInterface::nativeResourceForWindow(const QByteArray& resourceString, QWindow* window)
