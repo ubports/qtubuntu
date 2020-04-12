@@ -117,9 +117,9 @@ void* QMirClientNativeInterface::nativeResourceForContext(
 
     switch (kResourceType) {
     case EglConfig:
-        return static_cast<UbuntuOpenGLContext*>(context->handle())->eglConfig();
+        return static_cast<QMirClientOpenGLContext*>(context->handle())->eglConfig();
     case EglContext:
-        return static_cast<UbuntuOpenGLContext*>(context->handle())->eglContext();
+        return static_cast<QMirClientOpenGLContext*>(context->handle())->eglContext();
     default:
         return nullptr;
 }
