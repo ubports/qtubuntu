@@ -332,13 +332,19 @@ QPlatformOpenGLContext* QMirClientClientIntegration::createPlatformOpenGLContext
 
 QStringList QMirClientClientIntegration::themeNames() const
 {
-    return QStringList(QStringLiteral("ubuntuappmenu"));
+    // Prefers the app menu theme (installed externally), but failback to
+    // the built-in theme if it's not installed.
+    return QStringList()
+                << QStringLiteral("ubuntuappmenu")
+                << QStringLiteral("ubuntu");
 }
 
 QPlatformTheme* QMirClientClientIntegration::createPlatformTheme(const QString& name) const
 {
-    Q_UNUSED(name);
-    return new UbuntuTheme;
+    if (name == QLatin1String("ubuntu")) // The failback theme.
+        return new UbuntuTheme;
+
+    return QGenericUnixTheme::createUnixTheme(name);
 }
 
 QVariant QMirClientClientIntegration::styleHint(StyleHint hint) const
