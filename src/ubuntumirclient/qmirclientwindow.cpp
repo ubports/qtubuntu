@@ -56,6 +56,7 @@
 #include <QSize>
 #include <QtMath>
 #include <QtGui/private/qguiapplication_p.h>
+#include <QtGui/private/qwindow_p.h>
 #include <QtEglSupport/private/qeglconvenience_p.h>
 
 #include <EGL/egl.h>
@@ -853,13 +854,13 @@ void QMirClientWindow::handleSurfaceStateChanged(Qt::WindowState state)
     QWindowSystemInterface::handleWindowStateChanged(window(), state);
 }
 
-void QMirClientWindow::setWindowState(Qt::WindowState state)
+void QMirClientWindow::setWindowState(Qt::WindowStates state)
 {
     QMutexLocker lock(&mMutex);
-    qCDebug(mirclient, "setWindowState(window=%p, %s)", this, qtWindowStateToStr(state));
+    qCDebug(mirclient, "setWindowState(window=%p, %s)", this, qtWindowStateToStr(QWindowPrivate::effectiveState(state)));
 
-    if (mWindowState == state) return;
-    mWindowState = state;
+    if (mWindowState == QWindowPrivate::effectiveState(state)) return;
+    mWindowState = QWindowPrivate::effectiveState(state);
 
     lock.unlock();
     updateSurfaceState();
