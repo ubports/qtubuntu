@@ -57,6 +57,7 @@ public:
         : QMap<QByteArray, QMirClientNativeInterface::ResourceType>() {
         insert("egldisplay", QMirClientNativeInterface::EglDisplay);
         insert("eglcontext", QMirClientNativeInterface::EglContext);
+        insert("eglconfig", QMirClientNativeInterface::EglConfig);
         insert("nativeorientation", QMirClientNativeInterface::NativeOrientation);
         insert("display", QMirClientNativeInterface::Display);
         insert("mirconnection", QMirClientNativeInterface::MirConnection);
@@ -114,10 +115,14 @@ void* QMirClientNativeInterface::nativeResourceForContext(
 
     const ResourceType kResourceType = ubuntuResourceMap()->value(kLowerCaseResource);
 
-    if (kResourceType == QMirClientNativeInterface::EglContext)
+    switch (kResourceType) {
+    case EglConfig:
+        return static_cast<QMirClientOpenGLContext*>(context->handle())->eglConfig();
+    case EglContext:
         return static_cast<QMirClientOpenGLContext*>(context->handle())->eglContext();
-    else
+    default:
         return nullptr;
+    }
 }
 
 void* QMirClientNativeInterface::nativeResourceForWindow(const QByteArray& resourceString, QWindow* window)
