@@ -34,7 +34,7 @@ ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
   ifneq "$(DEB_HOST_ARCH)" "$(DEB_BUILD_ARCH)"
 	cd $(ANDROID_DIR) && qt5-qmake-$(DEB_HOST_MULTIARCH) "QMAKE_CXXFLAGS=-DPLATFORM_API_TOUCH" $(CURDIR)
   else
-	dh_auto_configure -B$(ANDROID_DIR) -- "QMAKE_CXXFLAGS=-DPLATFORM_API_TOUCH" $(CURDIR)
+	dh_auto_configure -B$(ANDROID_DIR) -- "QMAKE_CXXFLAGS=-DPLATFORM_API_TOUCH" CONFIG+=debug $(CURDIR)
   endif
 endif
 	mkdir -p $(DESKTOP_DIR)
