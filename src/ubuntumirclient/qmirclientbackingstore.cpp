@@ -57,7 +57,7 @@ QMirClientBackingStore::QMirClientBackingStore(QWindow* window)
     mContext->setScreen(window->screen());
     mContext->create();
 
-    window->setSurfaceType(QSurface::OpenGLSurface);
+    window->setSurfaceType(QSurface::RasterGLSurface);
 }
 
 QMirClientBackingStore::~QMirClientBackingStore()
