@@ -16,6 +16,8 @@
 
 #include <QVariant>
 #include <QtThemeSupport/private/qgenericunixthemes_p.h>
+#include <QGuiApplication>
+#include <QScreen>
 
 class UbuntuTheme : public QGenericUnixTheme
 {
@@ -39,6 +41,22 @@ public:
             } else {
                 return iconTheme;
             }
+        }
+        case QPlatformTheme::MouseDoubleClickDistance: {
+            // Impl mostly yoinked from the QAndroidPlatformTheme
+            QScreen *screen = qGuiApp->primaryScreen();
+            if (screen) {
+                qreal dotsPerInch = screen->physicalDotsPerInch();
+                // Allow 15% of an inch between taps when double clicking
+                return qRound(dotsPerInch * 0.15);
+            } else {
+                return 5;
+            }
+        }
+        case QPlatformTheme::TouchDoubleTapDistance: {
+            bool ok = false;
+            int dist = themeHint(QPlatformTheme::MouseDoubleClickDistance).toInt(&ok) * 2;
+            return QVariant(ok ? dist : 10);
         }
         default:
             break;
