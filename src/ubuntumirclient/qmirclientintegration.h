@@ -44,13 +44,11 @@
 #include <qpa/qplatformintegration.h>
 #include <QSharedPointer>
 
+#include <mir/client/connection.h>
+
 #include "qmirclientappstatecontroller.h"
 #include "qmirclientplatformservices.h"
 #include "qmirclientscreenobserver.h"
-
-// platform-api
-#include <ubuntu/application/description.h>
-#include <ubuntu/application/instance.h>
 
 #include <EGL/egl.h>
 
@@ -98,8 +96,6 @@ private Q_SLOTS:
     void destroyScreen(QMirClientScreen *screen);
 
 private:
-    void setupOptions(QStringList &args);
-    void setupDescription(QByteArray &sessionName);
     static QByteArray generateSessionName(QStringList &args);
     static QByteArray generateSessionNameFromQmlFile(QStringList &args);
 
@@ -116,12 +112,7 @@ private:
     QScopedPointer<QMirClientAppStateController> mAppStateController;
     qreal mScaleFactor;
 
-    MirConnection *mMirConnection;
-
-    // Platform API stuff
-    UApplicationOptions* mOptions;
-    UApplicationDescription* mDesc;
-    UApplicationInstance* mInstance;
+    mir::client::Connection mMirConnection;
 
     // EGL related
     EGLDisplay mEglDisplay{EGL_NO_DISPLAY};

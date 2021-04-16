@@ -49,6 +49,8 @@ QPlatformIntegration *QMirClientIntegrationPlugin::create(const QString &system,
                                                           int &argc, char **argv)
 {
     if (system.toLower() == QLatin1String("ubuntumirclient")) {
+        // Note: this is kept despite not using platform-api anymore to
+        // facilitate other Qt platform plugins that still use platform-api.
 #ifdef PLATFORM_API_TOUCH
         setenv("UBUNTU_PLATFORM_API_BACKEND", "touch_mirclient", 1);
 #else

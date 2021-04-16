@@ -66,37 +66,37 @@
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
 
-// platform-api
-#include <ubuntu/application/lifecycle_delegate.h>
-#include <ubuntu/application/id.h>
-#include <ubuntu/application/options.h>
-
-static void resumedCallback(const UApplicationOptions */*options*/, void *context)
+static void lifecycle_callback(MirConnection* /* conn */, MirLifecycleState state, void* context)
 {
-    auto integration = static_cast<QMirClientClientIntegration*>(context);
+    auto integration = static_cast<QMirClientClientIntegration *>(context);
 
-    // Make sure calls to appStateController happen on the main thread.
-    QMetaObject::invokeMethod(integration->appStateController(),
-                                "setResumed",
-                                Qt::QueuedConnection);
-}
+    switch (state) {
+    case mir_lifecycle_state_will_suspend: {
+        auto inputContext = integration->inputContext();
+        if (inputContext) {
+            inputContext->hideInputPanel();
+        } else {
+            qCWarning(mirclient) << "aboutToStopCallback(): no input context";
+        }
 
-static void aboutToStopCallback(UApplicationArchive */*archive*/, void *context)
-{
-    auto integration = static_cast<QMirClientClientIntegration*>(context);
-    auto inputContext = integration->inputContext();
-    if (inputContext) {
-        inputContext->hideInputPanel();
-    } else {
-        qCWarning(mirclient) << "aboutToStopCallback(): no input context";
+        // Make sure calls to appStateController happen on the main thread.
+        QMetaObject::invokeMethod(integration->appStateController(),
+                                    "setSuspended",
+                                    Qt::QueuedConnection);
+        break;
     }
-
-    // Make sure calls to appStateController happen on the main thread.
-    QMetaObject::invokeMethod(integration->appStateController(),
-                                "setSuspended",
-                                Qt::QueuedConnection);
+    case mir_lifecycle_state_resumed:
+        // Make sure calls to appStateController happen on the main thread.
+        QMetaObject::invokeMethod(integration->appStateController(),
+                                  "setResumed",
+                                  Qt::QueuedConnection);
+        break;
+    case mir_lifecycle_connection_lost:
+        qCritical("[QPA] QMirClientClientIntegration: lost connection to Mir server.\n");
+        exit(EXIT_FAILURE);
+        break;
+    }
 }
-
 
 QMirClientClientIntegration::QMirClientClientIntegration(int argc, char **argv)
     : QPlatformIntegration()
@@ -109,26 +109,20 @@ QMirClientClientIntegration::QMirClientClientIntegration(int argc, char **argv)
     QByteArray sessionName;
     {
         QStringList args = QCoreApplication::arguments();
-        setupOptions(args);
         sessionName = generateSessionName(args);
-        setupDescription(sessionName);
     }
 
-    // Create new application instance
-    mInstance = u_application_instance_new_from_description_with_options(mDesc, mOptions);
+    // Create new mir connection
+    mMirConnection = mir::client::Connection(mir_connect_sync(nullptr, sessionName.data()));
 
-    if (mInstance == nullptr) {
+    if (!mir_connection_is_valid(mMirConnection)) {
         qCritical("[QPA] QMirClientClientIntegration: connection to Mir server failed.\n");
-
-        // TODO: add API to platform-api to fetch Mir's error message (bug:1655970).
-        // Workaround by retrying the connection here in order to get the message.
-        auto mirConnection = mir_connect_sync(nullptr, sessionName.data());
-        qCritical("Mir returned: \"%s\"", mir_connection_get_error_message(mirConnection));
-        mir_connection_release(mirConnection);
+        qCritical("Mir returned: \"%s\"", mir_connection_get_error_message(mMirConnection));
         exit(EXIT_FAILURE);
     }
 
-    mMirConnection = u_application_instance_get_mir_connection(mInstance);
+    mir_connection_set_lifecycle_event_callback(
+        mMirConnection, lifecycle_callback, /* context */ this);
 
     // Choose the default surface format suited to the Mir platform
     QSurfaceFormat defaultFormat;
@@ -199,35 +193,6 @@ QMirClientClientIntegration::~QMirClientClientIntegration()
 QPlatformServices *QMirClientClientIntegration::services() const
 {
     return mServices;
-}
-
-void QMirClientClientIntegration::setupOptions(QStringList &args)
-{
-    int argc = args.size() + 1;
-    char **argv = new char*[argc];
-    for (int i = 0; i < argc - 1; i++)
-        argv[i] = qstrdup(args.at(i).toLocal8Bit());
-    argv[argc - 1] = nullptr;
-
-    mOptions = u_application_options_new_from_cmd_line(argc - 1, argv);
-
-    for (int i = 0; i < argc; i++)
-        delete [] argv[i];
-    delete [] argv;
-}
-
-void QMirClientClientIntegration::setupDescription(QByteArray &sessionName)
-{
-    mDesc = u_application_description_new();
-
-    UApplicationId* id = u_application_id_new_from_stringn(sessionName.data(), sessionName.count());
-    u_application_description_set_application_id(mDesc, id);
-
-    UApplicationLifecycleDelegate* delegate = u_application_lifecycle_delegate_new();
-    u_application_lifecycle_delegate_set_application_resumed_cb(delegate, &resumedCallback);
-    u_application_lifecycle_delegate_set_application_about_to_stop_cb(delegate, &aboutToStopCallback);
-    u_application_lifecycle_delegate_set_context(delegate, this);
-    u_application_description_set_application_lifecycle_delegate(mDesc, delegate);
 }
 
 QByteArray QMirClientClientIntegration::generateSessionName(QStringList &args)
