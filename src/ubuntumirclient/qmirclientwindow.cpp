@@ -110,6 +110,9 @@ const char *mirWindowStateToStr(MirWindowState windowState)
     case mir_window_state_fullscreen: return "fullscreen";
     case mir_window_state_horizmaximized: return "horizmaximized";
     case mir_window_state_hidden: return "hidden";
+#if MIR_CLIENT_API_VERSION >= MIR_VERSION_NUMBER(1, 4, 0)
+    case mir_window_state_attached: return "attached";
+#endif
     case mir_window_states: Q_UNREACHABLE();
     }
     Q_UNREACHABLE();
@@ -128,6 +131,17 @@ const char *mirPixelFormatToStr(MirPixelFormat pixelFormat)
     case mir_pixel_format_rgb_565:   return "RGB565";
     case mir_pixel_format_rgba_5551: return "RGBA5551";
     case mir_pixel_format_rgba_4444: return "RGBA4444";
+    /*
+     * NOTE: this ifdef is technically incorrect. This pixel format is
+     * defined in a UBports-specific patch to Mir. However, the point of
+     * this #if is to allow compilation on unpatched version of Mir on
+     * Ubuntu 20.04, which caries Mir 1.7, so this will do for now until
+     * we find a better solution. We plans to vendor Mir 1.8.1 + our patches
+     * soon, so as soon as we do that this code will pick up this.
+     */
+#if MIR_CLIENT_API_VERSION >= MIR_VERSION_NUMBER(1, 8, 1)
+    case mir_pixel_format_rgba_10101002: return "RGBA10101002";
+#endif
     case mir_pixel_formats:          Q_UNREACHABLE();
     }
     Q_UNREACHABLE();
