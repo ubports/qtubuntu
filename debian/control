@@ -34,8 +34,7 @@ Replaces: qtubuntu (<< 0.52),
 Breaks: ubuntu-touch-session (<< 0.107),
         unity8 (<< 7.85),
 Provides: qtubuntu,
-Depends: ubuntu-application-api3-touch,
-         ${misc:Depends},
+Depends: ${misc:Depends},
          ${shlibs:Depends},
 Description: Qt plugins for Ubuntu Platform API (mobile)
  QtUbuntu is a set of Qt5 components for the Ubuntu Platform API. It contains a
@@ -54,8 +53,7 @@ Replaces: qtubuntu (<< 0.52),
           qtubuntu-android,
 Breaks: unity8 (<< 7.85),
 Provides: qtubuntu,
-Depends: ubuntu-application-api3-desktop,
-         ${misc:Depends},
+Depends: ${misc:Depends},
          ${shlibs:Depends},
 Description: Qt plugins for Ubuntu Platform API (desktop)
  QtUbuntu is a set of Qt5 components for the Ubuntu Platform API. It contains a
