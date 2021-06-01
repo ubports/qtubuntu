@@ -23,9 +23,9 @@ gles2_architectures = arm64 armhf
 
 override_dh_clean:
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
-	rm -rf $(TMP1_DIR) $(DESKTOP_DIR)
+	rm -rf $(TMP1_DIR) $(ANDROID_DIR)
 endif
-	rm -rf $(TMP2_DIR) $(ANDROID_DIR)
+	rm -rf $(TMP2_DIR) $(DESKTOP_DIR)
 	dh_clean
 
 override_dh_auto_configure:

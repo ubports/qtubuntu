@@ -42,8 +42,7 @@
 
 #include <QUrl>
 
-#include <ubuntu/application/url_dispatcher/service.h>
-#include <ubuntu/application/url_dispatcher/session.h>
+#include <url-dispatcher.h>
 
 bool QMirClientPlatformServices::openUrl(const QUrl &url)
 {
@@ -57,13 +56,7 @@ bool QMirClientPlatformServices::openDocument(const QUrl &url)
 
 bool QMirClientPlatformServices::callDispatcher(const QUrl &url)
 {
-    UAUrlDispatcherSession* session = ua_url_dispatcher_session();
-    if (!session)
-        return false;
-
-    ua_url_dispatcher_session_open(session, url.toEncoded().constData(), NULL, NULL);
-
-    free(session);
+    url_dispatch_send(url.toEncoded().constData(), /* cb */ NULL, /* user_data */ NULL);
 
     // We are returning true here because the other option
     // is spawning a nested event loop and wait for the
